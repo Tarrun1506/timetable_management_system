@@ -155,20 +155,25 @@ const QueryResolution = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b shadow-sm ${
-        isDarkMode 
-          ? 'bg-gray-900 border-gray-800' 
+      <header className={`sticky top-0 z-50 border-b shadow-sm ${isDarkMode
+          ? 'bg-gray-900 border-gray-800'
           : 'bg-white border-gray-200'
-      }`}>
+        }`}>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg">
+              <div
+                onClick={() => navigate('/admin-dashboard')}
+                className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg cursor-pointer hover:scale-105 transition-transform"
+              >
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Admin Dashboard
+              <div
+                onClick={() => navigate('/admin-dashboard')}
+                className="cursor-pointer group"
+              >
+                <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all`}>
+                  AcademicSync
                 </h1>
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   Query Resolution Center
@@ -177,27 +182,24 @@ const QueryResolution = () => {
             </div>
             <div className="flex items-center space-x-3">
               <ThemeToggle />
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                  ? 'hover:bg-gray-800 text-gray-300'
                   : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+                }`}>
                 <Bell className="w-5 h-5" />
               </button>
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                  ? 'hover:bg-gray-800 text-gray-300'
                   : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+                }`}>
                 <Settings className="w-5 h-5" />
               </button>
               <button
                 onClick={handleLogout}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-800 text-gray-300' 
+                className={`p-2 rounded-lg transition-colors ${isDarkMode
+                    ? 'hover:bg-gray-800 text-gray-300'
                     : 'hover:bg-gray-100 text-gray-600'
-                }`}
+                  }`}
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -212,9 +214,8 @@ const QueryResolution = () => {
         <main className="flex-1 p-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className={`p-4 rounded-xl shadow-sm ${
-              isDarkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+            <div className={`p-4 rounded-xl shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -228,9 +229,8 @@ const QueryResolution = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl shadow-sm ${
-              isDarkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+            <div className={`p-4 rounded-xl shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -244,9 +244,8 @@ const QueryResolution = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl shadow-sm ${
-              isDarkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+            <div className={`p-4 rounded-xl shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -260,9 +259,8 @@ const QueryResolution = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl shadow-sm ${
-              isDarkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
+            <div className={`p-4 rounded-xl shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -278,9 +276,8 @@ const QueryResolution = () => {
           </div>
 
           {/* Filters and Search */}
-          <div className={`p-4 rounded-xl shadow-sm mb-6 ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+          <div className={`p-4 rounded-xl shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
@@ -290,11 +287,10 @@ const QueryResolution = () => {
                     placeholder="Search queries..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
-                      isDarkMode
+                    className={`w-full pl-10 pr-4 py-2 rounded-lg border ${isDarkMode
                         ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                         : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
@@ -303,11 +299,10 @@ const QueryResolution = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    isDarkMode
+                  className={`px-4 py-2 rounded-lg border ${isDarkMode
                       ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
@@ -319,11 +314,10 @@ const QueryResolution = () => {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    isDarkMode
+                  className={`px-4 py-2 rounded-lg border ${isDarkMode
                       ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 >
                   <option value="all">All Types</option>
                   <option value="timetable-conflict">Timetable Conflict</option>
@@ -344,9 +338,8 @@ const QueryResolution = () => {
           </div>
 
           {/* Queries List */}
-          <div className={`rounded-xl shadow-sm overflow-hidden ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+          <div className={`rounded-xl shadow-sm overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
             {loading ? (
               <div className="p-8 text-center">
                 <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
@@ -369,34 +362,28 @@ const QueryResolution = () => {
                 <table className="w-full">
                   <thead className={isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}>
                     <tr>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Subject
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Submitted By
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Type
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Status
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Date
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
+                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                         Actions
                       </th>
                     </tr>
@@ -407,34 +394,30 @@ const QueryResolution = () => {
                         key={query._id}
                         className={isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}
                       >
-                        <td className={`px-6 py-4 whitespace-nowrap ${
-                          isDarkMode ? 'text-gray-300' : 'text-gray-900'
-                        }`}>
+                        <td className={`px-6 py-4 whitespace-nowrap ${isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                          }`}>
                           <div className="flex items-center gap-2">
                             {getTypeIcon(query.type)}
                             <span className="font-medium">{query.subject}</span>
                           </div>
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
+                        <td className={`px-6 py-4 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                           {query.submittedBy?.name || 'Unknown'}
                           <br />
                           <span className="text-xs">
                             {query.submittedBy?.role || 'N/A'}
                           </span>
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
+                        <td className={`px-6 py-4 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                           {query.type?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(query.status)}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                           {new Date(query.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -491,9 +474,8 @@ const QueryResolution = () => {
       {/* Detail Modal */}
       {showDetailModal && selectedQuery && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+          <div className={`rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
             <div className={`p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <div className="flex items-center justify-between">
                 <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -572,9 +554,8 @@ const QueryResolution = () => {
                   <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     Admin Response
                   </label>
-                  <p className={`mt-1 p-3 rounded-lg ${
-                    isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                  }`}>
+                  <p className={`mt-1 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                    }`}>
                     {selectedQuery.adminResponse}
                   </p>
                 </div>
@@ -588,11 +569,10 @@ const QueryResolution = () => {
                   value={responseText}
                   onChange={(e) => setResponseText(e.target.value)}
                   rows="4"
-                  className={`mt-2 w-full px-4 py-2 rounded-lg border ${
-                    isDarkMode
+                  className={`mt-2 w-full px-4 py-2 rounded-lg border ${isDarkMode
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                    }`}
                   placeholder="Enter your response..."
                 />
               </div>
@@ -629,11 +609,10 @@ const QueryResolution = () => {
                 )}
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isDarkMode
+                  className={`px-4 py-2 rounded-lg ${isDarkMode
                       ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   Close
                 </button>

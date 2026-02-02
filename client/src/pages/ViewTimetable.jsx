@@ -5,8 +5,8 @@ import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
 import Chatbot from '../components/Chatbot';
-import { 
-  Calendar, 
+import {
+  Calendar,
   Download,
   Printer,
   RefreshCw,
@@ -33,9 +33,9 @@ import {
   Bell,
   Settings
 } from 'lucide-react';
-import { 
-  getTimetables, 
-  getTimetable, 
+import {
+  getTimetables,
+  getTimetable,
   updateTimetableStatus,
   addTimetableComment,
   resolveConflict,
@@ -106,7 +106,7 @@ const ViewTimetable = () => {
         setCurrentTimetable(response.data);
       } else {
         // Load all timetables (not just completed)
-        const response = await getTimetables({ });
+        const response = await getTimetables({});
         setTimetables(response.data);
       }
     } catch (error) {
@@ -201,15 +201,15 @@ const ViewTimetable = () => {
 
   const filteredSchedule = currentTimetable?.schedule?.filter(slot => {
     const matchesDay = selectedDay === 'all' || slot.day === selectedDay;
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       slot.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       slot.teacherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       slot.classroomName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesTeacher = selectedTeacher === 'all' || slot.teacherId === selectedTeacher;
     const matchesClassroom = selectedClassroom === 'all' || slot.classroomId === selectedClassroom;
     const matchesBatch = selectedBatch === 'all' || slot.batchId === selectedBatch || slot.divisionId === selectedBatch;
-    
+
     return matchesDay && matchesSearch && matchesTeacher && matchesClassroom && matchesBatch;
   }) || [];
 
@@ -280,10 +280,10 @@ const ViewTimetable = () => {
   const exportCurrentTimetableCSV = () => {
     if (!currentTimetable?.schedule) return;
     const rows = [];
-    rows.push(['Day','StartTime','EndTime','CourseCode','CourseName','SessionType','Teacher','Classroom','StudentCount']);
+    rows.push(['Day', 'StartTime', 'EndTime', 'CourseCode', 'CourseName', 'SessionType', 'Teacher', 'Classroom', 'StudentCount']);
     // Sort schedule by day and startTime for consistent ordering
-    const order = { Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
-    const sorted = [...currentTimetable.schedule].sort((a,b) => {
+    const order = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
+    const sorted = [...currentTimetable.schedule].sort((a, b) => {
       if (order[a.day] !== order[b.day]) return order[a.day] - order[b.day];
       if (a.startTime === b.startTime) return a.endTime.localeCompare(b.endTime);
       return a.startTime.localeCompare(b.startTime);
@@ -303,7 +303,7 @@ const ViewTimetable = () => {
       ]);
     }
 
-    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
     const filename = `${currentTimetable.name || 'timetable'}.csv`;
     downloadFile(csv, filename, 'text/csv');
   };
@@ -371,9 +371,9 @@ const ViewTimetable = () => {
 
       // Build CSV similar to exportCurrentTimetableCSV
       const rows = [];
-      rows.push(['Day','StartTime','EndTime','CourseCode','CourseName','SessionType','Teacher','Classroom','StudentCount']);
-      const order = { Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
-      const sorted = [...timetable.schedule].sort((a,b) => {
+      rows.push(['Day', 'StartTime', 'EndTime', 'CourseCode', 'CourseName', 'SessionType', 'Teacher', 'Classroom', 'StudentCount']);
+      const order = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
+      const sorted = [...timetable.schedule].sort((a, b) => {
         if (order[a.day] !== order[b.day]) return order[a.day] - order[b.day];
         if (a.startTime === b.startTime) return a.endTime.localeCompare(b.endTime);
         return a.startTime.localeCompare(b.startTime);
@@ -393,7 +393,7 @@ const ViewTimetable = () => {
         ]);
       }
 
-      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
       const filename = `${name || 'timetable'}.csv`;
       downloadFile(csv, filename, 'text/csv');
     } catch (error) {
@@ -602,11 +602,10 @@ const ViewTimetable = () => {
                           </div>
                         </td>
                         <td className="px-3 py-2">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                            'bg-purple-100 text-purple-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
+                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                                'bg-purple-100 text-purple-800'
+                            }`}>
                             {slot.sessionType}
                           </span>
                         </td>
@@ -693,11 +692,10 @@ const ViewTimetable = () => {
                         </td>
                         <td className="px-3 py-2">{slot.teacherName}</td>
                         <td className="px-3 py-2">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                            'bg-purple-100 text-purple-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
+                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                                'bg-purple-100 text-purple-800'
+                            }`}>
                             {slot.sessionType}
                           </span>
                         </td>
@@ -786,11 +784,10 @@ const ViewTimetable = () => {
                         <td className="px-3 py-2">{slot.teacherName}</td>
                         <td className="px-3 py-2">{slot.classroomName}</td>
                         <td className="px-3 py-2">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                            'bg-purple-100 text-purple-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
+                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                                'bg-purple-100 text-purple-800'
+                            }`}>
                             {slot.sessionType}
                           </span>
                         </td>
@@ -833,19 +830,18 @@ const ViewTimetable = () => {
                   </td>
                   {daysToShow.map(day => {
                     // Find session in filteredSchedule instead of currentTimetable.schedule
-                    const session = filteredSchedule.find(s => 
+                    const session = filteredSchedule.find(s =>
                       s.day === day && s.startTime + '-' + s.endTime === timeSlot
                     );
-                    
+
                     return (
                       <td key={`${day}-${timeSlot}`} className="px-4 py-4">
                         {session ? (
                           <div className="space-y-1">
-                            <div className={`p-3 rounded-lg border-l-4 ${
-                              session.sessionType === 'Theory' ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20' :
-                              session.sessionType === 'Practical' ? 'bg-green-50 border-green-400 dark:bg-green-900/20' :
-                              'bg-purple-50 border-purple-400 dark:bg-purple-900/20'
-                            }`}>
+                            <div className={`p-3 rounded-lg border-l-4 ${session.sessionType === 'Theory' ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20' :
+                                session.sessionType === 'Practical' ? 'bg-green-50 border-green-400 dark:bg-green-900/20' :
+                                  'bg-purple-50 border-purple-400 dark:bg-purple-900/20'
+                              }`}>
                               <p className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {session.courseName}
                               </p>
@@ -890,11 +886,10 @@ const ViewTimetable = () => {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className={`px-2 py-1 text-xs rounded ${
-                    session.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                    session.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                    'bg-purple-100 text-purple-800'
-                  }`}>
+                  <span className={`px-2 py-1 text-xs rounded ${session.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
+                      session.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                        'bg-purple-100 text-purple-800'
+                    }`}>
                     {session.sessionType}
                   </span>
                   <span className="text-sm font-medium text-gray-500">{session.day}</span>
@@ -940,7 +935,7 @@ const ViewTimetable = () => {
     const publishedTimetables = timetables.filter(t => t.status === 'published');
     let finalTimetableId = null;
     if (publishedTimetables.length > 0) {
-      const sortedPublished = [...publishedTimetables].sort((a, b) => 
+      const sortedPublished = [...publishedTimetables].sort((a, b) =>
         new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt)
       );
       finalTimetableId = sortedPublished[0]._id;
@@ -951,101 +946,101 @@ const ViewTimetable = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {timetables.map((timetable) => {
             const isFinalTimetable = timetable._id === finalTimetableId;
-            
+
             return (
-            <div key={timetable._id} className={`bg-white dark:bg-gray-800 rounded-xl border p-6 ${
-              isFinalTimetable 
-                ? 'border-green-500 dark:border-green-600 ring-2 ring-green-500/20' 
-                : 'border-gray-200 dark:border-gray-700'
-            }`}>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {timetable.name}
-                    </h3>
-                    {isFinalTimetable && (
-                      <span className="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-current" />
-                        Final
-                      </span>
-                    )}
+              <div key={timetable._id} className={`bg-white dark:bg-gray-800 rounded-xl border p-6 ${isFinalTimetable
+                  ? 'border-green-500 dark:border-green-600 ring-2 ring-green-500/20'
+                  : 'border-gray-200 dark:border-gray-700'
+                }`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {timetable.name}
+                      </h3>
+                      {isFinalTimetable && (
+                        <span className="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          Final
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                      <p>{timetable.department} • Year {timetable.year} • Semester {timetable.semester}</p>
+                      {timetable.program && <p>Program: {timetable.program}</p>}
+                      <p className="text-xs">Created: {new Date(timetable.createdAt).toLocaleString()}</p>
+                      {timetable.publishedAt && (
+                        <p className="text-xs text-green-600 dark:text-green-400">
+                          Published: {new Date(timetable.publishedAt).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <p>{timetable.department} • Year {timetable.year} • Semester {timetable.semester}</p>
-                    {timetable.program && <p>Program: {timetable.program}</p>}
-                    <p className="text-xs">Created: {new Date(timetable.createdAt).toLocaleString()}</p>
-                    {timetable.publishedAt && (
-                      <p className="text-xs text-green-600 dark:text-green-400">
-                        Published: {new Date(timetable.publishedAt).toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <span className={`px-2 py-1 text-xs rounded ${getStatusColor(timetable.status)}`}>
-                  {timetable.status}
-                </span>
-              </div>
-
-              {timetable.quality && (
-                <div className="mb-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Quality Score</span>
-                    <span className={`font-semibold ${getQualityColor(timetable.quality.overallScore)}`}>
-                      {Math.round(timetable.quality.overallScore)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${timetable.quality.overallScore}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Classes:</span>
-                  <span className="ml-1 font-medium">{timetable.statistics?.totalClasses || timetable.schedule?.length || 0}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Conflicts:</span>
-                  <span className={`ml-1 font-medium ${(timetable.conflicts?.length || 0) > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                    {timetable.conflicts?.length || 0}
+                  <span className={`px-2 py-1 text-xs rounded ${getStatusColor(timetable.status)}`}>
+                    {timetable.status}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => navigate(`/view-timetable/${timetable._id}`)}
-                  className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>View</span>
-                </button>
-                
-                {timetable.status === 'completed' && (
-                  <button
-                    onClick={() => handleStatusUpdate(timetable._id, 'published')}
-                    className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Publish</span>
-                  </button>
+                {timetable.quality && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Quality Score</span>
+                      <span className={`font-semibold ${getQualityColor(timetable.quality.overallScore)}`}>
+                        {Math.round(timetable.quality.overallScore)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{ width: `${timetable.quality.overallScore}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 )}
-                
-                <button
-                  onClick={() => exportTimetableFromList(timetable._id, timetable.name)}
-                  className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Export</span>
-                </button>
+
+                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Classes:</span>
+                    <span className="ml-1 font-medium">{timetable.statistics?.totalClasses || timetable.schedule?.length || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Conflicts:</span>
+                    <span className={`ml-1 font-medium ${(timetable.conflicts?.length || 0) > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {timetable.conflicts?.length || 0}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => navigate(`/view-timetable/${timetable._id}`)}
+                    className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View</span>
+                  </button>
+
+                  {timetable.status === 'completed' && (
+                    <button
+                      onClick={() => handleStatusUpdate(timetable._id, 'published')}
+                      className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Publish</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => exportTimetableFromList(timetable._id, timetable.name)}
+                    className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Export</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          )})}
+            )
+          })}
         </div>
       </div>
     );
@@ -1070,20 +1065,25 @@ const ViewTimetable = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b shadow-sm ${
-        isDarkMode 
-          ? 'bg-gray-900 border-gray-800' 
+      <header className={`sticky top-0 z-50 border-b shadow-sm ${isDarkMode
+          ? 'bg-gray-900 border-gray-800'
           : 'bg-white border-gray-200'
-      }`}>
+        }`}>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg">
+              <div
+                onClick={() => navigate('/admin-dashboard')}
+                className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg cursor-pointer hover:scale-105 transition-transform"
+              >
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Admin Dashboard
+              <div
+                onClick={() => navigate('/admin-dashboard')}
+                className="cursor-pointer group"
+              >
+                <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all`}>
+                  AcademicSync
                 </h1>
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   All Time Tables
@@ -1092,27 +1092,24 @@ const ViewTimetable = () => {
             </div>
             <div className="flex items-center space-x-3">
               <ThemeToggle />
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                  ? 'hover:bg-gray-800 text-gray-300'
                   : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+                }`}>
                 <Bell className="w-5 h-5" />
               </button>
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                  ? 'hover:bg-gray-800 text-gray-300'
                   : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+                }`}>
                 <Settings className="w-5 h-5" />
               </button>
               <button
                 onClick={handleLogout}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-800 text-gray-300' 
+                className={`p-2 rounded-lg transition-colors ${isDarkMode
+                    ? 'hover:bg-gray-800 text-gray-300'
                     : 'hover:bg-gray-100 text-gray-600'
-                }`}
+                  }`}
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -1128,277 +1125,277 @@ const ViewTimetable = () => {
           {/* Back Button */}
           {/* Page heading removed as requested */}
 
-        {currentTimetable ? (
-          // Individual Timetable View
-          <>
-            {/* Timetable Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {currentTimetable.name}
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
-                    <div>
-                      <p className="font-semibold text-gray-700 dark:text-gray-300">Academic Year</p>
-                      <p>{currentTimetable.academicYear}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-700 dark:text-gray-300">Department</p>
-                      <p>{currentTimetable.department}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-700 dark:text-gray-300">Semester • Year</p>
-                      <p>Semester {currentTimetable.semester} • Year {currentTimetable.year}</p>
-                    </div>
-                    {currentTimetable.program && (
+          {currentTimetable ? (
+            // Individual Timetable View
+            <>
+              {/* Timetable Info */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {currentTimetable.name}
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div>
-                        <p className="font-semibold text-gray-700 dark:text-gray-300">Program</p>
-                        <p>{currentTimetable.program}</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">Academic Year</p>
+                        <p>{currentTimetable.academicYear}</p>
                       </div>
-                    )}
-                    <div>
-                      <p className="font-semibold text-gray-700 dark:text-gray-300">Generated</p>
-                      <p>{new Date(currentTimetable.createdAt).toLocaleDateString()}</p>
+                      <div>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">Department</p>
+                        <p>{currentTimetable.department}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">Semester • Year</p>
+                        <p>Semester {currentTimetable.semester} • Year {currentTimetable.year}</p>
+                      </div>
+                      {currentTimetable.program && (
+                        <div>
+                          <p className="font-semibold text-gray-700 dark:text-gray-300">Program</p>
+                          <p>{currentTimetable.program}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">Generated</p>
+                        <p>{new Date(currentTimetable.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-col items-end space-y-3">
-                  <span className={`px-3 py-1 rounded ${getStatusColor(currentTimetable.status)}`}>
-                    {currentTimetable.status}
-                  </span>
-                  {currentTimetable.quality && (
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Quality Score</p>
-                      <p className={`text-lg font-bold ${getQualityColor(currentTimetable.quality.overallScore)}`}>
-                        {Math.round(currentTimetable.quality.overallScore)}%
-                      </p>
-                    </div>
-                  )}
-                  {currentTimetable.conflicts && currentTimetable.conflicts.length > 0 && (
-                    <button
-                      onClick={() => setShowConflictsModal(true)}
-                      className="flex items-center space-x-2 px-3 py-1 bg-orange-100 text-orange-800 rounded hover:bg-orange-200"
-                    >
-                      <AlertCircle className="w-4 h-4" />
-                      <span>{currentTimetable.conflicts.length} Conflicts</span>
-                    </button>
-                  )}
+                  <div className="flex flex-col items-end space-y-3">
+                    <span className={`px-3 py-1 rounded ${getStatusColor(currentTimetable.status)}`}>
+                      {currentTimetable.status}
+                    </span>
+                    {currentTimetable.quality && (
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Quality Score</p>
+                        <p className={`text-lg font-bold ${getQualityColor(currentTimetable.quality.overallScore)}`}>
+                          {Math.round(currentTimetable.quality.overallScore)}%
+                        </p>
+                      </div>
+                    )}
+                    {currentTimetable.conflicts && currentTimetable.conflicts.length > 0 && (
+                      <button
+                        onClick={() => setShowConflictsModal(true)}
+                        className="flex items-center space-x-2 px-3 py-1 bg-orange-100 text-orange-800 rounded hover:bg-orange-200"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{currentTimetable.conflicts.length} Conflicts</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Controls */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
-              <div className="flex flex-col space-y-4">
-                {/* View Type Selection */}
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="flex items-center space-x-4">
+              {/* Controls */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+                <div className="flex flex-col space-y-4">
+                  {/* View Type Selection */}
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">View Mode:</label>
+                        <select
+                          value={timetableViewMode}
+                          onChange={(e) => setTimetableViewMode(e.target.value)}
+                          className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
+                        >
+                          <option value="standard">Standard Grid</option>
+                          <option value="teacher">By Teacher</option>
+                          <option value="classroom">By Classroom</option>
+                          <option value="batch">By Batch/Division</option>
+                        </select>
+                      </div>
+
+                      {timetableViewMode === 'standard' && (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setViewType('grid')}
+                            className={`p-2 rounded ${viewType === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                          >
+                            <Grid3X3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setViewType('list')}
+                            className={`p-2 rounded ${viewType === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                          >
+                            <List className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center space-x-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">View Mode:</label>
+                      <button
+                        onClick={() => setShowCommentModal(true)}
+                        className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Comment</span>
+                      </button>
+                      <button
+                        onClick={exportCurrentTimetableCSV}
+                        className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Export CSV</span>
+                      </button>
+                      <button
+                        onClick={exportCurrentTimetableJSON}
+                        className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        <span>JSON</span>
+                      </button>
+                      <button
+                        onClick={printTimetable}
+                        className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                      >
+                        <Printer className="w-4 h-4" />
+                        <span>Print</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Filters - Show for all view modes */}
+                  <div className="flex items-center space-x-4 flex-wrap gap-2">
+                    <select
+                      value={selectedDay}
+                      onChange={(e) => setSelectedDay(e.target.value)}
+                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
+                    >
+                      <option value="all">All Days</option>
+                      {daysOfWeek.map(day => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+
+                    {uniqueTeachers.length > 1 && (
                       <select
-                        value={timetableViewMode}
-                        onChange={(e) => setTimetableViewMode(e.target.value)}
+                        value={selectedTeacher}
+                        onChange={(e) => setSelectedTeacher(e.target.value)}
                         className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
                       >
-                        <option value="standard">Standard Grid</option>
-                        <option value="teacher">By Teacher</option>
-                        <option value="classroom">By Classroom</option>
-                        <option value="batch">By Batch/Division</option>
+                        <option value="all">All Teachers</option>
+                        {uniqueTeachers.map(teacher => (
+                          <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                        ))}
                       </select>
-                    </div>
-
-                    {timetableViewMode === 'standard' && (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => setViewType('grid')}
-                          className={`p-2 rounded ${viewType === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          <Grid3X3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setViewType('list')}
-                          className={`p-2 rounded ${viewType === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          <List className="w-4 h-4" />
-                        </button>
-                      </div>
                     )}
-                  </div>
 
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setShowCommentModal(true)}
-                      className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Comment</span>
-                    </button>
-                    <button
-                      onClick={exportCurrentTimetableCSV}
-                      className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Export CSV</span>
-                    </button>
-                    <button 
-                      onClick={exportCurrentTimetableJSON} 
-                      className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                      <span>JSON</span>
-                    </button>
-                    <button 
-                      onClick={printTimetable} 
-                      className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-                    >
-                      <Printer className="w-4 h-4" />
-                      <span>Print</span>
-                    </button>
-                  </div>
-                </div>
+                    {uniqueClassrooms.length > 1 && (
+                      <select
+                        value={selectedClassroom}
+                        onChange={(e) => setSelectedClassroom(e.target.value)}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
+                      >
+                        <option value="all">All Classrooms</option>
+                        {uniqueClassrooms.map(classroom => (
+                          <option key={classroom.id} value={classroom.id}>{classroom.name}</option>
+                        ))}
+                      </select>
+                    )}
 
-                {/* Filters - Show for all view modes */}
-                <div className="flex items-center space-x-4 flex-wrap gap-2">
-                  <select
-                    value={selectedDay}
-                    onChange={(e) => setSelectedDay(e.target.value)}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
-                  >
-                    <option value="all">All Days</option>
-                    {daysOfWeek.map(day => (
-                      <option key={day} value={day}>{day}</option>
-                    ))}
-                  </select>
+                    {uniqueBatches.length > 0 && (
+                      <select
+                        value={selectedBatch}
+                        onChange={(e) => setSelectedBatch(e.target.value)}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
+                      >
+                        <option value="all">All Batches</option>
+                        {uniqueBatches.map(batch => (
+                          <option key={batch.id} value={batch.id}>{batch.name}</option>
+                        ))}
+                      </select>
+                    )}
 
-                  {uniqueTeachers.length > 1 && (
-                    <select
-                      value={selectedTeacher}
-                      onChange={(e) => setSelectedTeacher(e.target.value)}
-                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
-                    >
-                      <option value="all">All Teachers</option>
-                      {uniqueTeachers.map(teacher => (
-                        <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                      ))}
-                    </select>
-                  )}
-
-                  {uniqueClassrooms.length > 1 && (
-                    <select
-                      value={selectedClassroom}
-                      onChange={(e) => setSelectedClassroom(e.target.value)}
-                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
-                    >
-                      <option value="all">All Classrooms</option>
-                      {uniqueClassrooms.map(classroom => (
-                        <option key={classroom.id} value={classroom.id}>{classroom.name}</option>
-                      ))}
-                    </select>
-                  )}
-
-                  {uniqueBatches.length > 0 && (
-                    <select
-                      value={selectedBatch}
-                      onChange={(e) => setSelectedBatch(e.target.value)}
-                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
-                    >
-                      <option value="all">All Batches</option>
-                      {uniqueBatches.map(batch => (
-                        <option key={batch.id} value={batch.id}>{batch.name}</option>
-                      ))}
-                    </select>
-                  )}
-
-                  <input
-                    type="text"
-                    placeholder="Search courses, teachers, rooms..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 min-w-[200px] px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Timetable Display */}
-            {timetableViewMode === 'teacher' ? (
-              renderTeacherView()
-            ) : timetableViewMode === 'classroom' ? (
-              renderClassroomView()
-            ) : timetableViewMode === 'batch' ? (
-              renderBatchView()
-            ) : viewType === 'grid' ? (
-              renderTimetableGrid()
-            ) : (
-              renderTimetableList()
-            )}
-
-            {/* Statistics */}
-            {currentTimetable.statistics && (
-              <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statistics</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">{currentTimetable.statistics.totalClasses}</p>
-                    <p className="text-sm text-gray-500">Total Classes</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{currentTimetable.statistics.totalTeachers}</p>
-                    <p className="text-sm text-gray-500">Teachers</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">{currentTimetable.statistics.totalRooms}</p>
-                    <p className="text-sm text-gray-500">Rooms Used</p>
-                  </div>
-                  <div 
-                    className="text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded p-2"
-                    onClick={() => setShowConflictsModal(true)}
-                  >
-                    <p className={`text-2xl font-bold ${(currentTimetable.conflicts?.length || 0) > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {currentTimetable.conflicts?.length || 0}
-                    </p>
-                    <p className="text-sm text-gray-500 flex items-center justify-center">
-                      Conflicts
-                      <AlertCircle className="w-3 h-3 ml-1" />
-                    </p>
+                    <input
+                      type="text"
+                      placeholder="Search courses, teachers, rooms..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="flex-1 min-w-[200px] px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700"
+                    />
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Conflicts Modal */}
-            {renderConflictsModal()}
-          </>
-        ) : (
-          // Timetables List View
-          <>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Generated Timetables</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                View and manage all generated timetables
-              </p>
-            </div>
+              {/* Timetable Display */}
+              {timetableViewMode === 'teacher' ? (
+                renderTeacherView()
+              ) : timetableViewMode === 'classroom' ? (
+                renderClassroomView()
+              ) : timetableViewMode === 'batch' ? (
+                renderBatchView()
+              ) : viewType === 'grid' ? (
+                renderTimetableGrid()
+              ) : (
+                renderTimetableList()
+              )}
 
-            {timetables.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Timetables Found</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  You haven't generated any timetables yet.
+              {/* Statistics */}
+              {currentTimetable.statistics && (
+                <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statistics</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">{currentTimetable.statistics.totalClasses}</p>
+                      <p className="text-sm text-gray-500">Total Classes</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">{currentTimetable.statistics.totalTeachers}</p>
+                      <p className="text-sm text-gray-500">Teachers</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-purple-600">{currentTimetable.statistics.totalRooms}</p>
+                      <p className="text-sm text-gray-500">Rooms Used</p>
+                    </div>
+                    <div
+                      className="text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded p-2"
+                      onClick={() => setShowConflictsModal(true)}
+                    >
+                      <p className={`text-2xl font-bold ${(currentTimetable.conflicts?.length || 0) > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                        {currentTimetable.conflicts?.length || 0}
+                      </p>
+                      <p className="text-sm text-gray-500 flex items-center justify-center">
+                        Conflicts
+                        <AlertCircle className="w-3 h-3 ml-1" />
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Conflicts Modal */}
+              {renderConflictsModal()}
+            </>
+          ) : (
+            // Timetables List View
+            <>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Generated Timetables</h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  View and manage all generated timetables
                 </p>
-                <button
-                  onClick={() => navigate('/generate-timetable')}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Generate First Timetable
-                </button>
               </div>
-            ) : (
-              renderTimetablesList()
-            )}
-          </>
-        )}
+
+              {timetables.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+                  <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Timetables Found</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    You haven't generated any timetables yet.
+                  </p>
+                  <button
+                    onClick={() => navigate('/generate-timetable')}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Generate First Timetable
+                  </button>
+                </div>
+              ) : (
+                renderTimetablesList()
+              )}
+            </>
+          )}
         </main>
       </div>
 

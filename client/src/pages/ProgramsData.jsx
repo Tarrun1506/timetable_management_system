@@ -4,9 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
-import { 
-  Calendar, 
-  BookOpen, 
+import { deleteCourse, deleteProgram } from '../services/api';
+import {
+  Calendar,
+  BookOpen,
   ArrowLeft,
   ArrowRight,
   Plus,
@@ -32,7 +33,7 @@ const ProgramsData = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formType, setFormType] = useState('program'); // 'program', 'course', 'batch'
-  
+
   const [programForm, setProgramForm] = useState({
     id: '',
     name: '',
@@ -241,12 +242,34 @@ const ProgramsData = () => {
     setShowAddForm(true);
   };
 
-  const handleDeleteProgram = (programId) => {
-    setPrograms(programs.filter(p => p.id !== programId));
+  const handleDeleteProgram = async (programId) => {
+    if (!window.confirm('Are you sure you want to delete this program? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteProgram(programId);
+      setPrograms(programs.filter(p => p.id !== programId));
+      alert('Program deleted successfully');
+    } catch (err) {
+      console.error('Error deleting program:', err);
+      alert('Failed to delete program. Please try again.');
+    }
   };
 
-  const handleDeleteCourse = (courseId) => {
-    setCourses(courses.filter(c => c.id !== courseId));
+  const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteCourse(courseId);
+      setCourses(courses.filter(c => c.id !== courseId));
+      alert('Course deleted successfully');
+    } catch (err) {
+      console.error('Error deleting course:', err);
+      alert('Failed to delete course. Please try again.');
+    }
   };
 
   const handleSaveProgram = () => {
@@ -293,7 +316,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={programForm.id}
-                onChange={(e) => setProgramForm({...programForm, id: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, id: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="P001"
               />
@@ -303,7 +326,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={programForm.name}
-                onChange={(e) => setProgramForm({...programForm, name: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, name: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Computer Science & Engineering"
               />
@@ -312,7 +335,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
               <select
                 value={programForm.department}
-                onChange={(e) => setProgramForm({...programForm, department: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, department: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Department</option>
@@ -325,7 +348,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Degree</label>
               <select
                 value={programForm.degree}
-                onChange={(e) => setProgramForm({...programForm, degree: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, degree: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Degree</option>
@@ -339,7 +362,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={programForm.duration}
-                onChange={(e) => setProgramForm({...programForm, duration: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, duration: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="4 years"
               />
@@ -349,7 +372,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.totalSemesters}
-                onChange={(e) => setProgramForm({...programForm, totalSemesters: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, totalSemesters: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="8"
               />
@@ -358,7 +381,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Semester</label>
               <select
                 value={programForm.currentSemester}
-                onChange={(e) => setProgramForm({...programForm, currentSemester: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, currentSemester: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Current Semester</option>
@@ -372,7 +395,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.totalStudents}
-                onChange={(e) => setProgramForm({...programForm, totalStudents: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, totalStudents: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="240"
               />
@@ -382,7 +405,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.divisions}
-                onChange={(e) => setProgramForm({...programForm, divisions: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, divisions: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="4"
               />
@@ -392,7 +415,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.studentsPerDivision}
-                onChange={(e) => setProgramForm({...programForm, studentsPerDivision: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, studentsPerDivision: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="60"
               />
@@ -402,7 +425,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.labBatches}
-                onChange={(e) => setProgramForm({...programForm, labBatches: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, labBatches: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="3"
               />
@@ -412,7 +435,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={programForm.studentsPerBatch}
-                onChange={(e) => setProgramForm({...programForm, studentsPerBatch: e.target.value})}
+                onChange={(e) => setProgramForm({ ...programForm, studentsPerBatch: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="20"
               />
@@ -463,7 +486,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={courseForm.id}
-                onChange={(e) => setCourseForm({...courseForm, id: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, id: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="C001"
               />
@@ -473,7 +496,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={courseForm.name}
-                onChange={(e) => setCourseForm({...courseForm, name: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Data Structures and Algorithms"
               />
@@ -483,7 +506,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={courseForm.code}
-                onChange={(e) => setCourseForm({...courseForm, code: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, code: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="CS301"
               />
@@ -492,7 +515,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Program</label>
               <select
                 value={courseForm.programId}
-                onChange={(e) => setCourseForm({...courseForm, programId: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, programId: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Program</option>
@@ -505,7 +528,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Semester</label>
               <select
                 value={courseForm.semester}
-                onChange={(e) => setCourseForm({...courseForm, semester: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, semester: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Semester</option>
@@ -519,7 +542,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={courseForm.credits}
-                onChange={(e) => setCourseForm({...courseForm, credits: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, credits: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="4"
               />
@@ -528,7 +551,7 @@ const ProgramsData = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Course Type</label>
               <select
                 value={courseForm.type}
-                onChange={(e) => setCourseForm({...courseForm, type: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, type: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Type</option>
@@ -542,7 +565,7 @@ const ProgramsData = () => {
               <input
                 type="number"
                 value={courseForm.hoursPerWeek}
-                onChange={(e) => setCourseForm({...courseForm, hoursPerWeek: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, hoursPerWeek: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="6"
               />
@@ -552,7 +575,7 @@ const ProgramsData = () => {
                 <input
                   type="checkbox"
                   checked={courseForm.requiresLab}
-                  onChange={(e) => setCourseForm({...courseForm, requiresLab: e.target.checked})}
+                  onChange={(e) => setCourseForm({ ...courseForm, requiresLab: e.target.checked })}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">Requires Lab</span>
@@ -561,7 +584,7 @@ const ProgramsData = () => {
                 <input
                   type="number"
                   value={courseForm.labHours}
-                  onChange={(e) => setCourseForm({...courseForm, labHours: e.target.value})}
+                  onChange={(e) => setCourseForm({ ...courseForm, labHours: e.target.value })}
                   className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Lab hours"
                 />
@@ -572,7 +595,7 @@ const ProgramsData = () => {
               <input
                 type="text"
                 value={courseForm.teacher}
-                onChange={(e) => setCourseForm({...courseForm, teacher: e.target.value})}
+                onChange={(e) => setCourseForm({ ...courseForm, teacher: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Dr. Sarah Johnson"
               />
@@ -661,7 +684,7 @@ const ProgramsData = () => {
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
-              <button 
+              <button
                 onClick={handleAddProgram}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
@@ -724,13 +747,13 @@ const ProgramsData = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
-                      <button 
+                      <button
                         onClick={() => handleEditProgram(program)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteProgram(program.id)}
                         className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                       >
@@ -809,7 +832,7 @@ const ProgramsData = () => {
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
-              <button 
+              <button
                 onClick={handleAddCourse}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
@@ -874,13 +897,13 @@ const ProgramsData = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
-                      <button 
+                      <button
                         onClick={() => handleEditCourse(course)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteCourse(course.id)}
                         className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                       >
@@ -910,7 +933,7 @@ const ProgramsData = () => {
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-gray-500 dark:text-gray-400">Welcome, {user?.name}</span>
-              <button 
+              <button
                 onClick={() => { logout(); navigate('/login'); }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -927,21 +950,19 @@ const ProgramsData = () => {
           <div className="flex space-x-8">
             <button
               onClick={() => setActiveTab('programs')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'programs'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'programs'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
             >
               Academic Programs
             </button>
             <button
               onClick={() => setActiveTab('courses')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'courses'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'courses'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
             >
               Courses
             </button>
@@ -957,62 +978,62 @@ const ProgramsData = () => {
         {/* Main Content Area */}
         <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxHeight: 'calc(100vh - 4rem)', overflow: 'auto' }}>
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {activeTab === 'programs' ? 'Academic Programs' : 'Courses & Subjects'}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                {activeTab === 'programs' 
-                  ? 'Set up academic programs, student divisions, and batch configurations'
-                  : 'Manage course details, credits, and subject assignments'
-                }
-              </p>
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {activeTab === 'programs' ? 'Academic Programs' : 'Courses & Subjects'}
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {activeTab === 'programs'
+                      ? 'Set up academic programs, student divisions, and batch configurations'
+                      : 'Manage course details, credits, and subject assignments'
+                    }
+                  </p>
+                </div>
+                <button
+                  onClick={handleBack}
+                  className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Classrooms Data
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={handleBack}
-              className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Classrooms Data
-            </button>
-          </div>
-        </div>
 
-        <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Academic Structure Setup</h4>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                {activeTab === 'programs' 
-                  ? 'Configure programs with student divisions and lab batches. This determines the basic structure for timetable generation.'
-                  : 'Set up courses with credit hours, teaching requirements, and lab sessions. Link courses to programs and assign teachers.'
-                }
-              </p>
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Academic Structure Setup</h4>
+                  <p className="text-blue-700 dark:text-blue-300 text-sm">
+                    {activeTab === 'programs'
+                      ? 'Configure programs with student divisions and lab batches. This determines the basic structure for timetable generation.'
+                      : 'Set up courses with credit hours, teaching requirements, and lab sessions. Link courses to programs and assign teachers.'
+                    }
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {activeTab === 'programs' ? renderProgramsList() : renderCoursesList()}
+            {activeTab === 'programs' ? renderProgramsList() : renderCoursesList()}
 
-        <div className="mt-8 flex justify-between">
-          <button 
-            onClick={handleBack}
-            className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </button>
-          <button 
-            onClick={() => navigate('/infrastructure-data')}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-          >
-            Next: Infrastructure & Policy
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
+            <div className="mt-8 flex justify-between">
+              <button
+                onClick={handleBack}
+                className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </button>
+              <button
+                onClick={() => navigate('/infrastructure-data')}
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Next: Infrastructure & Policy
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
           </div>
         </main>
       </div>

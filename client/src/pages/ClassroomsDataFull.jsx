@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
 import { getClassrooms, createClassroom, updateClassroom, deleteClassroom } from '../services/api';
-import { 
+import {
   Building2,
   ArrowLeft,
   ArrowRight,
@@ -26,7 +26,9 @@ import {
   Thermometer,
   Lightbulb,
   Shield,
-  Loader
+  Loader,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 
 const ClassroomsData = () => {
@@ -38,11 +40,22 @@ const ClassroomsData = () => {
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch classrooms from API on component mount
   useEffect(() => {
     fetchClassrooms();
   }, []);
+
+  // Auto-clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const fetchClassrooms = async () => {
     try {
@@ -114,28 +127,30 @@ const ClassroomsData = () => {
   const handleAddRoom = async () => {
     try {
       setLoading(true);
-      
+
       // Client-side validation
       if (!roomForm.id || !roomForm.name || !roomForm.building || !roomForm.floor || !roomForm.type || !roomForm.capacity) {
-        alert('Please fill in all required fields: ID, Name, Building, Floor, Type, and Capacity');
+        setError('Please fill in all required fields: ID, Name, Building, Floor, Type, and Capacity');
+        setLoading(false);
         return;
       }
 
       console.log('Sending classroom data:', JSON.stringify(roomForm, null, 2));
       const response = await createClassroom(roomForm);
+      setSuccessMessage(response.message || 'Classroom added successfully');
       await fetchClassrooms(); // Reload classrooms from API
       resetForm();
       setShowAddForm(false);
     } catch (err) {
       console.error('Error adding classroom:', err);
       console.error('Failed data:', JSON.stringify(roomForm, null, 2));
-      
+
       // Show detailed error message from server if available
-      const errorMessage = err.response?.data?.errors 
+      const errorMessage = err.response?.data?.errors
         ? err.response.data.errors.map(e => e.msg).join(', ')
         : err.response?.data?.message || 'Failed to add classroom. Please try again.';
-      
-      alert(errorMessage);
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,21 +158,22 @@ const ClassroomsData = () => {
 
   const handleEditRoom = (room) => {
     setRoomForm(room);
-    setEditingRoom(room._id || room.id);
+    setEditingRoom(room.id || room._id);
     setShowAddForm(true);
   };
 
   const handleUpdateRoom = async () => {
     try {
       setLoading(true);
-      await updateClassroom(editingRoom, roomForm);
+      const response = await updateClassroom(editingRoom, roomForm);
+      setSuccessMessage(response.message || 'Classroom updated successfully');
       await fetchClassrooms(); // Reload classrooms from API
       resetForm();
       setShowAddForm(false);
       setEditingRoom(null);
     } catch (err) {
       console.error('Error updating classroom:', err);
-      alert('Failed to update classroom. Please try again.');
+      setError('Failed to update classroom. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -165,14 +181,15 @@ const ClassroomsData = () => {
 
   const handleDeleteRoom = async (roomId) => {
     if (!confirm('Are you sure you want to delete this classroom?')) return;
-    
+
     try {
       setLoading(true);
-      await deleteClassroom(roomId);
+      const response = await deleteClassroom(roomId);
+      setSuccessMessage(response.message || 'Classroom deleted successfully');
       await fetchClassrooms(); // Reload classrooms from API
     } catch (err) {
       console.error('Error deleting classroom:', err);
-      alert('Failed to delete classroom. Please try again.');
+      setError(err.response?.data?.message || 'Failed to delete classroom. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -264,7 +281,7 @@ const ClassroomsData = () => {
                 <input
                   type="text"
                   value={roomForm.id}
-                  onChange={(e) => setRoomForm({...roomForm, id: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="R101"
                   disabled={editingRoom} // Disable ID editing when updating
@@ -275,7 +292,7 @@ const ClassroomsData = () => {
                 <input
                   type="text"
                   value={roomForm.name}
-                  onChange={(e) => setRoomForm({...roomForm, name: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Room 101"
                 />
@@ -284,7 +301,7 @@ const ClassroomsData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Building</label>
                 <select
                   value={roomForm.building}
-                  onChange={(e) => setRoomForm({...roomForm, building: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, building: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Building</option>
@@ -297,7 +314,7 @@ const ClassroomsData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Floor</label>
                 <select
                   value={roomForm.floor}
-                  onChange={(e) => setRoomForm({...roomForm, floor: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, floor: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Floor</option>
@@ -310,7 +327,7 @@ const ClassroomsData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Room Type</label>
                 <select
                   value={roomForm.type}
-                  onChange={(e) => setRoomForm({...roomForm, type: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Type</option>
@@ -324,7 +341,7 @@ const ClassroomsData = () => {
                 <input
                   type="number"
                   value={roomForm.capacity}
-                  onChange={(e) => setRoomForm({...roomForm, capacity: parseInt(e.target.value) || ''})}
+                  onChange={(e) => setRoomForm({ ...roomForm, capacity: parseInt(e.target.value) || '' })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="60"
                   min="1"
@@ -335,7 +352,7 @@ const ClassroomsData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
                 <select
                   value={roomForm.status}
-                  onChange={(e) => setRoomForm({...roomForm, status: e.target.value})}
+                  onChange={(e) => setRoomForm({ ...roomForm, status: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="available">Available</option>
@@ -446,7 +463,7 @@ const ClassroomsData = () => {
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-gray-500 dark:text-gray-400">Welcome, {user?.name}</span>
-              <button 
+              <button
                 onClick={() => { logout(); navigate('/login'); }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -466,238 +483,257 @@ const ClassroomsData = () => {
         <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxHeight: 'calc(100vh - 4rem)', overflow: 'auto' }}>
             <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Classrooms & Laboratories</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage room details, capacity, and availability for optimal space utilization
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                <Upload className="w-4 h-4" />
-                <span>Import CSV</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
-            </div>
-          </div>
-        </div>
+              {/* Success Message */}
+              {successMessage && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    {successMessage}
+                  </div>
+                </div>
+              )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Rooms</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{classrooms.length}</p>
+              {/* Error Message */}
+              {error && !loading && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                  <div className="flex items-center">
+                    <AlertCircle className="w-5 h-5 mr-2" />
+                    {error}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Classrooms & Laboratories</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Manage room details, capacity, and availability for optimal space utilization
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                    <Upload className="w-4 h-4" />
+                    <span>Import CSV</span>
+                  </button>
+                  <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    <Download className="w-4 h-4" />
+                    <span>Export</span>
+                  </button>
+                </div>
               </div>
-              <Building2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Capacity</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {classrooms.reduce((sum, room) => sum + room.capacity, 0)}
-                </p>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Rooms</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{classrooms.length}</p>
+                  </div>
+                  <Building2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
-              <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Buildings</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(classrooms.map(room => room.building)).size}
-                </p>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Capacity</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {classrooms.reduce((sum, room) => sum + room.capacity, 0)}
+                    </p>
+                  </div>
+                  <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
               </div>
-              <MapPin className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Labs</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {classrooms.filter(room => room.type.includes('Lab')).length}
-                </p>
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Buildings</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {new Set(classrooms.map(room => room.building)).size}
+                    </p>
+                  </div>
+                  <MapPin className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
               </div>
-              <Monitor className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Labs</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {classrooms.filter(room => room.type.includes('Lab')).length}
+                    </p>
+                  </div>
+                  <Monitor className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Rooms Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Rooms & Laboratories</h3>
-              <button
-                onClick={() => setShowAddForm(true)}
-                disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Room</span>
-              </button>
-            </div>
-          </div>
-          
-          {/* Loading State */}
-          {loading && classrooms.length === 0 && (
-            <div className="p-12 text-center">
-              <Loader className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Loading classrooms...</p>
-            </div>
-          )}
+            {/* Rooms Table */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Rooms & Laboratories</h3>
+                  <button
+                    onClick={() => setShowAddForm(true)}
+                    disabled={loading}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Room</span>
+                  </button>
+                </div>
+              </div>
 
-          {/* Error State */}
-          {error && (
-            <div className="p-12 text-center">
-              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-              <button
-                onClick={fetchClassrooms}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Retry
-              </button>
-            </div>
-          )}
+              {/* Loading State */}
+              {loading && classrooms.length === 0 && (
+                <div className="p-12 text-center">
+                  <Loader className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">Loading classrooms...</p>
+                </div>
+              )}
 
-          {/* Empty State */}
-          {!loading && !error && classrooms.length === 0 && (
-            <div className="p-12 text-center">
-              <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400 mb-4">No classrooms found. Add your first classroom to get started.</p>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Add Classroom
-              </button>
-            </div>
-          )}
+              {/* Error State */}
+              {error && (
+                <div className="p-12 text-center">
+                  <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+                  <button
+                    onClick={fetchClassrooms}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
 
-          {/* Data Table */}
-          {!loading && !error && classrooms.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Room Details
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Type & Capacity
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Features
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {classrooms.map((room) => (
-                  <tr key={room.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{room.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{room.id}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{room.building}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{room.floor}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{room.type}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{room.capacity} students</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {room.features.slice(0, 3).map((feature, index) => {
-                          const IconComponent = featureIcons[feature] || Shield;
-                          return (
-                            <span key={index} className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
-                              <IconComponent className="w-3 h-3" />
-                              <span>{feature}</span>
+              {/* Empty State */}
+              {!loading && !error && classrooms.length === 0 && (
+                <div className="p-12 text-center">
+                  <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">No classrooms found. Add your first classroom to get started.</p>
+                  <button
+                    onClick={() => setShowAddForm(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add Classroom
+                  </button>
+                </div>
+              )}
+
+              {/* Data Table */}
+              {!loading && !error && classrooms.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Room Details
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Location
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Type & Capacity
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Features
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      {classrooms.map((room) => (
+                        <tr key={room.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{room.name}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{room.id}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white">{room.building}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{room.floor}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white">{room.type}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{room.capacity} students</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {room.features.slice(0, 3).map((feature, index) => {
+                                const IconComponent = featureIcons[feature] || Shield;
+                                return (
+                                  <span key={index} className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+                                    <IconComponent className="w-3 h-3" />
+                                    <span>{feature}</span>
+                                  </span>
+                                );
+                              })}
+                              {room.features.length > 3 && (
+                                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
+                                  +{room.features.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 text-xs rounded ${room.status === 'Active'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : room.status === 'Maintenance'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }`}>
+                              {room.status}
                             </span>
-                          );
-                        })}
-                        {room.features.length > 3 && (
-                          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
-                            +{room.features.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        room.status === 'Active' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : room.status === 'Maintenance'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      }`}>
-                        {room.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEditRoom(room)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRoom(room._id || room.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          )}
-        </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => handleEditRoom(room)}
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteRoom(room.id || room._id)}
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
 
-        {/* Navigation */}
-        <div className="mt-8 flex justify-between">
-          <button 
-            onClick={handleBack}
-            className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back: Teachers Data
-          </button>
-          
-          <button 
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-          >
-            Next: Programs & Courses
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
-        </div>
+            {/* Navigation */}
+            <div className="mt-8 flex justify-between">
+              <button
+                onClick={handleBack}
+                className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back: Teachers Data
+              </button>
+
+              <button
+                onClick={handleNext}
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Next: Programs & Courses
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+          </div>
         </main>
       </div>
 

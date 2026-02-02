@@ -21,7 +21,7 @@
     "optimization"
   ],
   "author": "Your Name",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "bcrypt": "^6.0.0",
