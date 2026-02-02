@@ -145,7 +145,21 @@ const ProgramsData = () => {
     status: 'Active'
   });
 
-  const schools = ['Engineering', 'Business', 'Sciences', 'Arts', 'Medicine', 'Law'];
+  const schools = [
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
+  ];
   const programTypes = ['Bachelor', 'Master', 'Doctorate', 'Diploma', 'Certificate'];
   const courseTypes = ['Theory', 'Practical', 'Tutorial', 'Seminar'];
   const semesters = [1, 2, 3, 4, 5, 6, 7, 8];

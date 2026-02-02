@@ -67,7 +67,23 @@ const GenerateTimetable = () => {
     balanceWorkload: true,
     prioritizePreferences: false
   });
-  const [availableDepartments, setAvailableDepartments] = useState(['Computer Science']);
+  const [availableDepartments, setAvailableDepartments] = useState(['CSE']);
+
+  const departments = [
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
+  ];
 
   const [dataValidation, setDataValidation] = useState({
     teachers: { status: 'unknown', count: 0, issues: [] },
@@ -83,7 +99,7 @@ const GenerateTimetable = () => {
     name: location.state?.name || `Timetable ${new Date().getFullYear()}`,
     academicYear: location.state?.academicYear || '2024-2025',
     semester: location.state?.semester || 1,
-    department: location.state?.department || 'Computer Science',
+    department: location.state?.department || 'CSE',
     year: location.state?.year || 1
   });
 
@@ -749,9 +765,9 @@ const GenerateTimetable = () => {
           <select
             value={timetableData.department}
             onChange={(e) => setTimetableData({ ...timetableData, department: e.target.value })}
-            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
           >
-            {availableDepartments.map(dept => (
+            {departments.map(dept => (
               <option key={dept} value={dept}>{dept}</option>
             ))}
           </select>
@@ -761,7 +777,7 @@ const GenerateTimetable = () => {
           <select
             value={timetableData.year}
             onChange={(e) => setTimetableData({ ...timetableData, year: parseInt(e.target.value) })}
-            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
           >
             <option value={1}>Year 1</option>
             <option value={2}>Year 2</option>
@@ -774,7 +790,7 @@ const GenerateTimetable = () => {
           <select
             value={timetableData.semester}
             onChange={(e) => setTimetableData({ ...timetableData, semester: parseInt(e.target.value) })}
-            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
           >
             <option value={1}>Semester 1</option>
             <option value={2}>Semester 2</option>
@@ -785,7 +801,7 @@ const GenerateTimetable = () => {
           <select
             value={timetableData.academicYear}
             onChange={(e) => setTimetableData({ ...timetableData, academicYear: e.target.value })}
-            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
           >
             <option value="2024-2025">2024-2025</option>
             <option value="2025-2026">2025-2026</option>

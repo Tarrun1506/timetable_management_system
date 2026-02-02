@@ -64,18 +64,29 @@ class GeneticAlgorithm {
       let currentHour = startHour;
       let currentMinute = startMinute;
 
-      while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+      // Safety check to prevent infinite loops
+      let loopSafe = 0;
+      const MAX_LOOPS = 100; // Max slots per day
+
+      while ((currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) && loopSafe < MAX_LOOPS) {
+        loopSafe++;
+
         const startTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
 
         let endTimeMinute = currentMinute + this.settings.slotDuration;
         let endTimeHour = currentHour;
 
-        if (endTimeMinute >= 60) {
-          endTimeHour += Math.floor(endTimeMinute / 60);
-          endTimeMinute = endTimeMinute % 60;
+        while (endTimeMinute >= 60) {
+          endTimeHour += 1;
+          endTimeMinute -= 60;
         }
 
         const endTime = `${endTimeHour.toString().padStart(2, '0')}:${endTimeMinute.toString().padStart(2, '0')}`;
+
+        // Stop if we exceed end time
+        if (endTimeHour > endHour || (endTimeHour === endHour && endTimeMinute > endMinute)) {
+          break;
+        }
 
         const isBreakTime = this.settings.breakSlots.some(breakSlot => {
           const [breakStart, breakEnd] = breakSlot.split('-');
@@ -92,9 +103,9 @@ class GeneticAlgorithm {
         }
 
         currentMinute += this.settings.slotDuration + (this.settings.breakDuration || 0);
-        if (currentMinute >= 60) {
-          currentHour += Math.floor(currentMinute / 60);
-          currentMinute = currentMinute % 60;
+        while (currentMinute >= 60) {
+          currentHour += 1;
+          currentMinute -= 60;
         }
       }
     }
@@ -199,6 +210,9 @@ class GeneticAlgorithm {
         if (progressCallback && this.generationCount % 10 === 0) {
           const progress = (this.generationCount / this.settings.maxGenerations) * 100;
           await progressCallback(progress, this.generationCount, this.bestFitness);
+
+          // Yield to event loop to allow other requests/interrupts
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         // Check for convergence or good enough solution
@@ -579,7 +593,10 @@ class GeneticAlgorithm {
       });
 
       // Count gaps
+      let dayGaps = 0;
       for (let i = 1; i < studentSchedule.length; i++) {
+        if (dayGaps > 20) break; // Circuit breaker
+
         const prev = studentSchedule[i - 1];
         const curr = studentSchedule[i];
 

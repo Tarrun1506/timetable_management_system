@@ -199,11 +199,11 @@ const AdminDashboard = () => {
         percentage: totalStudents > 0 ? ((dept.departmentTotal / totalStudents) * 100).toFixed(1) : 0
       }))
       : [
-        { name: 'Computer Science', value: Math.floor(totalStudents * 0.35), percentage: 35 },
-        { name: 'Electronics', value: Math.floor(totalStudents * 0.25), percentage: 25 },
-        { name: 'Mechanical', value: Math.floor(totalStudents * 0.20), percentage: 20 },
-        { name: 'Civil', value: Math.floor(totalStudents * 0.15), percentage: 15 },
-        { name: 'Others', value: Math.floor(totalStudents * 0.05), percentage: 5 }
+        { name: 'CSE', value: Math.floor(totalStudents * 0.30), percentage: 30 },
+        { name: 'ECE', value: Math.floor(totalStudents * 0.25), percentage: 25 },
+        { name: 'MECHANICAL', value: Math.floor(totalStudents * 0.20), percentage: 20 },
+        { name: 'CIVIL', value: Math.floor(totalStudents * 0.15), percentage: 15 },
+        { name: 'AIDS', value: Math.floor(totalStudents * 0.10), percentage: 10 }
       ];
 
     // Timetable Status Distribution

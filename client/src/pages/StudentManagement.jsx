@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
-import { 
-  Users, 
-  Plus, 
-  Upload, 
-  Download, 
-  Search, 
+import {
+  Users,
+  Plus,
+  Upload,
+  Download,
+  Search,
   Filter,
   Edit3,
   Trash2,
@@ -117,7 +117,7 @@ const StudentManagement = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const queryParams = new URLSearchParams({
         page: pagination.current,
         limit: pagination.limit,
@@ -169,11 +169,11 @@ const StudentManagement = () => {
     try {
       setLoading(true);
       setError('');
-      
-      const endpoint = modalType === 'edit' ? 
-        `/api/data/students/${selectedStudent.studentId}` : 
+
+      const endpoint = modalType === 'edit' ?
+        `/api/data/students/${selectedStudent.studentId}` :
         '/api/data/students';
-      
+
       const method = modalType === 'edit' ? 'PUT' : 'POST';
 
       // Filter out empty gender field to avoid validation error
@@ -220,7 +220,7 @@ const StudentManagement = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await fetch(`http://localhost:8000/api/data/students/${studentId}`, {
         method: 'DELETE',
         headers: {
@@ -303,9 +303,9 @@ const StudentManagement = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('Bulk creating students:', bulkData);
-      
+
       const response = await fetch('http://localhost:8000/api/data/students/bulk-create', {
         method: 'POST',
         headers: {
@@ -343,7 +343,7 @@ const StudentManagement = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const formData = new FormData();
       formData.append('csvFile', uploadFile);
       formData.append('sendCredentials', bulkData.sendCredentials);
@@ -380,7 +380,7 @@ const StudentManagement = () => {
   const handleExport = async () => {
     try {
       setError('');
-      
+
       const queryParams = new URLSearchParams(
         Object.fromEntries(Object.entries(filters).filter(([_, v]) => v))
       );
@@ -462,8 +462,8 @@ const StudentManagement = () => {
   };
 
   const toggleCredentialVisibility = (index) => {
-    setShowCredentials(prev => 
-      prev.includes(index) 
+    setShowCredentials(prev =>
+      prev.includes(index)
         ? prev.filter(i => i !== index)
         : [...prev, index]
     );
@@ -488,7 +488,7 @@ const StudentManagement = () => {
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-gray-500 dark:text-gray-400">Welcome, {user?.name}</span>
-              <button 
+              <button
                 onClick={() => { logout(); navigate('/login'); }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -507,319 +507,326 @@ const StudentManagement = () => {
         {/* Main Content Area */}
         <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxHeight: 'calc(100vh - 4rem)', overflow: 'auto' }}>
-        {/* Alerts */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3" />
-            <span className="text-red-700 dark:text-red-300">{error}</span>
-            <button onClick={() => setError('')} className="ml-auto text-red-600 dark:text-red-400">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center">
-            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-3" />
-            <span className="text-green-700 dark:text-green-300">{success}</span>
-            <button onClick={() => setSuccess('')} className="ml-auto text-green-600 dark:text-green-400">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Action Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => openModal('add')}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Student
-              </button>
-              <button
-                onClick={() => openModal('bulk')}
-                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Bulk Add
-              </button>
-              <button
-                onClick={handleExport}
-                className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </button>
-            </div>
-
-            {/* Search */}
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search students..."
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-3">
-            <select
-              value={filters.department}
-              onChange={(e) => handleFilterChange('department', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Departments</option>
-              <option value="engineering">Engineering</option>
-              <option value="computer-science">Computer Science</option>
-              <option value="business">Business</option>
-              <option value="medical">Medical</option>
-              <option value="law">Law</option>
-            </select>
-
-            <select
-              value={filters.program}
-              onChange={(e) => handleFilterChange('program', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Programs</option>
-              <option value="B.Tech">B.Tech</option>
-              <option value="M.Tech">M.Tech</option>
-              <option value="MBA">MBA</option>
-              <option value="BBA">BBA</option>
-            </select>
-
-            <select
-              value={filters.year}
-              onChange={(e) => handleFilterChange('year', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Years</option>
-              <option value="1">Year 1</option>
-              <option value="2">Year 2</option>
-              <option value="3">Year 3</option>
-              <option value="4">Year 4</option>
-            </select>
-
-            <select
-              value={filters.semester}
-              onChange={(e) => handleFilterChange('semester', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Semesters</option>
-              <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="Division"
-              value={filters.division}
-              onChange={(e) => handleFilterChange('division', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-
-            <button
-              onClick={clearFilters}
-              className="flex items-center justify-center px-3 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {/* Upload Result */}
-        {uploadResult && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upload Results</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <div className="text-green-600 dark:text-green-400 font-semibold">Created: {uploadResult.created?.length || 0}</div>
-              </div>
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                <div className="text-red-600 dark:text-red-400 font-semibold">Failed: {uploadResult.failed?.length || 0}</div>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <div className="text-blue-600 dark:text-blue-400 font-semibold">Accounts Created: {uploadResult.userAccountsCreated?.length || 0}</div>
-              </div>
-            </div>
-
-            {/* Show credentials if any */}
-            {uploadResult.userAccountsCreated?.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Student Login Credentials:</h4>
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg max-h-60 overflow-y-auto">
-                  {uploadResult.userAccountsCreated.map((account, index) => (
-                    <div key={index} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
-                      <div>
-                        <span className="font-medium">{account.studentId}</span> - {account.email}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm">
-                          Password: {showCredentials.includes(index) ? account.tempPassword : '••••••••'}
-                        </span>
-                        <button
-                          onClick={() => toggleCredentialVisibility(index)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          {showCredentials.includes(index) ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                  ⚠️ Please save these credentials and share them with the respective students. For security, change passwords on first login.
-                </div>
+            {/* Alerts */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3" />
+                <span className="text-red-700 dark:text-red-300">{error}</span>
+                <button onClick={() => setError('')} className="ml-auto text-red-600 dark:text-red-400">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             )}
 
-            <button
-              onClick={() => setUploadResult(null)}
-              className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-            >
-              Close Results
-            </button>
-          </div>
-        )}
+            {success && (
+              <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-3" />
+                <span className="text-green-700 dark:text-green-300">{success}</span>
+                <button onClick={() => setSuccess('')} className="ml-auto text-green-600 dark:text-green-400">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-        {/* Students Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Academic Info</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                      Loading students...
-                    </td>
-                  </tr>
-                ) : students.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                      No students found
-                    </td>
-                  </tr>
-                ) : (
-                  students.map((student) => (
-                    <tr key={student._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                              <span className="text-white font-medium">
-                                {student.personalInfo.firstName.charAt(0)}{student.personalInfo.lastName.charAt(0)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {student.personalInfo.firstName} {student.personalInfo.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              ID: {student.studentId} | Roll: {student.academicInfo.rollNumber}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-white">
-                          {student.academicInfo.program} - Year {student.academicInfo.year}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {student.academicInfo.department} | Div: {student.academicInfo.division}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-white flex items-center">
-                          <Mail className="w-4 h-4 mr-1" />
-                          {student.personalInfo.email}
-                        </div>
-                        {student.personalInfo.phone && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                            <Phone className="w-4 h-4 mr-1" />
-                            {student.personalInfo.phone}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          student.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                          student.status === 'Inactive' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' :
-                          'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {student.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => openModal('edit', student)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                            title="Edit student"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStudent(student.studentId)}
-                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                            title="Delete student"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {pagination.pages > 1 && (
-            <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Showing page {pagination.current} of {pagination.pages} ({pagination.total} total students)
+            {/* Action Bar */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => openModal('add')}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Student
+                  </button>
+                  <button
+                    onClick={() => openModal('bulk')}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Bulk Add
+                  </button>
+                  <button
+                    onClick={handleExport}
+                    className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </button>
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    disabled={!pagination.hasPrev}
-                    onClick={() => setPagination(prev => ({ ...prev, current: prev.current - 1 }))}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    disabled={!pagination.hasNext}
-                    onClick={() => setPagination(prev => ({ ...prev, current: prev.current + 1 }))}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Next
-                  </button>
+
+                {/* Search */}
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search students..."
+                      value={filters.search}
+                      onChange={(e) => handleFilterChange('search', e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Filters */}
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-3">
+                <select
+                  value={filters.department}
+                  onChange={(e) => handleFilterChange('department', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">All Departments</option>
+                  <option value="AIDS">AIDS</option>
+                  <option value="AIML">AIML</option>
+                  <option value="AUTOMOBILE">AUTOMOBILE</option>
+                  <option value="CHEMICAL">CHEMICAL</option>
+                  <option value="CIVIL">CIVIL</option>
+                  <option value="CSE">CSE</option>
+                  <option value="CSD">CSD</option>
+                  <option value="ECE">ECE</option>
+                  <option value="EEE">EEE</option>
+                  <option value="EIE">EIE</option>
+                  <option value="FT">FT</option>
+                  <option value="IT">IT</option>
+                  <option value="MECHANICAL">MECHANICAL</option>
+                </select>
+
+                <select
+                  value={filters.program}
+                  onChange={(e) => handleFilterChange('program', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">All Programs</option>
+                  <option value="B.Tech">B.Tech</option>
+                  <option value="M.Tech">M.Tech</option>
+                  <option value="MBA">MBA</option>
+                  <option value="BBA">BBA</option>
+                </select>
+
+                <select
+                  value={filters.year}
+                  onChange={(e) => handleFilterChange('year', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">All Years</option>
+                  <option value="1">Year 1</option>
+                  <option value="2">Year 2</option>
+                  <option value="3">Year 3</option>
+                  <option value="4">Year 4</option>
+                </select>
+
+                <select
+                  value={filters.semester}
+                  onChange={(e) => handleFilterChange('semester', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">All Semesters</option>
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Division"
+                  value={filters.division}
+                  onChange={(e) => handleFilterChange('division', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center justify-center px-3 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Clear Filters
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Upload Result */}
+            {uploadResult && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upload Results</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <div className="text-green-600 dark:text-green-400 font-semibold">Created: {uploadResult.created?.length || 0}</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                    <div className="text-red-600 dark:text-red-400 font-semibold">Failed: {uploadResult.failed?.length || 0}</div>
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <div className="text-blue-600 dark:text-blue-400 font-semibold">Accounts Created: {uploadResult.userAccountsCreated?.length || 0}</div>
+                  </div>
+                </div>
+
+                {/* Show credentials if any */}
+                {uploadResult.userAccountsCreated?.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Student Login Credentials:</h4>
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg max-h-60 overflow-y-auto">
+                      {uploadResult.userAccountsCreated.map((account, index) => (
+                        <div key={index} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                          <div>
+                            <span className="font-medium">{account.studentId}</span> - {account.email}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm">
+                              Password: {showCredentials.includes(index) ? account.tempPassword : '••••••••'}
+                            </span>
+                            <button
+                              onClick={() => toggleCredentialVisibility(index)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              {showCredentials.includes(index) ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                      ⚠️ Please save these credentials and share them with the respective students. For security, change passwords on first login.
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setUploadResult(null)}
+                  className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  Close Results
+                </button>
+              </div>
+            )}
+
+            {/* Students Table */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Academic Info</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                          Loading students...
+                        </td>
+                      </tr>
+                    ) : students.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                          No students found
+                        </td>
+                      </tr>
+                    ) : (
+                      students.map((student) => (
+                        <tr key={student._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                  <span className="text-white font-medium">
+                                    {student.personalInfo.firstName.charAt(0)}{student.personalInfo.lastName.charAt(0)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {student.personalInfo.firstName} {student.personalInfo.lastName}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  ID: {student.studentId} | Roll: {student.academicInfo.rollNumber}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white">
+                              {student.academicInfo.program} - Year {student.academicInfo.year}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {student.academicInfo.department} | Div: {student.academicInfo.division}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white flex items-center">
+                              <Mail className="w-4 h-4 mr-1" />
+                              {student.personalInfo.email}
+                            </div>
+                            {student.personalInfo.phone && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                <Phone className="w-4 h-4 mr-1" />
+                                {student.personalInfo.phone}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${student.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                                student.status === 'Inactive' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' :
+                                  'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                              }`}>
+                              {student.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => openModal('edit', student)}
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                title="Edit student"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteStudent(student.studentId)}
+                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                title="Delete student"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {pagination.pages > 1 && (
+                <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                      Showing page {pagination.current} of {pagination.pages} ({pagination.total} total students)
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        disabled={!pagination.hasPrev}
+                        onClick={() => setPagination(prev => ({ ...prev, current: prev.current - 1 }))}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        disabled={!pagination.hasNext}
+                        onClick={() => setPagination(prev => ({ ...prev, current: prev.current + 1 }))}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>
@@ -832,7 +839,7 @@ const StudentManagement = () => {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {modalType === 'add' ? 'Add New Student' :
-                   modalType === 'edit' ? 'Edit Student' : 'Bulk Add Students'}
+                    modalType === 'edit' ? 'Edit Student' : 'Bulk Add Students'}
                 </h2>
                 <button
                   onClick={() => setShowModal(false)}
@@ -1023,11 +1030,19 @@ const StudentManagement = () => {
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
                         <option value="">Select Department</option>
-                        <option value="engineering">Engineering</option>
-                        <option value="computer-science">Computer Science</option>
-                        <option value="business">Business</option>
-                        <option value="medical">Medical</option>
-                        <option value="law">Law</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="AIML">AIML</option>
+                        <option value="AUTOMOBILE">AUTOMOBILE</option>
+                        <option value="CHEMICAL">CHEMICAL</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="CSE">CSE</option>
+                        <option value="CSD">CSD</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="EIE">EIE</option>
+                        <option value="FT">FT</option>
+                        <option value="IT">IT</option>
+                        <option value="MECHANICAL">MECHANICAL</option>
                       </select>
                     </div>
                     <div>

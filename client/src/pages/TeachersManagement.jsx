@@ -85,14 +85,19 @@ const TeachersManagement = () => {
 
   // Options
   const departments = [
-    'Computer Science',
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Biology',
-    'Engineering',
-    'Business',
-    'Law'
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
   ];
 
   const designations = [

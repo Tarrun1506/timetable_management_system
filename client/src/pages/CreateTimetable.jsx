@@ -34,6 +34,22 @@ const CreateTimetable = () => {
     department: ''
   });
 
+  const departments = [
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
+  ];
+
   const steps = [
     { id: 1, title: 'Basic Information', icon: FileText },
     { id: 2, title: 'Teachers Data', icon: Users },
@@ -109,17 +125,17 @@ const CreateTimetable = () => {
   };
 
   const renderBasicInformation = () => (
-    <div className="bg-white rounded-xl border border-gray-200 p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Create New Timetable</h2>
-        <p className="text-gray-600">Enter the basic information for your timetable generation</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create New Timetable</h2>
+        <p className="text-gray-600 dark:text-gray-400">Enter the basic information for your timetable generation</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Academic Year</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Academic Year</label>
           <select
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
             value={timetableData.academicYear}
             onChange={(e) => setTimetableData({ ...timetableData, academicYear: e.target.value })}
           >
@@ -131,25 +147,23 @@ const CreateTimetable = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Department/School</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department/School</label>
           <select
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
             value={timetableData.department}
             onChange={(e) => setTimetableData({ ...timetableData, department: e.target.value })}
           >
             <option value="">Select Department</option>
-            <option value="engineering">Engineering</option>
-            <option value="computer-science">Computer Science</option>
-            <option value="business">Business Administration</option>
-            <option value="medical">Medical Sciences</option>
-            <option value="law">Law</option>
+            {departments.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Year</label>
           <select
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
             value={timetableData.year}
             onChange={(e) => setTimetableData({ ...timetableData, year: e.target.value })}
           >
@@ -162,9 +176,9 @@ const CreateTimetable = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Semester</label>
           <select
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
             value={timetableData.semester}
             onChange={(e) => setTimetableData({ ...timetableData, semester: e.target.value })}
           >
@@ -178,7 +192,7 @@ const CreateTimetable = () => {
       <div className="flex justify-between">
         <button
           onClick={handleBack}
-          className="group flex items-center px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-all duration-300 hover:scale-105 hover:-translate-y-1 rounded-lg hover:bg-gray-100 hover:shadow-lg"
+          className="group flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-all duration-300 hover:scale-105 hover:-translate-y-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Dashboard

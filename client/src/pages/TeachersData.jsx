@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
-import { 
-  Calendar, 
-  Users, 
+import {
+  Calendar,
+  Users,
   ArrowLeft,
   ArrowRight,
   Plus,
@@ -25,14 +25,14 @@ import {
   Phone,
   GraduationCap
 } from 'lucide-react';
-import { 
-  getTeachers, 
-  createTeacher, 
-  updateTeacher, 
-  deleteTeacher, 
+import {
+  getTeachers,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher,
   bulkImportTeachers,
   uploadCSV,
-  exportData 
+  exportData
 } from '../services/api';
 
 const TeachersData = () => {
@@ -41,7 +41,7 @@ const TeachersData = () => {
   const [activeTab, setActiveTab] = useState('list');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
-  
+
   const [teacherForm, setTeacherForm] = useState({
     id: '',
     name: '',
@@ -69,10 +69,24 @@ const TeachersData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const departments = ['Computer Science', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Engineering'];
+  const departments = [
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
+  ];
   const designations = ['Professor', 'Associate Professor', 'Assistant Professor', 'Lecturer', 'Teaching Assistant'];
   const subjectsList = [
-    'Data Structures', 'Algorithms', 'Machine Learning', 'Software Engineering', 
+    'Data Structures', 'Algorithms', 'Machine Learning', 'Software Engineering',
     'Database Systems', 'Web Development', 'Computer Networks', 'Operating Systems',
     'Calculus', 'Linear Algebra', 'Statistics', 'Discrete Mathematics',
     'Physics I', 'Physics II', 'Quantum Physics', 'Thermodynamics',
@@ -261,7 +275,7 @@ const TeachersData = () => {
                 <input
                   type="text"
                   value={teacherForm.id}
-                  onChange={(e) => setTeacherForm({...teacherForm, id: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, id: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="T001"
                 />
@@ -271,7 +285,7 @@ const TeachersData = () => {
                 <input
                   type="text"
                   value={teacherForm.name}
-                  onChange={(e) => setTeacherForm({...teacherForm, name: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, name: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Dr. John Doe"
                 />
@@ -281,7 +295,7 @@ const TeachersData = () => {
                 <input
                   type="email"
                   value={teacherForm.email}
-                  onChange={(e) => setTeacherForm({...teacherForm, email: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, email: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="john.doe@university.edu"
                 />
@@ -291,7 +305,7 @@ const TeachersData = () => {
                 <input
                   type="tel"
                   value={teacherForm.phone}
-                  onChange={(e) => setTeacherForm({...teacherForm, phone: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, phone: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="+1-555-0123"
                 />
@@ -300,7 +314,7 @@ const TeachersData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
                 <select
                   value={teacherForm.department}
-                  onChange={(e) => setTeacherForm({...teacherForm, department: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, department: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Department</option>
@@ -313,7 +327,7 @@ const TeachersData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Designation</label>
                 <select
                   value={teacherForm.designation}
-                  onChange={(e) => setTeacherForm({...teacherForm, designation: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, designation: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Designation</option>
@@ -327,7 +341,7 @@ const TeachersData = () => {
                 <input
                   type="text"
                   value={teacherForm.qualification}
-                  onChange={(e) => setTeacherForm({...teacherForm, qualification: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, qualification: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Ph.D. Computer Science"
                 />
@@ -337,7 +351,7 @@ const TeachersData = () => {
                 <input
                   type="text"
                   value={teacherForm.experience}
-                  onChange={(e) => setTeacherForm({...teacherForm, experience: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, experience: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="5 years"
                 />
@@ -347,7 +361,7 @@ const TeachersData = () => {
                 <input
                   type="number"
                   value={teacherForm.maxHoursPerWeek}
-                  onChange={(e) => setTeacherForm({...teacherForm, maxHoursPerWeek: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, maxHoursPerWeek: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="20"
                   min="1"
@@ -358,7 +372,7 @@ const TeachersData = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Priority</label>
                 <select
                   value={teacherForm.priority}
-                  onChange={(e) => setTeacherForm({...teacherForm, priority: e.target.value})}
+                  onChange={(e) => setTeacherForm({ ...teacherForm, priority: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="low">Low Priority</option>
@@ -466,7 +480,7 @@ const TeachersData = () => {
             <div>
               <h3 className="font-medium text-red-900 dark:text-red-100">Error Loading Teachers</h3>
               <p className="text-red-700 dark:text-red-300">{error}</p>
-              <button 
+              <button
                 onClick={loadTeachers}
                 className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
@@ -482,200 +496,199 @@ const TeachersData = () => {
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Teachers</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{teachers.length}</p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Teachers</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{teachers.length}</p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Active Teachers</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {teachers.filter(t => t.status === 'active').length}
-              </p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Active Teachers</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {teachers.filter(t => t.status === 'active').length}
+                </p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {[...new Set(teachers.map(t => t.department))].length}
-              </p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {[...new Set(teachers.map(t => t.department))].length}
+                </p>
+              </div>
+              <GraduationCap className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <GraduationCap className="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Subjects</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {[...new Set(teachers.flatMap(t => t.subjects))].length}
-              </p>
-            </div>
-            <BookOpen className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-          </div>
-        </div>
-      </div>
-
-      {/* Teachers Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Teachers List</h3>
-            <div className="flex space-x-3">
-              <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer">
-                <Upload className="w-4 h-4" />
-                <span>Import CSV</span>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVImport}
-                  className="hidden"
-                />
-              </label>
-              <button 
-                onClick={handleExport}
-                className="group relative flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:shadow-green-500/25 overflow-hidden"
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                <Download className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110" />
-                <span className="relative z-10">Export</span>
-              </button>
-              <button 
-                onClick={handleAddTeacher}
-                className="group relative flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/25 overflow-hidden"
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                <Plus className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:rotate-180" />
-                <span className="relative z-10">Add Teacher</span>
-              </button>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Subjects</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {[...new Set(teachers.flatMap(t => t.subjects))].length}
+                </p>
+              </div>
+              <BookOpen className="w-8 h-8 text-orange-600 dark:text-orange-400" />
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Teacher</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subjects</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hours/Week</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {teachers.length === 0 ? (
+        {/* Teachers Table */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Teachers List</h3>
+              <div className="flex space-x-3">
+                <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer">
+                  <Upload className="w-4 h-4" />
+                  <span>Import CSV</span>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCSVImport}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  onClick={handleExport}
+                  className="group relative flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:shadow-green-500/25 overflow-hidden"
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+                  <Download className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                  <span className="relative z-10">Export</span>
+                </button>
+                <button
+                  onClick={handleAddTeacher}
+                  className="group relative flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/25 overflow-hidden"
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+                  <Plus className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:rotate-180" />
+                  <span className="relative z-10">Add Teacher</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <Users className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Teachers Found</h3>
-                      <p className="text-gray-500 dark:text-gray-400 mb-4">Get started by adding your first teacher.</p>
-                      <button 
-                        onClick={handleAddTeacher}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add First Teacher
-                      </button>
-                    </div>
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Teacher</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subjects</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hours/Week</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
-              ) : (
-                teachers.map((teacher) => (
-                  <tr key={teacher.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                          <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {teachers.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <Users className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Teachers Found</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-4">Get started by adding your first teacher.</p>
+                        <button
+                          onClick={handleAddTeacher}
+                          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add First Teacher
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  teachers.map((teacher) => (
+                    <tr key={teacher.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                              <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{teacher.name}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.id}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.email}</div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{teacher.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.id}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{teacher.department}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.designation}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {teacher.subjects.slice(0, 3).map((subject, index) => (
-                        <span key={index} className="inline-block px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
-                          {subject}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">{teacher.department}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{teacher.designation}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {teacher.subjects.slice(0, 3).map((subject, index) => (
+                            <span key={index} className="inline-block px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+                              {subject}
+                            </span>
+                          ))}
+                          {teacher.subjects.length > 3 && (
+                            <span className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                              +{teacher.subjects.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {teacher.maxHoursPerWeek} hrs
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${teacher.priority === 'high'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            : teacher.priority === 'medium'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          }`}>
+                          {teacher.priority}
                         </span>
-                      ))}
-                      {teacher.subjects.length > 3 && (
-                        <span className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                          +{teacher.subjects.length - 3} more
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          {teacher.status}
                         </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {teacher.maxHoursPerWeek} hrs
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      teacher.priority === 'high' 
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                        : teacher.priority === 'medium'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                        : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                    }`}>
-                      {teacher.priority}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      {teacher.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button 
-                        onClick={() => handleEditTeacher(teacher)}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteTeacher(teacher.id)}
-                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => handleEditTeacher(teacher)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTeacher(teacher.id)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
   }; // Close renderTeachersList function
 
   return (
@@ -691,7 +704,7 @@ const TeachersData = () => {
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-gray-500 dark:text-gray-400">Welcome, {user?.name}</span>
-              <button 
+              <button
                 onClick={() => { logout(); navigate('/login'); }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -710,55 +723,55 @@ const TeachersData = () => {
         {/* Main Content Area */}
         <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxHeight: 'calc(100vh - 4rem)', overflow: 'auto' }}>
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Teachers Data</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage teacher profiles, subjects, and availability for timetable generation
-              </p>
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Teachers Data</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Manage teacher profiles, subjects, and availability for timetable generation
+                  </p>
+                </div>
+                <button
+                  onClick={handleBack}
+                  className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Timetable Creation
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={handleBack}
-              className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Timetable Creation
-            </button>
-          </div>
-        </div>
 
-        <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Data Requirements</h4>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                Please ensure all teacher information is complete and accurate. This includes contact details, 
-                subject assignments, weekly availability, and teaching hour preferences.
-              </p>
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Data Requirements</h4>
+                  <p className="text-blue-700 dark:text-blue-300 text-sm">
+                    Please ensure all teacher information is complete and accurate. This includes contact details,
+                    subject assignments, weekly availability, and teaching hour preferences.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {renderTeachersList()}
+            {renderTeachersList()}
 
-        <div className="mt-8 flex justify-between">
-          <button 
-            onClick={handleBack}
-            className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </button>
-          <button 
-            onClick={() => navigate('/classrooms-data')}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-          >
-            Next: Classrooms & Labs
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
+            <div className="mt-8 flex justify-between">
+              <button
+                onClick={handleBack}
+                className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </button>
+              <button
+                onClick={() => navigate('/classrooms-data')}
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Next: Classrooms & Labs
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
           </div>
         </main>
       </div>

@@ -574,13 +574,26 @@ const Auth = () => {
 
                     <div className="relative">
                       <Building className="absolute left-4 top-4 w-5 h-5 text-gray-500" />
-                      <input
-                        type="text"
-                        placeholder="Department (Optional)"
+                      <select
                         value={registerData.department}
                         onChange={handleInputChange('register', 'department')}
-                        className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all duration-300"
-                      />
+                        className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all duration-300 appearance-none"
+                      >
+                        <option value="">Select Department (Optional)</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="AIML">AIML</option>
+                        <option value="AUTOMOBILE">AUTOMOBILE</option>
+                        <option value="CHEMICAL">CHEMICAL</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="CSE">CSE</option>
+                        <option value="CSD">CSD</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="EIE">EIE</option>
+                        <option value="FT">FT</option>
+                        <option value="IT">IT</option>
+                        <option value="MECHANICAL">MECHANICAL</option>
+                      </select>
                     </div>
 
                     <div className="relative">

@@ -177,7 +177,21 @@ const ProgramsData = () => {
     }
   ]);
 
-  const departments = ['Engineering', 'Arts & Sciences', 'Business', 'Medical Sciences', 'Law'];
+  const departments = [
+    'AIDS',
+    'AIML',
+    'AUTOMOBILE',
+    'CHEMICAL',
+    'CIVIL',
+    'CSE',
+    'CSD',
+    'ECE',
+    'EEE',
+    'EIE',
+    'FT',
+    'IT',
+    'MECHANICAL'
+  ];
   const degrees = ['B.Tech', 'B.Sc', 'B.A', 'B.Com', 'BBA', 'MBA', 'M.Tech', 'M.Sc', 'Ph.D'];
   const courseTypes = ['Theory', 'Lab', 'Theory + Lab', 'Project', 'Seminar'];
   const semesters = ['1', '2', '3', '4', '5', '6', '7', '8'];
