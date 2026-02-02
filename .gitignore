@@ -1,0 +1,80 @@
+# Dependencies
+node_modules/
+*/node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+server/.env
+client/.env.local
+
+# Build outputs
+dist/
+build/
+client/dist/
+client/build/
+server/dist/
+server/build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+server/logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+*.bak
+*~
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploads (if any)
+uploads/
+public/uploads/
+
+# CSV exports (optional - uncomment if you don't want to track these)
+# *.csv
+# exported_*.csv
