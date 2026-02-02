@@ -56,6 +56,26 @@ export const getProfile = async () => {
   return response.data
 }
 
+export const forgotPassword = async (email) => {
+  const response = await api.post('/auth/forgot-password', { email })
+  return response.data
+}
+
+export const verifyOTP = async (email, otp) => {
+  const response = await api.post('/auth/verify-otp', { email, otp })
+  return response.data
+}
+
+export const resetPassword = async (token, password) => {
+  const response = await api.post('/auth/reset-password', { token, password })
+  return response.data
+}
+
+export const firstTimePasswordChange = async (data) => {
+  const response = await api.put('/auth/first-time-password-change', data)
+  return response.data
+}
+
 // User Management (Admin only)
 export const createUser = async (userData) => {
   const response = await api.post('/auth/create-user', userData)
@@ -171,7 +191,7 @@ export const deleteTeacher = async (id) => {
 export const bulkImportTeachers = async (file) => {
   const formData = new FormData()
   formData.append('csv', file)
-  
+
   const response = await api.post('/data/teachers/bulk-import', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
@@ -301,7 +321,7 @@ export const getStudentStats = async () => {
   return response.data
 }
 
-// Get all timetable data (Students, Teachers, Classrooms, Programs, Divisions, System Config, Holidays, Courses)
+// Get all timetable data (Students, Teachers, Classrooms, Programs, Divisions, System Config, Courses)
 export const getAllTimetableData = async () => {
   const response = await api.get('/data/all-timetable-data')
   return response.data
@@ -329,11 +349,11 @@ export const validateAlgorithmParameters = async (algorithm, parameters) => {
 }
 
 export const getAlgorithmRecommendations = async (dataSize, constraints = [], priorities = {}, timeLimit = 1800) => {
-  const response = await api.post('/algorithm/recommend', { 
-    dataSize, 
-    constraints, 
-    priorities, 
-    timeLimit 
+  const response = await api.post('/algorithm/recommend', {
+    dataSize,
+    constraints,
+    priorities,
+    timeLimit
   })
   return response.data
 }
@@ -342,7 +362,7 @@ export const getAlgorithmRecommendations = async (dataSize, constraints = [], pr
 export const uploadCSV = async (file, type) => {
   const formData = new FormData()
   formData.append('csv', file)
-  
+
   const response = await api.post(`/data/${type}/bulk-import`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'

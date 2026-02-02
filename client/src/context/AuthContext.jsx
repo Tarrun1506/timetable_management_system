@@ -19,26 +19,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials);
-      
+
       if (response.success) {
         const { token, user: userData } = response;
-        
+
         // Store token and user data
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(userData));
-        
+
         setUser(userData);
         setIsAuthenticated(true);
-        
+
         return { success: true, user: userData };
       } else {
         return { success: false, message: response.message };
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed. Please try again.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed. Please try again.'
       };
     }
   };
@@ -46,26 +46,26 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      
+
       if (response.success) {
         const { token, user: newUser } = response;
-        
+
         // Store token and user data
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(newUser));
-        
+
         setUser(newUser);
         setIsAuthenticated(true);
-        
+
         return { success: true, user: newUser };
       } else {
         return { success: false, message: response.message };
       }
     } catch (error) {
       console.error('Registration error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed. Please try again.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Registration failed. Please try again.'
       };
     }
   };
@@ -89,11 +89,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('authToken');
       const savedUser = localStorage.getItem('user');
-      
+
       if (token && savedUser) {
         // Verify token is still valid by fetching profile
         const profileResponse = await authAPI.getProfile();
-        
+
         if (profileResponse.success) {
           const userData = profileResponse.user;
           setUser(userData);
@@ -123,6 +123,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     isAuthenticated,
@@ -130,7 +135,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
+    updateUser
   };
 
   return (

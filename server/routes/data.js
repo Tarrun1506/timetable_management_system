@@ -11,7 +11,6 @@ const User = require('../models/User');
 const Program = require('../models/Program');
 const Division = require('../models/Division');
 const SystemConfig = require('../models/SystemConfig');
-const Holiday = require('../models/Holiday');
 const { authenticateToken } = require('./auth');
 const logger = require('../utils/logger');
 const emailService = require('../utils/emailService');
@@ -60,7 +59,7 @@ router.get('/teachers', [
     }
 
     const { department, status, subject, page = 1, limit = 50 } = req.query;
-    
+
     // Build query
     const query = {};
     if (department) query.department = department;
@@ -105,7 +104,7 @@ router.get('/teachers/export', async (req, res) => {
   try {
     logger.info('Teachers export requested');
     const { format = 'csv' } = req.query;
-    
+
     if (format !== 'csv') {
       return res.status(400).json({
         success: false,
@@ -115,7 +114,7 @@ router.get('/teachers/export', async (req, res) => {
 
     const teachers = await Teacher.find().lean();
     logger.info(`Found ${teachers.length} teachers to export`);
-    
+
     if (teachers.length === 0) {
       return res.status(404).json({
         success: false,
@@ -177,7 +176,7 @@ router.get('/teachers/export', async (req, res) => {
 router.get('/teachers/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findOne({ id: req.params.id });
-    
+
     if (!teacher) {
       return res.status(404).json({
         success: false,
@@ -272,11 +271,11 @@ router.post('/teachers', [
     // Send credentials email
     const emailSent = await emailService.sendTeacherCredentials(teacher, tempPassword);
 
-    logger.info('Teacher and user account created', { 
-      teacherId: teacher.id, 
+    logger.info('Teacher and user account created', {
+      teacherId: teacher.id,
       userId: userAccount._id,
       emailSent,
-      createdBy: req.user.userId 
+      createdBy: req.user.userId
     });
 
     res.status(201).json({
@@ -409,8 +408,8 @@ router.put('/teachers/:id', [
 
     res.json({
       success: true,
-      message: emailChanged ? 
-        'Teacher updated successfully. Email change notification sent to new address.' : 
+      message: emailChanged ?
+        'Teacher updated successfully. Email change notification sent to new address.' :
         'Teacher updated successfully',
       data: teacher
     });
@@ -486,9 +485,9 @@ router.post('/teachers/upload', upload.single('csvFile'), async (req, res) => {
         skip_empty_lines: true,
         trim: true
       })
-      .on('data', (record) => records.push(record))
-      .on('error', reject)
-      .on('end', resolve);
+        .on('data', (record) => records.push(record))
+        .on('error', reject)
+        .on('end', resolve);
     });
 
     if (records.length === 0) {
@@ -662,7 +661,7 @@ router.post('/teachers/upload', upload.single('csvFile'), async (req, res) => {
 
         // Create user account
         const tempPassword = emailService.generateSecurePassword(10);
-        
+
         const userAccount = new User({
           name: teacherData.name,
           email: teacherData.email,
@@ -672,7 +671,7 @@ router.post('/teachers/upload', upload.single('csvFile'), async (req, res) => {
           isFirstLogin: true,
           mustChangePassword: true
         });
-        
+
         await userAccount.save();
 
         const credentialData = {
@@ -690,7 +689,7 @@ router.post('/teachers/upload', upload.single('csvFile'), async (req, res) => {
         if (sendCredentials) {
           try {
             const emailSent = await emailService.sendTeacherCredentials(teacher, tempPassword);
-            
+
             if (emailSent) {
               logger.info(`Credentials email sent to teacher: ${teacherData.id}`);
             }
@@ -807,7 +806,7 @@ router.post('/teachers/bulk-create', [
         if (sendCredentials) {
           try {
             const tempPassword = emailService.generateSecurePassword(10);
-            
+
             const userData = {
               name: teacherData.name,
               email: teacherData.email,
@@ -832,7 +831,7 @@ router.post('/teachers/bulk-create', [
 
             // Send credentials email
             const emailSent = await emailService.sendTeacherCredentials(teacherData, tempPassword);
-            
+
             if (emailSent) {
               logger.info(`Credentials email sent to teacher: ${teacherData.id}`);
             } else {
@@ -865,14 +864,14 @@ router.post('/teachers/bulk-create', [
       try {
         const adminUser = await User.findById(req.user.userId);
         const adminEmail = adminUser ? adminUser.email : req.user.email;
-        
+
         // Adapt the summary for teachers
         const teacherSummary = results.userAccountsCreated.map(account => ({
           studentId: account.teacherId, // Reuse the field name for consistency
           email: account.email,
           tempPassword: account.tempPassword
         }));
-        
+
         const emailSent = await emailService.sendBulkCreationSummary(teacherSummary, adminEmail);
         if (emailSent) {
           logger.info(`Bulk teacher creation summary email sent to admin: ${adminEmail}`);
@@ -925,7 +924,7 @@ router.get('/classrooms', [
     }
 
     const { building, type, status, minCapacity, features, page = 1, limit = 50 } = req.query;
-    
+
     // Build query
     const query = {};
     if (building) query.building = building;
@@ -1009,10 +1008,10 @@ router.post('/classrooms', [
 
   } catch (error) {
     logger.error('Error creating classroom:', error);
-    
+
     // Log the request body for debugging
     logger.error('Classroom creation failed with data:', JSON.stringify(req.body, null, 2));
-    
+
     // Return validation errors if they exist
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => ({
@@ -1020,14 +1019,14 @@ router.post('/classrooms', [
         message: err.message,
         value: err.value
       }));
-      
+
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
         errors: validationErrors
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Internal server error while creating classroom'
@@ -1165,7 +1164,7 @@ router.post('/classrooms/bulk-import', upload.single('csv'), async (req, res) =>
 
           // Parse features (comma-separated)
           const features = record.features ? record.features.split(',').map(f => f.trim()) : [];
-          
+
           // Parse availability if provided
           const availability = record.availability ? JSON.parse(record.availability) : undefined;
 
@@ -1199,11 +1198,11 @@ router.post('/classrooms/bulk-import', upload.single('csv'), async (req, res) =>
       // Bulk insert valid records
       try {
         const result = await Classroom.insertMany(records, { ordered: false });
-        
-        logger.info('Bulk classroom import completed', { 
+
+        logger.info('Bulk classroom import completed', {
           imported: result.length,
           errors: errors.length,
-          importedBy: req.user.userId 
+          importedBy: req.user.userId
         });
 
         res.json({
@@ -1258,7 +1257,7 @@ router.get('/courses', [
     }
 
     const { department, program, year, semester, teacher, isActive, page = 1, limit = 50 } = req.query;
-    
+
     // Build query
     const query = {};
     if (department) query.department = department;
@@ -1493,7 +1492,7 @@ router.post('/courses/bulk-import', upload.single('csv'), async (req, res) => {
           }
 
           // Parse assigned teachers (comma-separated)
-          const assignedTeachers = record.assignedTeachers ? 
+          const assignedTeachers = record.assignedTeachers ?
             record.assignedTeachers.split(',').map(t => ({ teacherId: t.trim() })) : [];
 
           const courseData = {
@@ -1531,11 +1530,11 @@ router.post('/courses/bulk-import', upload.single('csv'), async (req, res) => {
       // Bulk insert valid records
       try {
         const result = await Course.insertMany(records, { ordered: false });
-        
-        logger.info('Bulk course import completed', { 
+
+        logger.info('Bulk course import completed', {
           imported: result.length,
           errors: errors.length,
-          importedBy: req.user.userId 
+          importedBy: req.user.userId
         });
 
         res.json({
@@ -1582,9 +1581,9 @@ router.get('/validate', async (req, res) => {
     // Validate teachers
     const teachers = await Teacher.find({ status: 'active' });
     validation.teachers.count = teachers.length;
-    validation.teachers.issues = teachers.filter(t => 
-      !t.subjects || t.subjects.length === 0 || 
-      !t.availability || 
+    validation.teachers.issues = teachers.filter(t =>
+      !t.subjects || t.subjects.length === 0 ||
+      !t.availability ||
       !t.maxHoursPerWeek
     ).length;
     validation.teachers.status = validation.teachers.issues === 0 ? 'completed' : 'warning';
@@ -1592,9 +1591,9 @@ router.get('/validate', async (req, res) => {
     // Validate classrooms
     const classrooms = await Classroom.find({ status: 'available' });
     validation.classrooms.count = classrooms.length;
-    validation.classrooms.issues = classrooms.filter(c => 
-      !c.capacity || c.capacity < 1 || 
-      !c.type || 
+    validation.classrooms.issues = classrooms.filter(c =>
+      !c.capacity || c.capacity < 1 ||
+      !c.type ||
       !c.availability
     ).length;
     validation.classrooms.status = validation.classrooms.issues === 0 ? 'completed' : 'warning';
@@ -1602,18 +1601,18 @@ router.get('/validate', async (req, res) => {
     // Validate courses
     const courses = await Course.find({ isActive: true });
     validation.courses.count = courses.length;
-    validation.courses.issues = courses.filter(c => 
-      !c.assignedTeachers || c.assignedTeachers.length === 0 || 
-      !c.sessions || 
+    validation.courses.issues = courses.filter(c =>
+      !c.assignedTeachers || c.assignedTeachers.length === 0 ||
+      !c.sessions ||
       !c.enrolledStudents
     ).length;
     validation.courses.status = validation.courses.issues === 0 ? 'completed' : 'warning';
 
     // Overall validation
-    validation.overall.ready = validation.teachers.count > 0 && 
-                               validation.classrooms.count > 0 && 
-                               validation.courses.count > 0 &&
-                               validation.teachers.issues + validation.classrooms.issues + validation.courses.issues < 5;
+    validation.overall.ready = validation.teachers.count > 0 &&
+      validation.classrooms.count > 0 &&
+      validation.courses.count > 0 &&
+      validation.teachers.issues + validation.classrooms.issues + validation.courses.issues < 5;
     validation.overall.status = validation.overall.ready ? 'completed' : 'warning';
 
     res.json({
@@ -1711,7 +1710,7 @@ router.get('/statistics', async (req, res) => {
 router.get('/classrooms/export', async (req, res) => {
   try {
     const { format = 'csv' } = req.query;
-    
+
     if (format !== 'csv') {
       return res.status(400).json({
         success: false,
@@ -1720,7 +1719,7 @@ router.get('/classrooms/export', async (req, res) => {
     }
 
     const classrooms = await Classroom.find({ status: 'available' });
-    
+
     const csvData = classrooms.map(classroom => ({
       id: classroom.id,
       name: classroom.name,
@@ -1765,7 +1764,7 @@ router.get('/classrooms/export', async (req, res) => {
 router.get('/courses/export', async (req, res) => {
   try {
     const { format = 'csv' } = req.query;
-    
+
     if (format !== 'csv') {
       return res.status(400).json({
         success: false,
@@ -1774,7 +1773,7 @@ router.get('/courses/export', async (req, res) => {
     }
 
     const courses = await Course.find({ isActive: true });
-    
+
     const csvData = courses.map(course => ({
       id: course.id,
       name: course.name,
@@ -1841,15 +1840,15 @@ router.get('/students', [
       });
     }
 
-    const { 
-      department, 
-      program, 
-      year, 
-      semester, 
-      division, 
+    const {
+      department,
+      program,
+      year,
+      semester,
+      division,
       status = 'Active',
-      page = 1, 
-      limit = 50 
+      page = 1,
+      limit = 50
     } = req.query;
 
     // Build filter object
@@ -1995,7 +1994,7 @@ router.post('/students', [
     res.status(201).json({
       success: true,
       message: `Student created successfully${emailSent ? ' and credentials sent via email' : ' (email sending failed)'}`,
-      data: { 
+      data: {
         student,
         userAccount: {
           id: userAccount._id,
@@ -2008,7 +2007,7 @@ router.post('/students', [
 
   } catch (error) {
     logger.error('Error creating student:', error);
-    
+
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -2100,7 +2099,7 @@ router.post('/students/bulk-create', [
 
             // Generate a secure temporary password
             const tempPassword = emailService.generateSecurePassword(10);
-            
+
             const userData = {
               name: `${studentData.personalInfo.firstName} ${studentData.personalInfo.lastName}`,
               email: studentData.personalInfo.email,
@@ -2137,7 +2136,7 @@ router.post('/students/bulk-create', [
               division: studentData.academicInfo.division,
               batch: studentData.academicInfo.batch
             }, tempPassword);
-            
+
             if (emailSent) {
               logger.info(`Credentials email sent to student: ${studentData.studentId}`);
             } else {
@@ -2165,7 +2164,7 @@ router.post('/students/bulk-create', [
       try {
         const adminUser = await User.findById(req.user.userId);
         const adminEmail = adminUser ? adminUser.email : req.user.email;
-        
+
         const emailSent = await emailService.sendBulkCreationSummary(results.userAccountsCreated, adminEmail);
         if (emailSent) {
           logger.info(`Bulk creation summary email sent to admin: ${adminEmail}`);
@@ -2216,9 +2215,9 @@ router.post('/students/upload', upload.single('csvFile'), async (req, res) => {
         skip_empty_lines: true,
         trim: true
       })
-      .on('data', (record) => records.push(record))
-      .on('error', reject)
-      .on('end', resolve);
+        .on('data', (record) => records.push(record))
+        .on('error', reject)
+        .on('end', resolve);
     });
 
     if (records.length === 0) {
@@ -2239,8 +2238,8 @@ router.post('/students/upload', upload.single('csvFile'), async (req, res) => {
       try {
         // Validate required fields
         const requiredFields = [
-          'studentId', 'firstName', 'lastName', 'email', 
-          'department', 'program', 'year', 'semester', 
+          'studentId', 'firstName', 'lastName', 'email',
+          'department', 'program', 'year', 'semester',
           'division', 'rollNumber', 'academicYear'
         ];
 
@@ -2395,7 +2394,7 @@ router.post('/students/upload', upload.single('csvFile'), async (req, res) => {
 
         // Create user account
         const tempPassword = emailService.generateSecurePassword(10);
-        
+
         const userAccount = new User({
           name: `${studentData.personalInfo.firstName} ${studentData.personalInfo.lastName}`,
           email: studentData.personalInfo.email,
@@ -2405,7 +2404,7 @@ router.post('/students/upload', upload.single('csvFile'), async (req, res) => {
           isFirstLogin: true,
           mustChangePassword: true
         });
-        
+
         await userAccount.save();
 
         const credentialData = {
@@ -2436,7 +2435,7 @@ router.post('/students/upload', upload.single('csvFile'), async (req, res) => {
               division: studentData.academicInfo.division,
               batch: studentData.academicInfo.batch
             }, tempPassword);
-            
+
             if (emailSent) {
               logger.info(`Credentials email sent to student: ${studentData.studentId}`);
             }
@@ -2552,7 +2551,7 @@ router.get('/students/export', [
       columns: [
         'studentId', 'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender',
         'department', 'program', 'year', 'semester', 'division', 'batch', 'rollNumber',
-        'admissionDate', 'academicYear', 'status', 'guardianName', 'guardianPhone', 
+        'admissionDate', 'academicYear', 'status', 'guardianName', 'guardianPhone',
         'guardianEmail', 'courses', 'street', 'city', 'state', 'zipCode', 'country'
       ]
     }, (err, output) => {
@@ -2795,15 +2794,15 @@ router.put('/students/:id', [
 
     res.json({
       success: true,
-      message: emailChanged ? 
-        'Student updated successfully. Email change notification sent to new address.' : 
+      message: emailChanged ?
+        'Student updated successfully. Email change notification sent to new address.' :
         'Student updated successfully',
       data: student
     });
 
   } catch (error) {
     logger.error('Error updating student:', error);
-    
+
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -2836,7 +2835,7 @@ router.delete('/students/:id', async (req, res) => {
 
     // Delete associated user account first
     const deletedUser = await User.findOneAndDelete({ email: student.personalInfo.email });
-    
+
     if (deletedUser) {
       logger.info(`User account deleted for student: ${student.personalInfo.email}`);
     }
@@ -2973,7 +2972,7 @@ router.get('/programs', [
     }
 
     const { school, type, status, page = 1, limit = 50 } = req.query;
-    
+
     // Build query
     const query = {};
     if (school) query.school = school;
@@ -3018,7 +3017,7 @@ router.get('/programs', [
 router.get('/programs/:id', async (req, res) => {
   try {
     const program = await Program.findOne({ id: req.params.id });
-    
+
     if (!program) {
       return res.status(404).json({
         success: false,
@@ -3211,7 +3210,7 @@ router.get('/divisions', [
     }
 
     const { program, year, semester, status, page = 1, limit = 50 } = req.query;
-    
+
     // Build query
     const query = {};
     if (program) query.program = program;
@@ -3257,7 +3256,7 @@ router.get('/divisions', [
 router.get('/divisions/:id', async (req, res) => {
   try {
     const division = await Division.findOne({ id: req.params.id });
-    
+
     if (!division) {
       return res.status(404).json({
         success: false,
@@ -3649,275 +3648,10 @@ router.put('/system-config/constraint-rules', async (req, res) => {
   }
 });
 
-// ==================== HOLIDAYS ROUTES ====================
-
-/**
- * @route   GET /api/data/holidays
- * @desc    Get all holidays
- * @access  Private
- */
-router.get('/holidays', [
-  query('type').optional().trim(),
-  query('status').optional().isIn(['Active', 'Inactive', 'Archived']),
-  query('page').optional().isInt({ min: 1 }),
-  query('limit').optional().isInt({ min: 1, max: 100 })
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-
-    const { type, status, page = 1, limit = 50 } = req.query;
-    
-    // Build query
-    const query = {};
-    if (type) query.type = type;
-    if (status) query.status = status;
-
-    // Execute query with pagination
-    const skip = (page - 1) * limit;
-    const holidays = await Holiday.find(query)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .sort({ date: 1, startDate: 1 });
-
-    const total = await Holiday.countDocuments(query);
-
-    res.json({
-      success: true,
-      data: holidays,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-
-  } catch (error) {
-    logger.error('Error fetching holidays:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while fetching holidays'
-    });
-  }
-});
-
-/**
- * @route   GET /api/data/holidays/:id
- * @desc    Get a specific holiday
- * @access  Private
- */
-router.get('/holidays/:id', async (req, res) => {
-  try {
-    const holiday = await Holiday.findOne({ id: req.params.id });
-
-    if (!holiday) {
-      return res.status(404).json({
-        success: false,
-        message: 'Holiday not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: holiday
-    });
-
-  } catch (error) {
-    logger.error('Error fetching holiday:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while fetching holiday'
-    });
-  }
-});
-
-/**
- * @route   POST /api/data/holidays
- * @desc    Create a new holiday
- * @access  Private
- */
-router.post('/holidays', [
-  body('id').trim().notEmpty().withMessage('ID is required'),
-  body('name').trim().isLength({ min: 1, max: 200 }).withMessage('Name must be between 1 and 200 characters'),
-  body('type').isIn(['National Holiday', 'Festival', 'Examination', 'Vacation', 'Academic Event', 'Other']).withMessage('Invalid holiday type'),
-  body('recurring').optional().isBoolean(),
-  body('isDateRange').optional().isBoolean(),
-  body('description').optional().trim()
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-
-    // Check if holiday ID already exists
-    const existingHoliday = await Holiday.findOne({ id: req.body.id });
-    if (existingHoliday) {
-      return res.status(400).json({
-        success: false,
-        message: 'Holiday with this ID already exists'
-      });
-    }
-
-    const holiday = new Holiday({
-      ...req.body,
-      createdBy: req.user.userId
-    });
-    await holiday.save();
-
-    logger.info('Holiday created', { holidayId: holiday.id, createdBy: req.user.userId });
-
-    res.status(201).json({
-      success: true,
-      message: 'Holiday created successfully',
-      data: holiday
-    });
-
-  } catch (error) {
-    logger.error('Error creating holiday:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Internal server error while creating holiday'
-    });
-  }
-});
-
-/**
- * @route   PUT /api/data/holidays/:id
- * @desc    Update a holiday
- * @access  Private
- */
-router.put('/holidays/:id', [
-  body('name').optional().trim().isLength({ min: 1, max: 200 }),
-  body('type').optional().isIn(['National Holiday', 'Festival', 'Examination', 'Vacation', 'Academic Event', 'Other']),
-  body('recurring').optional().isBoolean(),
-  body('isDateRange').optional().isBoolean(),
-  body('status').optional().isIn(['Active', 'Inactive', 'Archived'])
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-
-    const holiday = await Holiday.findOneAndUpdate(
-      { id: req.params.id },
-      { ...req.body, updatedBy: req.user.userId },
-      { new: true, runValidators: true }
-    );
-
-    if (!holiday) {
-      return res.status(404).json({
-        success: false,
-        message: 'Holiday not found'
-      });
-    }
-
-    logger.info('Holiday updated', { holidayId: holiday.id, updatedBy: req.user.userId });
-
-    res.json({
-      success: true,
-      message: 'Holiday updated successfully',
-      data: holiday
-    });
-
-  } catch (error) {
-    logger.error('Error updating holiday:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Internal server error while updating holiday'
-    });
-  }
-});
-
-/**
- * @route   DELETE /api/data/holidays/:id
- * @desc    Delete a holiday
- * @access  Private
- */
-router.delete('/holidays/:id', async (req, res) => {
-  try {
-    const holiday = await Holiday.findOneAndDelete({ id: req.params.id });
-
-    if (!holiday) {
-      return res.status(404).json({
-        success: false,
-        message: 'Holiday not found'
-      });
-    }
-
-    logger.info('Holiday deleted', { holidayId: holiday.id, deletedBy: req.user.userId });
-
-    res.json({
-      success: true,
-      message: 'Holiday deleted successfully'
-    });
-
-  } catch (error) {
-    logger.error('Error deleting holiday:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while deleting holiday'
-    });
-  }
-});
-
-/**
- * @route   POST /api/data/holidays/bulk
- * @desc    Create multiple holidays
- * @access  Private
- */
-router.post('/holidays/bulk', async (req, res) => {
-  try {
-    const { holidays } = req.body;
-
-    if (!Array.isArray(holidays) || holidays.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Holidays array is required'
-      });
-    }
-
-    // Add createdBy to each holiday
-    const holidaysWithCreator = holidays.map(h => ({
-      ...h,
-      createdBy: req.user.userId
-    }));
-
-    const result = await Holiday.insertMany(holidaysWithCreator, { ordered: false });
-
-    logger.info('Bulk holidays created', { count: result.length, createdBy: req.user.userId });
-
-    res.status(201).json({
-      success: true,
-      message: `${result.length} holidays created successfully`,
-      data: result
-    });
-
-  } catch (error) {
-    logger.error('Error creating bulk holidays:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while creating holidays'
-    });
-  }
-});
 
 /**
  * @route   GET /api/data/all-timetable-data
- * @desc    Get all data required for timetable generation (Students, Teachers, Classrooms, Programs, Divisions, System Config, Holidays, Courses)
+ * @desc    Get all data required for timetable generation (Students, Teachers, Classrooms, Programs, Divisions, System Config, Courses)
  * @access  Private
  */
 router.get('/all-timetable-data', async (req, res) => {
@@ -3932,7 +3666,6 @@ router.get('/all-timetable-data', async (req, res) => {
       programs,
       divisions,
       systemConfig,
-      holidays,
       courses
     ] = await Promise.all([
       Student.find({ status: { $ne: 'deleted' } })
@@ -3955,9 +3688,6 @@ router.get('/all-timetable-data', async (req, res) => {
       SystemConfig.findOne()
         .select('-__v')
         .lean(),
-      Holiday.find({ status: 'Active' })
-        .select('-__v')
-        .lean(),
       Course.find()
         .select('-__v')
         .lean()
@@ -3971,10 +3701,9 @@ router.get('/all-timetable-data', async (req, res) => {
       totalPrograms: programs.length,
       totalDivisions: divisions.length,
       totalCourses: courses.length,
-      totalHolidays: holidays.length,
       activeStudents: students.filter(s => s.status === 'active').length,
-  // Count classrooms whose status is 'available'
-  availableClassrooms: classrooms.filter(c => c.status === 'available').length,
+      // Count classrooms whose status is 'available'
+      availableClassrooms: classrooms.filter(c => c.status === 'available').length,
       configExists: !!systemConfig
     };
 
@@ -4009,20 +3738,16 @@ router.get('/all-timetable-data', async (req, res) => {
             breakDuration: 10
           },
           academicCalendar: {
-            semesterStartDate: new Date(),
-            semesterEndDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
-            totalWeeks: 18
           }
         },
-        holidays: holidays,
         courses: courses
       },
       statistics: statistics,
       validationStatus: {
-        readyForGeneration: 
-          statistics.totalTeachers > 0 && 
-          statistics.totalClassrooms > 0 && 
-          statistics.totalPrograms > 0 && 
+        readyForGeneration:
+          statistics.totalTeachers > 0 &&
+          statistics.totalClassrooms > 0 &&
+          statistics.totalPrograms > 0 &&
           statistics.totalDivisions > 0 &&
           statistics.totalCourses > 0 &&
           statistics.configExists,
@@ -4053,15 +3778,13 @@ router.get('/all-timetable-data', async (req, res) => {
     if (!systemConfig) {
       timetableData.validationStatus.warnings.push('No system configuration found - using default settings');
     }
-    if (statistics.totalHolidays === 0) {
-      timetableData.validationStatus.warnings.push('No holidays configured');
-    }
+
 
     // Update readyForGeneration based on errors
-    timetableData.validationStatus.readyForGeneration = 
+    timetableData.validationStatus.readyForGeneration =
       timetableData.validationStatus.errors.length === 0;
 
-    logger.info('All timetable data fetched successfully', { 
+    logger.info('All timetable data fetched successfully', {
       userId: req.user.userId,
       statistics: statistics,
       readyForGeneration: timetableData.validationStatus.readyForGeneration

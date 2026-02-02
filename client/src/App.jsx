@@ -18,11 +18,13 @@ import InfrastructureData from './pages/InfrastructureDataSimple';
 import GenerateTimetable from './pages/GenerateTimetable';
 import ViewTimetable from './pages/ViewTimetable';
 import QueryResolution from './pages/QueryResolution';
+import ResetPassword from './pages/ResetPassword';
+import FirstTimePasswordChange from './components/FirstTimePasswordChange';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -33,11 +35,11 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   if (allowedRole) {
     const allowedRoles = Array.isArray(allowedRole) ? allowedRole : [allowedRole];
     if (!allowedRoles.includes(user?.role)) {
@@ -51,14 +53,18 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       }
     }
   }
-  
+
+  if (user?.mustChangePassword && window.location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+
   return children;
 };
 
 // Main App Component
 const AppContent = () => {
   const { isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -77,117 +83,126 @@ const AppContent = () => {
         <Route path="/demo" element={<Demo />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/register" element={<Auth />} />
-        <Route 
-          path="/admin-dashboard" 
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <FirstTimePasswordChange />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-dashboard"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <AdminDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/student-dashboard" 
+        <Route
+          path="/student-dashboard"
           element={
             <ProtectedRoute allowedRole="student">
               <StudentDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/teacher-dashboard" 
+        <Route
+          path="/teacher-dashboard"
           element={
             <ProtectedRoute allowedRole="faculty">
               <TeacherDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/create-timetable" 
+        <Route
+          path="/create-timetable"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <CreateTimetable />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/user-management" 
+        <Route
+          path="/user-management"
           element={
             <ProtectedRoute allowedRole="admin">
               <UserManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/teachers-data" 
+        <Route
+          path="/teachers-data"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <TeachersData />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/student-management" 
+        <Route
+          path="/student-management"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <StudentManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/classrooms-data" 
+        <Route
+          path="/classrooms-data"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <ClassroomsData />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/programs-data" 
+        <Route
+          path="/programs-data"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <ProgramsData />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/infrastructure-data" 
+        <Route
+          path="/infrastructure-data"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <InfrastructureData />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/generate-timetable" 
+        <Route
+          path="/generate-timetable"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <GenerateTimetable />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/view-timetable" 
+        <Route
+          path="/view-timetable"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <ViewTimetable />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/view-timetable/:id" 
+        <Route
+          path="/view-timetable/:id"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <ViewTimetable />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/query-resolution" 
+        <Route
+          path="/query-resolution"
           element={
             <ProtectedRoute allowedRole={["admin", "faculty"]}>
               <QueryResolution />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -111,8 +111,8 @@ class BacktrackingSearch {
 
     // Select next variable (session) using MRV heuristic
     const session = this.sessions[index];
-    
-    logger.debug(`[BACKTRACKING] Assigning session ${index+1}/${this.sessions.length}: ${session.courseId} (${session.sessionType})`);
+
+    logger.debug(`[BACKTRACKING] Assigning session ${index + 1}/${this.sessions.length}: ${session.courseId} (${session.sessionType})`);
 
     // Get possible values (time-classroom combinations) using LCV heuristic
     const values = this.orderValuesByLCV(session);
@@ -136,7 +136,7 @@ class BacktrackingSearch {
 
         // Recurse
         const result = await this.backtrack(index + 1, progressCallback);
-        
+
         if (result) {
           return true; // Solution found
         }
@@ -149,7 +149,7 @@ class BacktrackingSearch {
     }
 
     // No valid assignment found
-    logger.debug(`[BACKTRACKING] No valid assignment for session ${index+1}, backtracking...`);
+    logger.debug(`[BACKTRACKING] No valid assignment for session ${index + 1}, backtracking...`);
     return false;
   }
 
@@ -158,44 +158,44 @@ class BacktrackingSearch {
    */
   generateTimeSlots() {
     const slots = [];
-    
+
     for (const day of this.settings.workingDays) {
       const [startH, startM] = this.settings.startTime.split(':').map(Number);
       const [endH, endM] = this.settings.endTime.split(':').map(Number);
-      
+
       let hour = startH;
       let minute = startM;
-      
+
       while (hour < endH || (hour === endH && minute < endM)) {
         const startTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-        
+
         let endMinute = minute + this.settings.slotDuration;
         let endHour = hour;
         if (endMinute >= 60) {
           endHour += Math.floor(endMinute / 60);
           endMinute = endMinute % 60;
         }
-        
+
         const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
-        
+
         // Check if break time
         const isBreak = this.settings.breakSlots.some(breakSlot => {
           const [breakStart, breakEnd] = breakSlot.split('-');
           return startTime >= breakStart && startTime < breakEnd;
         });
-        
+
         if (!isBreak) {
           slots.push({ day, startTime, endTime });
         }
-        
-        minute += this.settings.slotDuration;
+
+        minute += this.settings.slotDuration + (this.settings.breakDuration || 0);
         if (minute >= 60) {
           hour += Math.floor(minute / 60);
           minute = minute % 60;
         }
       }
     }
-    
+
     return slots;
   }
 
@@ -204,7 +204,7 @@ class BacktrackingSearch {
    */
   extractSessions() {
     const sessions = [];
-    
+
     for (const course of this.courses) {
       const courseInfo = {
         courseId: course.id || String(course._id),
@@ -240,7 +240,7 @@ class BacktrackingSearch {
       if (course.sessions?.practical) {
         const practical = course.sessions.practical;
         const batches = course.divisions?.[0]?.batches || [{ batchId: 'default', studentCount: course.enrolledStudents }];
-        
+
         for (let i = 0; i < practical.sessionsPerWeek; i++) {
           // Create session for each batch
           for (const batch of batches) {
@@ -295,19 +295,19 @@ class BacktrackingSearch {
         const teacher = this.teachers.find(t => (t.id || String(t._id)) === tid);
         return teacher?.teacherType === 'visiting' || teacher?.teacherType === 'guest';
       });
-      
+
       const bHasVisiting = b.teacherIds?.some(tid => {
         const teacher = this.teachers.find(t => (t.id || String(t._id)) === tid);
         return teacher?.teacherType === 'visiting' || teacher?.teacherType === 'guest';
       });
-      
+
       if (aHasVisiting && !bHasVisiting) return -1;
       if (!aHasVisiting && bHasVisiting) return 1;
-      
+
       // Then by number of constraints (harder first)
       const aConstraints = (a.teacherIds?.length || 0) + (a.requiresLab ? 2 : 0);
       const bConstraints = (b.teacherIds?.length || 0) + (b.requiresLab ? 2 : 0);
-      
+
       return bConstraints - aConstraints;
     });
   }
@@ -317,7 +317,7 @@ class BacktrackingSearch {
    */
   orderValuesByLCV(session) {
     const values = [];
-    
+
     // Generate all possible assignments for this session
     for (const slot of this.timeSlots) {
       for (const teacher of this.teachers) {
@@ -326,14 +326,14 @@ class BacktrackingSearch {
         if (!session.teacherIds || !session.teacherIds.includes(teacherId)) {
           continue;
         }
-        
+
         for (const classroom of this.classrooms) {
           const classroomId = classroom.id || String(classroom._id);
-          
+
           // Quick pre-checks
           if (session.requiresLab && !classroom.type?.includes('Lab')) continue;
           if (classroom.capacity < session.studentCount && !session.batchId) continue;
-          
+
           values.push({
             ...slot,
             teacherId,
@@ -344,7 +344,7 @@ class BacktrackingSearch {
         }
       }
     }
-    
+
     // Sort by least constraining (simple heuristic: prefer early days/times)
     return values;
   }

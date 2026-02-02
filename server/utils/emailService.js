@@ -17,11 +17,17 @@ let transporter = null;
 
 const initializeTransporter = () => {
   try {
-    if (emailConfig.auth.user && emailConfig.auth.pass) {
+    const isPlaceholder = (val) => !val || val.includes('your-email') || val.includes('your-app-password');
+    const emailEnabled = process.env.EMAIL_ENABLED === 'true';
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Only initialize if enabled AND not placeholder
+    if (emailEnabled && !isPlaceholder(emailConfig.auth.user) && !isPlaceholder(emailConfig.auth.pass)) {
       transporter = nodemailer.createTransport(emailConfig);
       logger.info('Email transporter initialized successfully');
     } else {
-      logger.warn('Email credentials not configured. Email functionality will be disabled.');
+      const reason = !emailEnabled ? 'EMAIL_ENABLED is false' : 'using placeholders';
+      logger.warn(`Email service disabled (${reason}). Simulation mode will be used.`);
     }
   } catch (error) {
     logger.error('Failed to initialize email transporter:', error);
@@ -344,7 +350,7 @@ const sendBulkCreationSummary = async (createdAccounts, adminEmail) => {
   }
 
   try {
-    const credentialsList = createdAccounts.map(account => 
+    const credentialsList = createdAccounts.map(account =>
       `<tr>
         <td style="padding: 8px; border: 1px solid #ddd;">${account.studentId}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${account.email}</td>
@@ -822,6 +828,67 @@ module.exports = {
   sendTeacherEmailChangeNotification,
   sendQueryNotification,
   sendQueryResponseEmail,
+  /**
+   * Send password reset email
+   * @param {Object} user - User information
+   * @param {string} resetLink - Password reset link
+   * @returns {Promise<boolean>} Success status
+   */
+  sendPasswordResetEmail: async (user, resetLink) => {
+    if (!transporter) return false;
+
+    try {
+      const mailOptions = {
+        from: `"Academic System" <${emailConfig.auth.user}>`,
+        to: user.email,
+        subject: 'Reset Your Password - Academic System',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #3b82f6; color: white; padding: 20px; text-align: center; }
+              .content { background-color: #f8fafc; padding: 30px; }
+              .button { background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }
+              .warning { background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; color: #856404; font-size: 14px; }
+              .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Password Reset Request</h1>
+              </div>
+              <div class="content">
+                <h2>Hello ${user.name},</h2>
+                <p>We received a request to reset the password for your Academic System account. If you didn't make this request, you can safely ignore this email.</p>
+                <p>To reset your password, click the button below. This link is valid for 1 hour.</p>
+                <div style="text-align: center;">
+                  <a href="${resetLink}" class="button">Reset Password</a>
+                </div>
+                <div class="warning">
+                  <strong>Security Note:</strong> If the button doesn't work, you can copy and paste this link into your browser: <br>
+                  <span style="word-break: break-all;">${resetLink}</span>
+                </div>
+              </div>
+              <div class="footer">
+                <p>Academic Management System © ${new Date().getFullYear()}</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      };
+      await transporter.sendMail(mailOptions);
+      logger.info(`Password reset email sent to ${user.email}`);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to send password reset email to ${user.email}:`, error);
+      return false;
+    }
+  },
   testEmailConfiguration,
   isConfigured: () => !!transporter
 };

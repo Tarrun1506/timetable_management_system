@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
-import { 
+import {
   BookOpen,
   ArrowLeft,
   Plus,
@@ -23,14 +23,9 @@ const InfrastructureData = () => {
   const { user, logout } = useAuth();
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('holidays');
+  const [activeTab, setActiveTab] = useState('policies');
 
-  // Holiday state
-  const [holidays, setHolidays] = useState([
-    { id: 1, name: 'Independence Day', date: '2024-08-15', type: 'National Holiday' },
-    { id: 2, name: 'Gandhi Jayanti', date: '2024-10-02', type: 'National Holiday' },
-    { id: 3, name: 'Diwali Break', date: '2024-11-01', type: 'Festival Holiday' }
-  ]);
+
 
   // Time slots state
   const [timeSlots, setTimeSlots] = useState([
@@ -62,52 +57,7 @@ const InfrastructureData = () => {
     navigate('/admin-dashboard');
   };
 
-  const renderHolidays = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Academic Holidays</h3>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Holiday</span>
-        </button>
-      </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Holiday Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {holidays.map((holiday) => (
-              <tr key={holiday.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{holiday.name}</td>
-                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{holiday.date}</td>
-                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{holiday.type}</td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-800 dark:text-red-400">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
 
   const renderTimeSlots = () => (
     <div className="space-y-6">
@@ -169,7 +119,7 @@ const InfrastructureData = () => {
             <input
               type="number"
               value={policies.maxClassesPerDay}
-              onChange={(e) => setPolicies({...policies, maxClassesPerDay: parseInt(e.target.value)})}
+              onChange={(e) => setPolicies({ ...policies, maxClassesPerDay: parseInt(e.target.value) })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -181,7 +131,7 @@ const InfrastructureData = () => {
             <input
               type="number"
               value={policies.maxConsecutiveClasses}
-              onChange={(e) => setPolicies({...policies, maxConsecutiveClasses: parseInt(e.target.value)})}
+              onChange={(e) => setPolicies({ ...policies, maxConsecutiveClasses: parseInt(e.target.value) })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -193,7 +143,7 @@ const InfrastructureData = () => {
             <input
               type="number"
               value={policies.breakDuration}
-              onChange={(e) => setPolicies({...policies, breakDuration: parseInt(e.target.value)})}
+              onChange={(e) => setPolicies({ ...policies, breakDuration: parseInt(e.target.value) })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -205,7 +155,7 @@ const InfrastructureData = () => {
             <input
               type="time"
               value={policies.lunchBreakStart}
-              onChange={(e) => setPolicies({...policies, lunchBreakStart: e.target.value})}
+              onChange={(e) => setPolicies({ ...policies, lunchBreakStart: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -217,7 +167,7 @@ const InfrastructureData = () => {
             <input
               type="time"
               value={policies.lunchBreakEnd}
-              onChange={(e) => setPolicies({...policies, lunchBreakEnd: e.target.value})}
+              onChange={(e) => setPolicies({ ...policies, lunchBreakEnd: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -235,9 +185,9 @@ const InfrastructureData = () => {
                   checked={policies.workingDays.includes(day)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setPolicies({...policies, workingDays: [...policies.workingDays, day]});
+                      setPolicies({ ...policies, workingDays: [...policies.workingDays, day] });
                     } else {
-                      setPolicies({...policies, workingDays: policies.workingDays.filter(d => d !== day)});
+                      setPolicies({ ...policies, workingDays: policies.workingDays.filter(d => d !== day) });
                     }
                   }}
                   className="w-4 h-4 text-blue-600 rounded"
@@ -269,7 +219,7 @@ const InfrastructureData = () => {
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-gray-500 dark:text-gray-400">Welcome, {user?.name}</span>
-              <button 
+              <button
                 onClick={() => { logout(); navigate('/login'); }}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
@@ -295,10 +245,10 @@ const InfrastructureData = () => {
                     Infrastructure & Policy Management
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Configure holidays, time slots, and timetable generation policies
+                    Configure time slots and timetable generation policies
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={handleBack}
                   className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
                 >
@@ -312,35 +262,23 @@ const InfrastructureData = () => {
             <div className="mb-6">
               <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-8">
-                  <button
-                    onClick={() => setActiveTab('holidays')}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'holidays'
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'
-                    }`}
-                  >
-                    <Calendar className="w-4 h-4 inline mr-2" />
-                    Holidays
-                  </button>
+
                   <button
                     onClick={() => setActiveTab('timeSlots')}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'timeSlots'
+                    className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'timeSlots'
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'
-                    }`}
+                      }`}
                   >
                     <Clock className="w-4 h-4 inline mr-2" />
                     Time Slots
                   </button>
                   <button
                     onClick={() => setActiveTab('policies')}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'policies'
+                    className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'policies'
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'
-                    }`}
+                      }`}
                   >
                     <Settings className="w-4 h-4 inline mr-2" />
                     Policies
@@ -350,21 +288,21 @@ const InfrastructureData = () => {
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'holidays' && renderHolidays()}
+
             {activeTab === 'timeSlots' && renderTimeSlots()}
             {activeTab === 'policies' && renderPolicies()}
 
             {/* Navigation */}
             <div className="mt-8 flex justify-between">
-              <button 
+              <button
                 onClick={handleBack}
                 className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back: Programs Data
               </button>
-              
-              <button 
+
+              <button
                 onClick={handleFinish}
                 className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
               >

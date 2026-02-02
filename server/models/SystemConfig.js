@@ -6,14 +6,14 @@ const systemConfigSchema = new mongoose.Schema({
     maxConsecutiveHours: {
       type: Number,
       default: 3,
-      min: 2,
-      max: 4
+      min: 1,
+      max: 8
     },
     maxDailyHours: {
       type: Number,
       default: 8,
-      min: 6,
-      max: 10
+      min: 1,
+      max: 15
     },
     minBreakBetweenSessions: {
       type: Number,
@@ -98,14 +98,14 @@ const systemConfigSchema = new mongoose.Schema({
     periodDuration: {
       type: Number,
       default: 50,
-      min: 40,
-      max: 60
+      min: 15,
+      max: 120
     },
     breakDuration: {
       type: Number,
       default: 10,
-      min: 5,
-      max: 15
+      min: 0,
+      max: 60
     },
     labPeriodDuration: {
       type: Number,
@@ -120,8 +120,8 @@ const systemConfigSchema = new mongoose.Schema({
     maxPeriodsPerDay: {
       type: Number,
       default: 8,
-      min: 6,
-      max: 10
+      min: 1,
+      max: 15
     },
     earlyMorningStart: {
       type: String,

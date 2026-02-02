@@ -31,7 +31,8 @@ import {
   Edit2,
   LogOut,
   Bell,
-  Settings
+  Settings,
+  Trash2
 } from 'lucide-react';
 import {
   getTimetables,
@@ -39,7 +40,8 @@ import {
   updateTimetableStatus,
   addTimetableComment,
   resolveConflict,
-  detectTimetableConflicts
+  detectTimetableConflicts,
+  deleteTimetable
 } from '../services/api';
 
 const ViewTimetable = () => {
@@ -196,6 +198,28 @@ const ViewTimetable = () => {
     } catch (error) {
       console.error('Error detecting conflicts:', error);
       alert('Error detecting conflicts');
+    }
+  };
+
+  const handleDeleteTimetable = async (timetableId, name) => {
+    if (!window.confirm(`Are you sure you want to delete the timetable "${name}"?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await deleteTimetable(timetableId);
+      if (id && id === timetableId) {
+        navigate('/view-timetable');
+      } else {
+        await loadData(); // Refresh list
+      }
+      alert('Timetable deleted successfully');
+    } catch (error) {
+      console.error('Error deleting timetable:', error);
+      alert('Error deleting timetable: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -603,8 +627,8 @@ const ViewTimetable = () => {
                         </td>
                         <td className="px-3 py-2">
                           <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
+                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                              'bg-purple-100 text-purple-800'
                             }`}>
                             {slot.sessionType}
                           </span>
@@ -693,8 +717,8 @@ const ViewTimetable = () => {
                         <td className="px-3 py-2">{slot.teacherName}</td>
                         <td className="px-3 py-2">
                           <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
+                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                              'bg-purple-100 text-purple-800'
                             }`}>
                             {slot.sessionType}
                           </span>
@@ -785,8 +809,8 @@ const ViewTimetable = () => {
                         <td className="px-3 py-2">{slot.classroomName}</td>
                         <td className="px-3 py-2">
                           <span className={`px-2 py-1 text-xs rounded ${slot.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                              slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
+                            slot.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                              'bg-purple-100 text-purple-800'
                             }`}>
                             {slot.sessionType}
                           </span>
@@ -839,8 +863,8 @@ const ViewTimetable = () => {
                         {session ? (
                           <div className="space-y-1">
                             <div className={`p-3 rounded-lg border-l-4 ${session.sessionType === 'Theory' ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20' :
-                                session.sessionType === 'Practical' ? 'bg-green-50 border-green-400 dark:bg-green-900/20' :
-                                  'bg-purple-50 border-purple-400 dark:bg-purple-900/20'
+                              session.sessionType === 'Practical' ? 'bg-green-50 border-green-400 dark:bg-green-900/20' :
+                                'bg-purple-50 border-purple-400 dark:bg-purple-900/20'
                               }`}>
                               <p className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {session.courseName}
@@ -887,8 +911,8 @@ const ViewTimetable = () => {
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className={`px-2 py-1 text-xs rounded ${session.sessionType === 'Theory' ? 'bg-blue-100 text-blue-800' :
-                      session.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
+                    session.sessionType === 'Practical' ? 'bg-green-100 text-green-800' :
+                      'bg-purple-100 text-purple-800'
                     }`}>
                     {session.sessionType}
                   </span>
@@ -949,8 +973,8 @@ const ViewTimetable = () => {
 
             return (
               <div key={timetable._id} className={`bg-white dark:bg-gray-800 rounded-xl border p-6 ${isFinalTimetable
-                  ? 'border-green-500 dark:border-green-600 ring-2 ring-green-500/20'
-                  : 'border-gray-200 dark:border-gray-700'
+                ? 'border-green-500 dark:border-green-600 ring-2 ring-green-500/20'
+                : 'border-gray-200 dark:border-gray-700'
                 }`}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -1037,6 +1061,14 @@ const ViewTimetable = () => {
                     <Download className="w-4 h-4" />
                     <span>Export</span>
                   </button>
+
+                  <button
+                    onClick={() => handleDeleteTimetable(timetable._id, timetable.name)}
+                    className="flex items-center space-x-1 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                  </button>
                 </div>
               </div>
             )
@@ -1066,8 +1098,8 @@ const ViewTimetable = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
       <header className={`sticky top-0 z-50 border-b shadow-sm ${isDarkMode
-          ? 'bg-gray-900 border-gray-800'
-          : 'bg-white border-gray-200'
+        ? 'bg-gray-900 border-gray-800'
+        : 'bg-white border-gray-200'
         }`}>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
@@ -1093,22 +1125,22 @@ const ViewTimetable = () => {
             <div className="flex items-center space-x-3">
               <ThemeToggle />
               <button className={`p-2 rounded-lg transition-colors ${isDarkMode
-                  ? 'hover:bg-gray-800 text-gray-300'
-                  : 'hover:bg-gray-100 text-gray-600'
+                ? 'hover:bg-gray-800 text-gray-300'
+                : 'hover:bg-gray-100 text-gray-600'
                 }`}>
                 <Bell className="w-5 h-5" />
               </button>
               <button className={`p-2 rounded-lg transition-colors ${isDarkMode
-                  ? 'hover:bg-gray-800 text-gray-300'
-                  : 'hover:bg-gray-100 text-gray-600'
+                ? 'hover:bg-gray-800 text-gray-300'
+                : 'hover:bg-gray-100 text-gray-600'
                 }`}>
                 <Settings className="w-5 h-5" />
               </button>
               <button
                 onClick={handleLogout}
                 className={`p-2 rounded-lg transition-colors ${isDarkMode
-                    ? 'hover:bg-gray-800 text-gray-300'
-                    : 'hover:bg-gray-100 text-gray-600'
+                  ? 'hover:bg-gray-800 text-gray-300'
+                  : 'hover:bg-gray-100 text-gray-600'
                   }`}
               >
                 <LogOut className="w-5 h-5" />

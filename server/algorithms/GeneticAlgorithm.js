@@ -26,6 +26,7 @@ class GeneticAlgorithm {
       tournamentSize: 3, // Reduced from 5
       diversityThreshold: 0.1,
       convergenceThreshold: 30, // Reduced from 50 for faster convergence detection
+      enforceBreaks: true,
       fitnessWeights: {
         hardConstraints: 0.6,
         softConstraints: 0.2,
@@ -65,23 +66,23 @@ class GeneticAlgorithm {
 
       while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
         const startTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        
+
         let endTimeMinute = currentMinute + this.settings.slotDuration;
         let endTimeHour = currentHour;
-        
+
         if (endTimeMinute >= 60) {
           endTimeHour += Math.floor(endTimeMinute / 60);
           endTimeMinute = endTimeMinute % 60;
         }
-        
+
         const endTime = `${endTimeHour.toString().padStart(2, '0')}:${endTimeMinute.toString().padStart(2, '0')}`;
-        
+
         const isBreakTime = this.settings.breakSlots.some(breakSlot => {
           const [breakStart, breakEnd] = breakSlot.split('-');
           return this.timeOverlaps(startTime, endTime, breakStart, breakEnd);
         });
 
-        if (!isBreakTime) {
+        if (!isBreakTime || !this.settings.enforceBreaks) {
           slots.push({
             id: slots.length,
             day,
@@ -90,7 +91,7 @@ class GeneticAlgorithm {
           });
         }
 
-        currentMinute += this.settings.slotDuration;
+        currentMinute += this.settings.slotDuration + (this.settings.breakDuration || 0);
         if (currentMinute >= 60) {
           currentHour += Math.floor(currentMinute / 60);
           currentMinute = currentMinute % 60;
@@ -120,7 +121,7 @@ class GeneticAlgorithm {
         if (session && session.sessionsPerWeek > 0) {
           // Check if course has assigned teachers for this session type
           const sessionTypeCapitalized = sessionType.charAt(0).toUpperCase() + sessionType.slice(1);
-          const teachersForSessionType = course.assignedTeachers.filter(t => 
+          const teachersForSessionType = course.assignedTeachers.filter(t =>
             t.sessionTypes && t.sessionTypes.includes(sessionTypeCapitalized)
           );
 
@@ -175,9 +176,9 @@ class GeneticAlgorithm {
       // Validate we have sessions to schedule
       if (!this.sessions || this.sessions.length === 0) {
         logger.error('GA: No sessions to schedule');
-        return { 
-          success: false, 
-          reason: 'No sessions to schedule. Check that courses have sessions defined and teachers assigned.' 
+        return {
+          success: false,
+          reason: 'No sessions to schedule. Check that courses have sessions defined and teachers assigned.'
         };
       }
 
@@ -188,9 +189,9 @@ class GeneticAlgorithm {
       logger.info(`GA: Initialized population of ${this.population.length} individuals`);
 
       // Evolution loop
-      while (this.generationCount < this.settings.maxGenerations && 
-             this.convergenceCount < this.settings.convergenceThreshold) {
-        
+      while (this.generationCount < this.settings.maxGenerations &&
+        this.convergenceCount < this.settings.convergenceThreshold) {
+
         // Evaluate fitness for all individuals
         this.evaluatePopulation();
 
@@ -202,13 +203,13 @@ class GeneticAlgorithm {
 
         // Check for convergence or good enough solution
         const currentBest = Math.max(...this.population.map(ind => ind.fitness));
-        
+
         // Early stopping if we found a very good solution (fitness > 0.95)
         if (currentBest > 0.95) {
           logger.info(`GA: Found excellent solution (fitness: ${currentBest.toFixed(3)}) at generation ${this.generationCount}`);
           break;
         }
-        
+
         if (Math.abs(currentBest - this.bestFitness) < 0.001) {
           this.convergenceCount++;
         } else {
@@ -269,7 +270,7 @@ class GeneticAlgorithm {
 
     for (const session of this.sessions) {
       const validAssignments = this.getValidAssignments(session);
-      
+
       if (validAssignments.length > 0) {
         const randomAssignment = validAssignments[Math.floor(Math.random() * validAssignments.length)];
         chromosome.push({
@@ -280,10 +281,10 @@ class GeneticAlgorithm {
         });
       } else {
         // Validate we have a real teacher (not 'unknown')
-        const fallbackTeacherId = session.assignedTeachers[0]?.teacherId || 
-                                  session.assignedTeachers[0]?._id || 
-                                  String(session.assignedTeachers[0]);
-        
+        const fallbackTeacherId = session.assignedTeachers[0]?.teacherId ||
+          session.assignedTeachers[0]?._id ||
+          String(session.assignedTeachers[0]);
+
         if (!fallbackTeacherId || fallbackTeacherId === 'unknown' || fallbackTeacherId === 'undefined' || fallbackTeacherId === '[object Object]') {
           logger.error(`GA: Cannot create fallback for session ${session.courseCode} ${session.sessionType} - invalid teacher ID`);
           continue; // Skip this session - will result in incomplete chromosome
@@ -292,19 +293,19 @@ class GeneticAlgorithm {
         // Get a random classroom
         const randomClassroom = this.classrooms[Math.floor(Math.random() * this.classrooms.length)];
         const fallbackClassroomId = randomClassroom?.id || String(randomClassroom?._id);
-        
+
         if (!fallbackClassroomId || fallbackClassroomId === 'undefined') {
           logger.error(`GA: Cannot create fallback for session ${session.courseCode} ${session.sessionType} - no valid classrooms`);
           continue; // Skip this session
         }
-        
+
         chromosome.push({
           sessionId: session.id,
           timeSlotId: Math.floor(Math.random() * this.timeSlots.length),
           teacherId: fallbackTeacherId,
           classroomId: fallbackClassroomId
         });
-        
+
         logger.warn(`GA: No valid assignments for session ${session.courseCode} ${session.sessionType}, using fallback with teacher ${fallbackTeacherId}`);
       }
     }
@@ -327,16 +328,16 @@ class GeneticAlgorithm {
     for (const timeSlot of this.timeSlots) {
       for (const teacher of session.assignedTeachers) {
         const teacherId = teacher.teacherId || teacher._id || String(teacher);
-        const teacherObj = this.teachers.find(t => 
-          (t.id && t.id === teacherId) || 
+        const teacherObj = this.teachers.find(t =>
+          (t.id && t.id === teacherId) ||
           (t._id && String(t._id) === teacherId)
         );
-        
+
         if (!teacherObj) {
           logger.warn(`GA: Teacher ${teacherId} not found in teachers list`);
           continue;
         }
-        
+
         // Check teacher availability inline (supports both plain objects and Mongoose models)
         const dayLower = timeSlot.day.toLowerCase();
         const teacherAvail = teacherObj.availability?.[dayLower];
@@ -366,9 +367,9 @@ class GeneticAlgorithm {
    */
   isValidAssignment(session, timeSlot, teacherId, classroomId) {
     const classroom = this.classrooms.find(c => c.id === classroomId);
-    
+
     if (!classroom) return false;
-    
+
     // Check classroom availability inline (supports both plain objects and Mongoose models)
     const dayLower = timeSlot.day.toLowerCase();
     const classroomAvail = classroom.availability?.[dayLower];
@@ -387,7 +388,7 @@ class GeneticAlgorithm {
     // Check required features inline
     if (session.requiredFeatures && session.requiredFeatures.length > 0) {
       const classroomFeatures = classroom.features || [];
-      const hasAllFeatures = session.requiredFeatures.every(feature => 
+      const hasAllFeatures = session.requiredFeatures.every(feature =>
         classroomFeatures.includes(feature)
       );
       if (!hasAllFeatures) {
@@ -421,12 +422,12 @@ class GeneticAlgorithm {
    */
   calculateFitness(chromosome) {
     const schedule = this.chromosomeToSchedule({ chromosome });
-    
+
     const hardConstraintPenalty = this.evaluateHardConstraints(schedule);
     const softConstraintScore = this.evaluateSoftConstraints(schedule);
     const optimizationScore = this.evaluateOptimization(schedule);
 
-    const fitness = 
+    const fitness =
       (1 - hardConstraintPenalty) * this.settings.fitnessWeights.hardConstraints +
       softConstraintScore * this.settings.fitnessWeights.softConstraints +
       optimizationScore * this.settings.fitnessWeights.optimization;
@@ -489,9 +490,9 @@ class GeneticAlgorithm {
     for (const slot of schedule) {
       const teacher = this.teachers.find(t => t.id === slot.teacherId);
       if (teacher?.preferences?.preferredTimeSlots) {
-        const isPreferredTime = teacher.preferences.preferredTimeSlots.some(pref => 
-          pref.day === slot.day && 
-          slot.startTime >= pref.startTime && 
+        const isPreferredTime = teacher.preferences.preferredTimeSlots.some(pref =>
+          pref.day === slot.day &&
+          slot.startTime >= pref.startTime &&
           slot.endTime <= pref.endTime
         );
         if (isPreferredTime) score++;
@@ -503,7 +504,7 @@ class GeneticAlgorithm {
     for (const slot of schedule) {
       const classroom = this.classrooms.find(c => c.id === slot.classroomId);
       const course = this.courses.find(c => c.id === slot.courseId);
-      
+
       // Check if room capacity is appropriate (not too large)
       const capacityRatio = course.enrolledStudents / classroom.capacity;
       if (capacityRatio >= 0.6 && capacityRatio <= 0.9) {
@@ -531,7 +532,7 @@ class GeneticAlgorithm {
     const avgLoad = schedule.length / this.settings.workingDays.length;
     const loadVariance = Array.from(dailyLoad.values())
       .reduce((sum, load) => sum + Math.pow(load - avgLoad, 2), 0) / this.settings.workingDays.length;
-    
+
     const balanceScore = 1 / (1 + loadVariance); // Lower variance = higher score
     score += balanceScore;
     totalChecks++;
@@ -560,7 +561,7 @@ class GeneticAlgorithm {
     for (const slot of schedule) {
       const course = this.courses.find(c => c.id === slot.courseId);
       const key = `${course.program}_${course.year}_${course.semester}`;
-      
+
       if (!studentSchedules.has(key)) {
         studentSchedules.set(key, []);
       }
@@ -581,7 +582,7 @@ class GeneticAlgorithm {
       for (let i = 1; i < studentSchedule.length; i++) {
         const prev = studentSchedule[i - 1];
         const curr = studentSchedule[i];
-        
+
         if (prev.day === curr.day) {
           const gap = this.calculateTimeGap(prev.endTime, curr.startTime);
           if (gap > 0 && gap <= 180) { // Gap between 0 and 3 hours
@@ -599,7 +600,7 @@ class GeneticAlgorithm {
    */
   calculateRoomUtilization(schedule) {
     const roomUsage = new Map();
-    
+
     for (const slot of schedule) {
       roomUsage.set(slot.classroomId, (roomUsage.get(slot.classroomId) || 0) + 1);
     }
@@ -667,7 +668,7 @@ class GeneticAlgorithm {
       tournament.push(this.population[randomIndex]);
     }
 
-    return tournament.reduce((best, current) => 
+    return tournament.reduce((best, current) =>
       current.fitness > best.fitness ? current : best
     );
   }
@@ -702,27 +703,27 @@ class GeneticAlgorithm {
    */
   fillRemainingPositions(offspring, parent, start, end) {
     let parentIndex = 0;
-    
+
     for (let i = 0; i < offspring.length; i++) {
       if (i < start || i > end) {
         // Find next valid assignment from parent
         while (parentIndex < parent.length) {
           const parentGene = parent[parentIndex];
           const session = this.sessions.find(s => s.id === parentGene.sessionId);
-          
+
           if (session && this.isValidGeneAssignment(parentGene, session)) {
             offspring[i] = { ...parentGene };
             break;
           }
           parentIndex++;
         }
-        
+
         // If no valid assignment found, create random one
         if (!offspring[i]) {
           const sessionId = i < this.sessions.length ? this.sessions[i].id : i;
           offspring[i] = this.createRandomGene(sessionId);
         }
-        
+
         parentIndex++;
       }
     }
@@ -774,7 +775,7 @@ class GeneticAlgorithm {
    */
   mutate(chromosome) {
     const mutationType = Math.random();
-    
+
     if (mutationType < 0.4) {
       this.swapMutation(chromosome);
     } else if (mutationType < 0.7) {
@@ -790,7 +791,7 @@ class GeneticAlgorithm {
   swapMutation(chromosome) {
     const index1 = Math.floor(Math.random() * chromosome.length);
     const index2 = Math.floor(Math.random() * chromosome.length);
-    
+
     [chromosome[index1], chromosome[index2]] = [chromosome[index2], chromosome[index1]];
   }
 
@@ -800,7 +801,7 @@ class GeneticAlgorithm {
   insertionMutation(chromosome) {
     const index1 = Math.floor(Math.random() * chromosome.length);
     const index2 = Math.floor(Math.random() * chromosome.length);
-    
+
     const gene = chromosome.splice(index1, 1)[0];
     chromosome.splice(index2, 0, gene);
   }
@@ -811,7 +812,7 @@ class GeneticAlgorithm {
   inversionMutation(chromosome) {
     const start = Math.floor(Math.random() * chromosome.length);
     const end = Math.floor(Math.random() * (chromosome.length - start)) + start;
-    
+
     const segment = chromosome.slice(start, end + 1).reverse();
     chromosome.splice(start, segment.length, ...segment);
   }
@@ -881,10 +882,10 @@ class GeneticAlgorithm {
    */
   detectConflicts(schedule) {
     const conflicts = [];
-    
+
     // This would implement detailed conflict detection
     // For now, conflicts are minimized through fitness function
-    
+
     return conflicts;
   }
 

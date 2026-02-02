@@ -18,7 +18,14 @@ import {
   Settings,
   BarChart3,
   UserCheck,
-  Building
+  Building,
+  KeyRound,
+  CheckCircle2
+} from 'lucide-react';
+import { forgotPassword, verifyOTP } from '../services/api';
+import {
+  AlertCircle,
+  Smartphone
 } from 'lucide-react';
 
 const Auth = () => {
@@ -44,6 +51,12 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [resetOTP, setResetOTP] = useState('');
+  const [simulatedOTP, setSimulatedOTP] = useState('');
 
   const handleInputChange = (formType, field) => (event) => {
     if (formType === 'login') {
@@ -148,6 +161,62 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await forgotPassword(resetEmail);
+      if (response.success) {
+        if (response.isSimulation) {
+          setSimulatedOTP(response.otp);
+          setSuccessMessage(response.message);
+        } else {
+          setSuccessMessage(response.message || 'Verification code sent to your email.');
+        }
+        setIsVerifyingOTP(true);
+      } else {
+        setError(response.message || 'Failed to send verification code.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    if (resetOTP.length !== 6) {
+      setError('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await verifyOTP(resetEmail, resetOTP);
+      if (response.success) {
+        // Code verified, navigate to reset password page with token
+        navigate(`/reset-password/${response.token}`);
+      } else {
+        setError(response.message || 'Invalid verification code.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-gray-900 flex items-start justify-center pt-6 px-4 pb-8 overflow-hidden bg-landing">
       <div className="w-full max-w-3xl">
@@ -158,8 +227,8 @@ const Auth = () => {
             <button
               onClick={() => toggleMode(false)}
               className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${!isSignUp
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-[0_15px_40px_rgba(59,130,246,0.16)] -translate-y-1 scale-105 text-glow'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-[0_15px_40px_rgba(59,130,246,0.16)] -translate-y-1 scale-105 text-glow'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
                 }`}
             >
               Sign In
@@ -167,8 +236,8 @@ const Auth = () => {
             <button
               onClick={() => toggleMode(true)}
               className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${isSignUp
-                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-[0_15px_40px_rgba(147,51,234,0.14)] -translate-y-1 scale-105 text-glow'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
+                ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-[0_15px_40px_rgba(147,51,234,0.14)] -translate-y-1 scale-105 text-glow'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
                 }`}
             >
               Sign Up
@@ -206,7 +275,7 @@ const Auth = () => {
                       <Brain className="w-7 h-7 text-blue-300" />
                     </div>
                     <h2 className="text-xl font-bold mb-1">Welcome Back</h2>
-                    <p className="text-blue-100/80 text-xs">AI Timetable Generator</p>
+                    <p className="text-blue-100/80 text-xs">Automated Timetable Generator</p>
                     <div className="space-y-2 mt-4 text-xs text-blue-100/80">
                       <div className="flex items-center justify-center space-x-1">
                         <Zap className="w-3 h-3" />
@@ -263,31 +332,149 @@ const Auth = () => {
                       </button>
                     </div>
 
-                    <div className="text-right">
-                      <button type="button" className="text-blue-400 text-sm hover:text-blue-300 transition-colors">
-                        Forgot Password?
-                      </button>
-                    </div>
+                    {isForgotPassword ? (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                        {!isVerifyingOTP ? (
+                          <>
+                            <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl text-blue-200 text-sm">
+                              <p>Enter your email address and we'll send you a verification code to reset your password.</p>
+                            </div>
 
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Signing in...</span>
+                            <div className="relative">
+                              <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-500" />
+                              <input
+                                type="email"
+                                placeholder="Email Address"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-300"
+                                required
+                              />
+                            </div>
+
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsForgotPassword(false);
+                                  setError('');
+                                  setSuccessMessage('');
+                                }}
+                                className="flex-1 py-3 bg-gray-700 text-white rounded-xl font-semibold transition-all hover:bg-gray-600"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                disabled={isLoading}
+                                className="flex-[2] py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold transition-all hover:scale-105 disabled:opacity-50"
+                              >
+                                {isLoading ? 'Sending...' : 'Get Code'}
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl text-blue-200 text-sm">
+                              <p>Enter the 6-digit verification code sent to <strong>{resetEmail}</strong></p>
+                            </div>
+
+                            {simulatedOTP && (
+                              <div className="bg-amber-900/20 border border-amber-500/30 p-4 rounded-xl text-amber-200 text-sm animate-pulse">
+                                <div className="flex items-center space-x-2">
+                                  <AlertCircle className="w-4 h-4" />
+                                  <span><strong>Simulation Mode:</strong> Your code is <strong>{simulatedOTP}</strong></span>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="relative">
+                              <Smartphone className="absolute left-4 top-4 w-5 h-5 text-gray-500" />
+                              <input
+                                type="text"
+                                maxLength="6"
+                                placeholder="Verification Code (6 digits)"
+                                value={resetOTP}
+                                onChange={(e) => setResetOTP(e.target.value.replace(/\D/g, ''))}
+                                className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white text-center text-2xl tracking-[0.5em] font-mono placeholder:text-sm placeholder:tracking-normal placeholder:font-sans focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-300"
+                                required
+                              />
+                            </div>
+
+                            {successMessage && !simulatedOTP && (
+                              <div className="p-3 bg-green-900/30 border border-green-700 rounded-lg text-green-300 flex items-center space-x-2">
+                                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                                <span className="text-sm">{successMessage}</span>
+                              </div>
+                            )}
+
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsVerifyingOTP(false);
+                                  setResetOTP('');
+                                  setSimulatedOTP('');
+                                  setError('');
+                                }}
+                                className="flex-1 py-3 bg-gray-700 text-white rounded-xl font-semibold transition-all hover:bg-gray-600"
+                              >
+                                Back
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleVerifyOTP}
+                                disabled={isLoading || resetOTP.length !== 6}
+                                className="flex-[2] py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold transition-all hover:scale-105 disabled:opacity-50"
+                              >
+                                {isLoading ? 'Verifying...' : 'Verify Code'}
+                              </button>
+                            </div>
+
+                            <div className="text-center">
+                              <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                className="text-blue-400 text-xs hover:text-blue-300 transition-colors underline"
+                              >
+                                Resend Code
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-right">
+                          <button
+                            type="button"
+                            onClick={() => setIsForgotPassword(true)}
+                            className="text-blue-400 text-sm hover:text-blue-300 transition-colors"
+                          >
+                            Forgot Password?
+                          </button>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center space-x-2">
-                          <span>Sign In</span>
-                          <ArrowRight className="w-5 h-5" />
-                        </div>
-                      )}
-                    </button>
 
-
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isLoading ? (
+                            <div className="flex items-center justify-center space-x-2">
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <span>Signing in...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center space-x-2">
+                              <span>Sign In</span>
+                              <ArrowRight className="w-5 h-5" />
+                            </div>
+                          )}
+                        </button>
+                      </>
+                    )}
                   </form>
 
                   <div className="mt-4 text-center">

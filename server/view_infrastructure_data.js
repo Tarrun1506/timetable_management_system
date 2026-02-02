@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const SystemConfig = require('./models/SystemConfig');
-const Holiday = require('./models/Holiday');
 
 async function viewInfrastructureData() {
   try {
@@ -9,12 +8,12 @@ async function viewInfrastructureData() {
 
     // Get System Configuration
     const config = await SystemConfig.findOne({ isActive: true });
-    
+
     if (config) {
       console.log('═══════════════════════════════════════════════════════════════');
       console.log('                    SYSTEM CONFIGURATION                       ');
       console.log('═══════════════════════════════════════════════════════════════\n');
-      
+
       console.log('📋 GENERAL POLICIES:');
       console.log('─────────────────────────────────────────────────────────────');
       console.log(`  • Max Consecutive Hours: ${config.generalPolicies.maxConsecutiveHours}`);
@@ -31,7 +30,7 @@ async function viewInfrastructureData() {
       console.log(`  • Prioritize Core Subjects: ${config.generalPolicies.prioritizeCoreBefore ? '✓' : '✗'}`);
       console.log(`  • Avoid First/Last Period: ${config.generalPolicies.avoidFirstLastPeriod ? '✓' : '✗'}`);
       console.log(`  • Require Lab Assistant: ${config.generalPolicies.requireLabAssistant ? '✓' : '✗'}\n`);
-      
+
       console.log('🕐 WORKING HOURS:');
       console.log('─────────────────────────────────────────────────────────────');
       console.log(`  • Start Time: ${config.workingHours.startTime}`);
@@ -42,7 +41,7 @@ async function viewInfrastructureData() {
       console.log(`  • Lab Period Duration: ${config.workingHours.labPeriodDuration} minutes`);
       console.log(`  • Max Periods Per Day: ${config.workingHours.maxPeriodsPerDay}`);
       console.log(`  • Working Days: ${config.workingHours.workingDays.join(', ')}\n`);
-      
+
       console.log('📅 ACADEMIC CALENDAR:');
       console.log('─────────────────────────────────────────────────────────────');
       console.log(`  • Academic Year: ${new Date(config.academicCalendar.academicYearStart).toLocaleDateString()} - ${new Date(config.academicCalendar.academicYearEnd).toLocaleDateString()}`);
@@ -51,7 +50,7 @@ async function viewInfrastructureData() {
       console.log(`  • Total Weeks: ${config.academicCalendar.totalWeeks}`);
       console.log(`  • Exam Weeks: ${config.academicCalendar.examWeeks}`);
       console.log(`  • Vacation Weeks: ${config.academicCalendar.vacationWeeks}\n`);
-      
+
       console.log('⚙️  CONSTRAINT RULES:');
       console.log('─────────────────────────────────────────────────────────────');
       console.log(`  • Min Gap Between Exams: ${config.constraintRules.minGapBetweenExams} days`);
@@ -62,7 +61,7 @@ async function viewInfrastructureData() {
       console.log(`  • Group Similar Subjects: ${config.constraintRules.groupSimilarSubjects ? '✓' : '✗'}`);
       console.log(`  • Maintain Teacher Continuity: ${config.constraintRules.maintainTeacherContinuity ? '✓' : '✗'}`);
       console.log(`  • Prioritize Popular Slots: ${config.constraintRules.prioritizePopularSlots ? '✓' : '✗'}\n`);
-      
+
       console.log('📝 METADATA:');
       console.log('─────────────────────────────────────────────────────────────');
       console.log(`  • Created: ${config.createdAt ? new Date(config.createdAt).toLocaleString() : 'N/A'}`);
@@ -71,34 +70,6 @@ async function viewInfrastructureData() {
       console.log(`  • Updated By: ${config.updatedBy || 'N/A'}\n`);
     } else {
       console.log('⚠️  No system configuration found in database\n');
-    }
-
-    // Get Holidays
-    const holidays = await Holiday.find().sort({ date: 1, startDate: 1 });
-    
-    console.log('═══════════════════════════════════════════════════════════════');
-    console.log('                    HOLIDAYS & EVENTS                          ');
-    console.log('═══════════════════════════════════════════════════════════════\n');
-    
-    if (holidays.length > 0) {
-      holidays.forEach((holiday, index) => {
-        console.log(`${index + 1}. ${holiday.name} (${holiday.id})`);
-        console.log(`   Type: ${holiday.type}`);
-        if (holiday.isDateRange) {
-          console.log(`   Duration: ${new Date(holiday.startDate).toLocaleDateString()} - ${new Date(holiday.endDate).toLocaleDateString()}`);
-        } else {
-          console.log(`   Date: ${new Date(holiday.date).toLocaleDateString()}`);
-        }
-        console.log(`   Recurring: ${holiday.recurring ? 'Yes' : 'No'}`);
-        console.log(`   Status: ${holiday.status}`);
-        if (holiday.description) {
-          console.log(`   Description: ${holiday.description}`);
-        }
-        console.log('');
-      });
-      console.log(`Total Holidays: ${holidays.length}\n`);
-    } else {
-      console.log('⚠️  No holidays found in database\n');
     }
 
     console.log('═══════════════════════════════════════════════════════════════\n');

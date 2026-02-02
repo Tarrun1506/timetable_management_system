@@ -84,10 +84,10 @@ router.post('/register', [
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    logger.info('User registered successfully', { 
-      userId: user._id, 
-      email: user.email, 
-      role: user.role 
+    logger.info('User registered successfully', {
+      userId: user._id,
+      email: user.email,
+      role: user.role
     });
 
     res.status(201).json({
@@ -178,8 +178,8 @@ router.post('/login', [
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    logger.info('User logged in successfully', { 
-      userId: user._id, 
+    logger.info('User logged in successfully', {
+      userId: user._id,
       email: user.email,
       lastLogin: user.lastLogin
     });
@@ -217,7 +217,7 @@ router.post('/login', [
 router.post('/logout', authenticateToken, async (req, res) => {
   try {
     logger.info('User logged out', { userId: req.user.userId });
-    
+
     res.json({
       success: true,
       message: 'Logout successful'
@@ -239,7 +239,7 @@ router.post('/logout', authenticateToken, async (req, res) => {
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -414,9 +414,9 @@ router.put('/change-password', authenticateToken, [
       role: user.role
     });
 
-    logger.info('User password changed', { 
-      userId: user._id, 
-      emailSent: emailSent 
+    logger.info('User password changed', {
+      userId: user._id,
+      emailSent: emailSent
     });
 
     res.json({
@@ -492,9 +492,9 @@ router.put('/first-time-password-change', authenticateToken, [
       role: user.role
     });
 
-    logger.info('First-time password changed', { 
+    logger.info('First-time password changed', {
       userId: user._id,
-      emailSent: emailSent 
+      emailSent: emailSent
     });
 
     res.json({
@@ -617,16 +617,18 @@ router.post('/create-user', [
       email,
       password,
       role,
-      department
+      department,
+      mustChangePassword: true,
+      isFirstLogin: true
     });
 
     await user.save();
 
-    logger.info('User created by admin', { 
-      userId: user._id, 
-      email: user.email, 
+    logger.info('User created by admin', {
+      userId: user._id,
+      email: user.email,
       role: user.role,
-      createdBy: req.user.userId 
+      createdBy: req.user.userId
     });
 
     res.status(201).json({
@@ -670,7 +672,7 @@ router.get('/users', authenticateToken, async (req, res) => {
     }
 
     const { role, department, page = 1, limit = 50 } = req.query;
-    
+
     // Build filter
     let filter = {};
     if (role && ['admin', 'faculty', 'student'].includes(role)) {
@@ -741,9 +743,9 @@ router.delete('/users/:id', authenticateToken, async (req, res) => {
 
     await User.findByIdAndDelete(req.params.id);
 
-    logger.info('User deleted by admin', { 
+    logger.info('User deleted by admin', {
       deletedUserId: req.params.id,
-      deletedBy: req.user.userId 
+      deletedBy: req.user.userId
     });
 
     res.json({
@@ -757,6 +759,158 @@ router.delete('/users/:id', authenticateToken, async (req, res) => {
       success: false,
       message: 'Internal server error while deleting user'
     });
+  }
+});
+
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Request password reset link
+ * @access  Public
+ */
+router.post('/forgot-password', [
+  body('email').isEmail().withMessage('Please provide a valid email')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    // Generate token and OTP (simulation fallback)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetToken = jwt.sign(
+      { userId: user?._id || 'dummy', type: 'reset' },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    if (user) {
+      user.resetPasswordToken = resetToken;
+      user.resetPasswordExpires = Date.now() + 3600000;
+      user.resetOTP = otp;
+      user.resetOTPExpires = Date.now() + 600000;
+      await user.save();
+    }
+
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+
+    // Handle Simulation Mode (No Email Service)
+    if (!emailService.isConfigured()) {
+      logger.warn('Email service not configured. Returning OTP in simulation mode.', { email: req.body.email, otp });
+      return res.json({
+        success: true,
+        message: 'Simulation Mode: Use the verification code below.',
+        otp,
+        resetLink,
+        isSimulation: true,
+        userExists: !!user
+      });
+    }
+
+    // Handle Live Mode (Email Service Active)
+    if (!user) {
+      return res.json({ success: true, message: 'If an account exists with this email, a reset link has been sent.' });
+    }
+
+    await emailService.sendPasswordResetEmail(user, resetLink);
+    res.json({ success: true, message: 'Password reset link sent to your email.' });
+  } catch (error) {
+    logger.error('Forgot password error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/verify-otp
+ * @desc    Verify OTP and return reset token
+ * @access  Public
+ */
+router.post('/verify-otp', [
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('otp').isLength({ min: 6, max: 6 }).withMessage('Invalid verification code')
+], async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await User.findOne({
+      email,
+      resetOTP: otp,
+      resetOTPExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification code'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Code verified successfully',
+      token: user.resetPasswordToken
+    });
+  } catch (error) {
+    logger.error('Verify OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Reset password using token
+ * @access  Public
+ */
+router.post('/reset-password', [
+  body('token').notEmpty().withMessage('Token is required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { token, password } = req.body;
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.type !== 'reset') throw new Error('Invalid token type');
+    } catch (err) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    const user = await User.findOne({
+      _id: decoded.userId,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    // Update password and clear reset fields
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    user.mustChangePassword = false;
+    user.isFirstLogin = false;
+    await user.save();
+
+    logger.info('Password reset successful', { userId: user._id });
+
+    res.json({ success: true, message: 'Password has been reset successfully. You can now login with your new password.' });
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

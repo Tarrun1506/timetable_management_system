@@ -5,7 +5,12 @@ import { useTheme } from '../context/ThemeContext';
 import AdminSidebar from '../components/AdminSidebar';
 import Chatbot from '../components/Chatbot';
 import QueryManagement from '../components/QueryManagement';
-import { getTeachers, getClassrooms, getCourses, getTimetables, getDataStatistics, getStudentStats } from '../services/api';
+import {
+  getTeachers, getClassrooms, getCourses, getTimetables,
+  deleteTimetable,
+  getDataStatistics,
+  getStudentStats
+} from '../services/api';
 import {
   Calendar,
   Users,
@@ -155,6 +160,25 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteTimetable = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete the timetable "${name}"?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await deleteTimetable(id);
+      // Refresh data
+      await fetchDashboardData();
+      alert('Timetable deleted successfully');
+    } catch (err) {
+      console.error('Error deleting timetable:', err);
+      alert('Failed to delete timetable: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -525,13 +549,17 @@ const AdminDashboard = () => {
                           {timetable.conflicts} conflicts
                         </span>
                       )}
-                      <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
-                        }`}>
+                      <button
+                        onClick={() => navigate(`/view-timetable/${timetable.id}`)}
+                        className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
+                          }`}>
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
-                        }`}>
-                        <Edit className="w-4 h-4" />
+                      <button
+                        onClick={() => handleDeleteTimetable(timetable.id, timetable.name)}
+                        className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
+                          }`}>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -656,8 +684,10 @@ const AdminDashboard = () => {
                     }`}>
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
-                    }`}>
+                  <button
+                    onClick={() => handleDeleteTimetable(timetable.id, timetable.name)}
+                    className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
+                      }`}>
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-400 hover:text-purple-600'

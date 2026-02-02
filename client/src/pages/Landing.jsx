@@ -58,13 +58,13 @@ const Landing = () => {
     {
       icon: <Calendar className="w-8 h-8" />,
       title: "Smart Scheduling",
-      description: "AI-powered algorithms that automatically resolve conflicts and optimize resource allocation for maximum efficiency.",
+      description: "Automated algorithms that automatically resolve conflicts and optimize resource allocation for maximum efficiency.",
       gradient: "from-blue-500 to-cyan-500"
     },
     {
       icon: <Brain className="w-8 h-8" />,
-      title: "AI Optimization",
-      description: "Machine learning models that learn from your preferences and continuously improve scheduling decisions.",
+      title: "Intelligent Automation",
+      description: "Advanced scheduling engines that learn from your preferences and continuously improve scheduling decisions.",
       gradient: "from-purple-500 to-pink-500"
     },
     {
@@ -174,7 +174,7 @@ const Landing = () => {
             }}
           >
             <span style={{ display: 'block' }}>
-              AI For Generating Timetable
+              Automated Timetable Generation
             </span>
             <span style={{ display: 'block' }}>
               and Optimization
@@ -186,7 +186,7 @@ const Landing = () => {
             lineHeight: '1.7',
             letterSpacing: '0.01em'
           }}>
-            Revolutionary AI-powered timetable generation and optimization platform. Create perfect schedules for schools, universities, and organizations in minutes.
+            Revolutionary automated timetable generation and optimization platform. Create perfect schedules for schools, universities, and organizations in minutes.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">

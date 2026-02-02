@@ -113,9 +113,8 @@ const Chatbot = () => {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 ${
-            isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
-          }`}
+          className={`fixed bottom-6 right-6 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
+            }`}
           style={{
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
           }}
@@ -166,16 +165,14 @@ const Chatbot = () => {
                     className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
                   >
                     <div
-                      className={`flex items-start space-x-2 max-w-[80%] ${
-                        message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-                      }`}
+                      className={`flex items-start space-x-2 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                        }`}
                     >
                       <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                          message.type === 'user'
+                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.type === 'user'
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                             : 'bg-gradient-to-r from-green-400 to-blue-500'
-                        }`}
+                          }`}
                       >
                         {message.type === 'user' ? (
                           <User className="w-4 h-4 text-white" />
@@ -185,11 +182,10 @@ const Chatbot = () => {
                       </div>
                       <div>
                         <div
-                          className={`rounded-2xl px-4 py-2 ${
-                            message.type === 'user'
+                          className={`rounded-2xl px-4 py-2 ${message.type === 'user'
                               ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                               : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow-md'
-                          }`}
+                            }`}
                         >
                           <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                         </div>
@@ -271,7 +267,7 @@ const Chatbot = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import * as authAPI from '../services/api';
 
 const FirstTimePasswordChange = () => {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ const FirstTimePasswordChange = () => {
   useEffect(() => {
     // Redirect if user doesn't need to change password
     if (!user?.mustChangePassword && !user?.isFirstLogin) {
-      navigate('/dashboard');
+      const dashboardPath = user?.role === 'admin' ? '/admin-dashboard' :
+        user?.role === 'faculty' ? '/teacher-dashboard' : '/student-dashboard';
+      navigate(dashboardPath);
     }
   }, [user, navigate]);
 
@@ -70,21 +73,12 @@ const FirstTimePasswordChange = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/first-time-password-change', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          newPassword: formData.newPassword,
-          confirmPassword: formData.confirmPassword
-        })
+      const response = await authAPI.firstTimePasswordChange({
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.success) {
         // Update user state to reflect password change
         updateUser({
           ...user,
@@ -96,12 +90,14 @@ const FirstTimePasswordChange = () => {
         alert('Password changed successfully! You can now access all features.');
 
         // Redirect to dashboard
-        navigate('/dashboard');
+        const dashboardPath = user.role === 'admin' ? '/admin-dashboard' :
+          user.role === 'faculty' ? '/teacher-dashboard' : '/student-dashboard';
+        navigate(dashboardPath);
       } else {
-        setErrors({ general: data.message || 'Failed to change password' });
+        setErrors({ general: response.message || 'Failed to change password' });
       }
     } catch (error) {
-      setErrors({ general: 'Network error. Please try again.' });
+      setErrors({ general: error.response?.data?.message || 'Error occurred. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -183,7 +179,7 @@ const FirstTimePasswordChange = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.level === 'weak' ? 'bg-red-500' :
-                          passwordStrength.level === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                        passwordStrength.level === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                         }`}
                       style={{ width: passwordStrength.width }}
                     />

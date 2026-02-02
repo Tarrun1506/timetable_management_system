@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
 import AdminSidebar from '../components/AdminSidebar';
 import Chatbot from '../components/Chatbot';
-import { 
-  Calendar, 
-  Zap, 
+import {
+  Calendar,
+  Zap,
   ArrowLeft,
   ArrowRight,
   Play,
@@ -28,11 +28,11 @@ import {
   LogOut,
   Bell
 } from 'lucide-react';
-import { 
-  generateTimetable, 
-  getTimetableProgress, 
-  validateData, 
-  getAlgorithms, 
+import {
+  generateTimetable,
+  getTimetableProgress,
+  validateData,
+  getAlgorithms,
   getConstraints,
   getOptimizationGoals,
   validateAlgorithmParameters,
@@ -43,6 +43,7 @@ const GenerateTimetable = () => {
   const { user, logout } = useAuth();
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
   const [generationComplete, setGenerationComplete] = useState(false);
@@ -52,7 +53,8 @@ const GenerateTimetable = () => {
   const [algorithmsData, setAlgorithmsData] = useState([]);
   const [constraintsData, setConstraintsData] = useState([]);
   const [optimizationGoalsData, setOptimizationGoalsData] = useState([]);
-  
+
+  const [systemConfig, setSystemConfig] = useState(null);
   const [generationSettings, setGenerationSettings] = useState({
     algorithm: 'hybrid', // Changed from 'greedy' to 'hybrid' for better results
     maxIterations: 200, // Reduced from 1000 for faster generation
@@ -65,6 +67,7 @@ const GenerateTimetable = () => {
     balanceWorkload: true,
     prioritizePreferences: false
   });
+  const [availableDepartments, setAvailableDepartments] = useState(['Computer Science']);
 
   const [dataValidation, setDataValidation] = useState({
     teachers: { status: 'unknown', count: 0, issues: [] },
@@ -77,11 +80,11 @@ const GenerateTimetable = () => {
   });
 
   const [timetableData, setTimetableData] = useState({
-    name: `Timetable ${new Date().getFullYear()}`,
-    academicYear: '2024-2025',
-    semester: 1,
-    department: 'Computer Science',
-    year: 1
+    name: location.state?.name || `Timetable ${new Date().getFullYear()}`,
+    academicYear: location.state?.academicYear || '2024-2025',
+    semester: location.state?.semester || 1,
+    department: location.state?.department || 'Computer Science',
+    year: location.state?.year || 1
   });
 
   // Load initial data
@@ -101,51 +104,69 @@ const GenerateTimetable = () => {
       setAlgorithmsData(algorithmsResponse.data?.algorithms || []);
       setConstraintsData(constraintsResponse.data || {});
       setOptimizationGoalsData(goalsResponse.data || []);
-      
+
       // Use the consolidated endpoint data to populate validation status
       if (allDataResponse.success) {
         const data = allDataResponse.data;
         const stats = allDataResponse.statistics;
-        
+
+        if (allDataResponse.data.systemConfig) {
+          setSystemConfig(allDataResponse.data.systemConfig);
+        }
+
+        if (allDataResponse.data) {
+          const programDepts = allDataResponse.data.programs?.map(p => p.school) || [];
+          const courseDepts = allDataResponse.data.courses?.map(c => c.department) || [];
+          const depts = [...new Set([...programDepts, ...courseDepts])].filter(Boolean);
+
+          if (depts.length > 0) {
+            setAvailableDepartments(depts);
+            // If current department is not in the list, set it to the first one
+            if (!depts.includes(timetableData.department)) {
+              setTimetableData(prev => ({ ...prev, department: depts[0] }));
+            }
+          }
+        }
+
         setDataValidation({
-          teachers: { 
-            status: stats.totalTeachers > 0 ? 'completed' : 'warning', 
-            count: stats.totalTeachers, 
-            issues: 0 
+          teachers: {
+            status: stats.totalTeachers > 0 ? 'completed' : 'warning',
+            count: stats.totalTeachers,
+            issues: 0
           },
-          classrooms: { 
-            status: stats.totalClassrooms > 0 ? 'completed' : 'warning', 
-            count: stats.totalClassrooms, 
-            issues: 0 
+          classrooms: {
+            status: stats.totalClassrooms > 0 ? 'completed' : 'warning',
+            count: stats.totalClassrooms,
+            issues: 0
           },
-          courses: { 
-            status: stats.totalCourses > 0 ? 'completed' : 'warning', 
-            count: stats.totalCourses, 
-            issues: 0 
+          courses: {
+            status: stats.totalCourses > 0 ? 'completed' : 'warning',
+            count: stats.totalCourses,
+            issues: 0
           },
-          programs: { 
-            status: stats.totalPrograms > 0 ? 'completed' : 'warning', 
-            count: stats.totalPrograms, 
-            issues: 0 
+          programs: {
+            status: stats.totalPrograms > 0 ? 'completed' : 'warning',
+            count: stats.totalPrograms,
+            issues: 0
           },
-          divisions: { 
-            status: stats.totalDivisions > 0 ? 'completed' : 'warning', 
-            count: stats.totalDivisions, 
-            issues: 0 
+          divisions: {
+            status: stats.totalDivisions > 0 ? 'completed' : 'warning',
+            count: stats.totalDivisions,
+            issues: 0
           },
-          policies: { 
-            status: stats.configExists ? 'completed' : 'warning', 
-            count: stats.configExists ? 1 : 0, 
-            issues: 0 
+          policies: {
+            status: stats.configExists ? 'completed' : 'warning',
+            count: stats.configExists ? 1 : 0,
+            issues: 0
           },
-          calendar: { 
-            status: stats.totalHolidays > 0 ? 'completed' : 'warning', 
-            count: stats.totalHolidays, 
-            issues: 0 
+          calendar: {
+            status: 'completed',
+            count: 0,
+            issues: 0
           },
-          overall: { 
-            status: allDataResponse.validationStatus.readyForGeneration ? 'completed' : 'warning', 
-            ready: allDataResponse.validationStatus.readyForGeneration 
+          overall: {
+            status: allDataResponse.validationStatus.readyForGeneration ? 'completed' : 'warning',
+            ready: allDataResponse.validationStatus.readyForGeneration
           }
         });
       }
@@ -173,30 +194,30 @@ const GenerateTimetable = () => {
 
   // Use algorithmsData and optimizationGoalsData from API
   const algorithms = algorithmsData.length > 0 ? algorithmsData : [
-    { 
-      id: 'greedy', 
-      name: 'Greedy Scheduler (Fast)', 
+    {
+      id: 'greedy',
+      name: 'Greedy Scheduler (Fast)',
       description: 'Quick scheduling with simple heuristics - Recommended for testing',
       pros: ['Very fast (< 1 second)', 'Simple', 'Good for small to medium schedules'],
       cons: ['May not find optimal solution', 'Limited optimization']
     },
-    { 
-      id: 'genetic', 
-      name: 'Genetic Algorithm', 
+    {
+      id: 'genetic',
+      name: 'Genetic Algorithm',
       description: 'Best for complex schedules with many constraints',
       pros: ['Handles complex constraints', 'Good optimization', 'Scalable'],
       cons: ['Longer generation time', 'May need parameter tuning']
     },
-    { 
-      id: 'csp', 
-      name: 'CSP Solver', 
+    {
+      id: 'csp',
+      name: 'CSP Solver',
       description: 'Fast and reliable constraint satisfaction',
       pros: ['Fast generation', 'Guaranteed solution', 'Handles constraints well'],
       cons: ['May struggle with optimization', 'Less flexible']
     },
-    { 
-      id: 'hybrid', 
-      name: 'Hybrid CSP-GA', 
+    {
+      id: 'hybrid',
+      name: 'Hybrid CSP-GA',
       description: 'Best of both worlds - feasibility and optimization',
       pros: ['High quality solutions', 'Robust performance', 'Adaptive'],
       cons: ['More complex', 'Higher computation time']
@@ -223,16 +244,16 @@ const GenerateTimetable = () => {
       console.log('====================================');
       console.log('Endpoint: GET /api/data/all-timetable-data');
       console.log('');
-      
+
       const response = await getAllTimetableData();
-      
+
       console.log('✅ API TEST SUCCESSFUL!');
       console.log('');
       console.log('📊 FULL RESPONSE:');
       console.log(response);
       console.log('');
       console.log('====================================');
-      
+
       alert('API test successful! Check the console (F12) for detailed response.');
     } catch (error) {
       console.error('====================================');
@@ -260,19 +281,19 @@ const GenerateTimetable = () => {
       setGenerationComplete(false);
 
       console.log('📡 Fetching all timetable data from API...');
-      
+
       // Fetch all timetable data from the new consolidated endpoint
       const allDataResponse = await getAllTimetableData();
-      
+
       console.log('✅ API Response Received:');
       console.log('📊 Full Response Object:', allDataResponse);
       console.log('');
-      
+
       // Log statistics
       console.log('📈 STATISTICS:');
       console.table(allDataResponse.statistics);
       console.log('');
-      
+
       // Log data counts
       console.log('📦 DATA SUMMARY:');
       console.log(`  👨‍🎓 Students: ${allDataResponse.data.students?.length || 0}`);
@@ -281,10 +302,10 @@ const GenerateTimetable = () => {
       console.log(`  📚 Programs: ${allDataResponse.data.programs?.length || 0}`);
       console.log(`  📋 Divisions: ${allDataResponse.data.divisions?.length || 0}`);
       console.log(`  📖 Courses: ${allDataResponse.data.courses?.length || 0}`);
-      console.log(`  🗓️ Holidays: ${allDataResponse.data.holidays?.length || 0}`);
+
       console.log(`  ⚙️ System Config: ${allDataResponse.data.systemConfig ? '✓ Exists' : '✗ Missing'}`);
       console.log('');
-      
+
       // Log detailed data
       console.log('📄 DETAILED DATA:');
       console.log('Students Data:', allDataResponse.data.students);
@@ -300,10 +321,10 @@ const GenerateTimetable = () => {
       console.log('Programs Data:', allDataResponse.data.programs);
       console.log('Divisions Data:', allDataResponse.data.divisions);
       console.log('Courses Data:', allDataResponse.data.courses);
-      console.log('Holidays Data:', allDataResponse.data.holidays);
+
       console.log('System Config:', allDataResponse.data.systemConfig);
       console.log('');
-      
+
       // Check if data fetch was successful
       if (!allDataResponse.success) {
         console.error('❌ Failed to fetch timetable data');
@@ -315,11 +336,11 @@ const GenerateTimetable = () => {
       console.log(`  Ready for Generation: ${allDataResponse.validationStatus.readyForGeneration ? '✅ YES' : '❌ NO'}`);
       console.log(`  Errors: ${allDataResponse.validationStatus.errors.length}`);
       console.log(`  Warnings: ${allDataResponse.validationStatus.warnings.length}`);
-      
+
       if (allDataResponse.validationStatus.errors.length > 0) {
         console.error('❌ ERRORS:', allDataResponse.validationStatus.errors);
       }
-      
+
       if (allDataResponse.validationStatus.warnings.length > 0) {
         console.warn('⚠️ WARNINGS:', allDataResponse.validationStatus.warnings);
       }
@@ -357,11 +378,14 @@ const GenerateTimetable = () => {
           crossoverRate: generationSettings.crossoverRate,
           mutationRate: generationSettings.mutationRate,
           optimizationGoals: generationSettings.optimizationGoals,
-          workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-          startTime: '09:00',
-          endTime: '17:00',
-          slotDuration: 60,
-          breakSlots: ['12:00-13:00'],
+          workingDays: systemConfig?.workingHours?.workingDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          startTime: systemConfig?.workingHours?.startTime || '09:00',
+          endTime: systemConfig?.workingHours?.endTime || '17:00',
+          slotDuration: systemConfig?.workingHours?.periodDuration || 60,
+          breakDuration: systemConfig?.workingHours?.breakDuration || 10,
+          breakSlots: systemConfig?.workingHours?.lunchBreakStart && systemConfig?.workingHours?.lunchBreakEnd
+            ? [`${systemConfig.workingHours.lunchBreakStart}-${systemConfig.workingHours.lunchBreakEnd}`]
+            : ['12:00-13:00'],
           enforceBreaks: generationSettings.enforceBreaks,
           balanceWorkload: generationSettings.balanceWorkload
         }
@@ -398,22 +422,22 @@ const GenerateTimetable = () => {
   const pollProgress = async (timetableId) => {
     console.log('[POLLING] Starting progress polling for timetableId:', timetableId);
     let pollCount = 0;
-    
+
     const pollInterval = setInterval(async () => {
       try {
         pollCount++;
         console.log(`[POLLING #${pollCount}] Fetching progress for timetableId:`, timetableId);
-        
+
         const response = await getTimetableProgress(timetableId);
         const progress = response.data || response;
-        
+
         console.log(`[POLLING #${pollCount}] Progress received:`, {
           status: progress.status,
           percentage: progress.progress?.percentage,
           currentStep: progress.progress?.currentStep,
           fullResponse: progress
         });
-        
+
         setProgressData(progress);
 
         if (progress.progress) {
@@ -480,10 +504,9 @@ const GenerateTimetable = () => {
         {Object.entries(dataValidation).filter(([key]) => key !== 'overall').map(([key, data]) => (
           <div key={key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-full ${
-                data.status === 'completed' ? 'bg-green-100 dark:bg-green-900' : 
+              <div className={`p-2 rounded-full ${data.status === 'completed' ? 'bg-green-100 dark:bg-green-900' :
                 data.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-gray-100 dark:bg-gray-700'
-              }`}>
+                }`}>
                 {data.status === 'completed' ? (
                   <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                 ) : data.status === 'warning' ? (
@@ -501,19 +524,18 @@ const GenerateTimetable = () => {
                 </p>
               </div>
             </div>
-            <span className={`px-2 py-1 text-xs rounded ${
-              data.status === 'completed' 
-                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                : data.status === 'warning'
+            <span className={`px-2 py-1 text-xs rounded ${data.status === 'completed'
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              : data.status === 'warning'
                 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                 : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-            }`}>
+              }`}>
               {data.status || 'Unknown'}
             </span>
           </div>
         ))}
       </div>
-      
+
       {Object.values(dataValidation).some(d => (d.issues || 0) > 0) && (
         <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
           <div className="flex items-start space-x-3">
@@ -521,14 +543,14 @@ const GenerateTimetable = () => {
             <div>
               <h4 className="font-medium text-yellow-900 dark:text-yellow-100 mb-1">Minor Issues Detected</h4>
               <p className="text-yellow-700 dark:text-yellow-300 text-sm">
-                Some minor issues were found in the data. The timetable generation can proceed, 
+                Some minor issues were found in the data. The timetable generation can proceed,
                 but you may want to review and fix these issues for optimal results.
               </p>
             </div>
           </div>
         </div>
       )}
-      
+
       {dataValidation.overall?.ready && (
         <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-start space-x-3">
@@ -560,18 +582,17 @@ const GenerateTimetable = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {algorithms.map((algorithm) => (
-          <div 
+          <div
             key={algorithm.id}
-            onClick={() => setGenerationSettings({...generationSettings, algorithm: algorithm.id})}
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-              generationSettings.algorithm === algorithm.id
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            }`}
+            onClick={() => setGenerationSettings({ ...generationSettings, algorithm: algorithm.id })}
+            className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${generationSettings.algorithm === algorithm.id
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
           >
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">{algorithm.name}</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{algorithm.description}</p>
-            
+
             <div className="space-y-2">
               <div>
                 <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Advantages:</p>
@@ -603,7 +624,7 @@ const GenerateTimetable = () => {
       {showAdvancedSettings && (
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
           <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">Advanced Algorithm Parameters</h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -613,11 +634,11 @@ const GenerateTimetable = () => {
                 <input
                   type="number"
                   value={generationSettings.maxIterations}
-                  onChange={(e) => setGenerationSettings({...generationSettings, maxIterations: parseInt(e.target.value)})}
+                  onChange={(e) => setGenerationSettings({ ...generationSettings, maxIterations: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
-              
+
               {generationSettings.algorithm === 'genetic' && (
                 <>
                   <div>
@@ -627,7 +648,7 @@ const GenerateTimetable = () => {
                     <input
                       type="number"
                       value={generationSettings.populationSize}
-                      onChange={(e) => setGenerationSettings({...generationSettings, populationSize: parseInt(e.target.value)})}
+                      onChange={(e) => setGenerationSettings({ ...generationSettings, populationSize: parseInt(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -641,7 +662,7 @@ const GenerateTimetable = () => {
                       min="0"
                       max="1"
                       value={generationSettings.crossoverRate}
-                      onChange={(e) => setGenerationSettings({...generationSettings, crossoverRate: parseFloat(e.target.value)})}
+                      onChange={(e) => setGenerationSettings({ ...generationSettings, crossoverRate: parseFloat(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -655,7 +676,7 @@ const GenerateTimetable = () => {
                       min="0"
                       max="1"
                       value={generationSettings.mutationRate}
-                      onChange={(e) => setGenerationSettings({...generationSettings, mutationRate: parseFloat(e.target.value)})}
+                      onChange={(e) => setGenerationSettings({ ...generationSettings, mutationRate: parseFloat(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -688,7 +709,7 @@ const GenerateTimetable = () => {
                   <input
                     type="checkbox"
                     checked={generationSettings.allowBackToBack}
-                    onChange={(e) => setGenerationSettings({...generationSettings, allowBackToBack: e.target.checked})}
+                    onChange={(e) => setGenerationSettings({ ...generationSettings, allowBackToBack: e.target.checked })}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Allow back-to-back classes</span>
@@ -697,7 +718,7 @@ const GenerateTimetable = () => {
                   <input
                     type="checkbox"
                     checked={generationSettings.enforceBreaks}
-                    onChange={(e) => setGenerationSettings({...generationSettings, enforceBreaks: e.target.checked})}
+                    onChange={(e) => setGenerationSettings({ ...generationSettings, enforceBreaks: e.target.checked })}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Enforce break times</span>
@@ -706,13 +727,83 @@ const GenerateTimetable = () => {
                   <input
                     type="checkbox"
                     checked={generationSettings.balanceWorkload}
-                    onChange={(e) => setGenerationSettings({...generationSettings, balanceWorkload: e.target.checked})}
+                    onChange={(e) => setGenerationSettings({ ...generationSettings, balanceWorkload: e.target.checked })}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Balance teacher workload</span>
                 </label>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderBasicConfig = () => (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Configuration</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
+          <select
+            value={timetableData.department}
+            onChange={(e) => setTimetableData({ ...timetableData, department: e.target.value })}
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            {availableDepartments.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Year</label>
+          <select
+            value={timetableData.year}
+            onChange={(e) => setTimetableData({ ...timetableData, year: parseInt(e.target.value) })}
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={1}>Year 1</option>
+            <option value={2}>Year 2</option>
+            <option value={3}>Year 3</option>
+            <option value={4}>Year 4</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Semester</label>
+          <select
+            value={timetableData.semester}
+            onChange={(e) => setTimetableData({ ...timetableData, semester: parseInt(e.target.value) })}
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={1}>Semester 1</option>
+            <option value={2}>Semester 2</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Academic Year</label>
+          <select
+            value={timetableData.academicYear}
+            onChange={(e) => setTimetableData({ ...timetableData, academicYear: e.target.value })}
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="2024-2025">2024-2025</option>
+            <option value="2025-2026">2025-2026</option>
+          </select>
+        </div>
+      </div>
+
+      {systemConfig && (
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
+          <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-400 mb-2 flex items-center">
+            <Clock className="w-4 h-4 mr-2" />
+            Applied System Policies (from Infrastructure Setup)
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-blue-700 dark:text-blue-300">
+            <div><span className="font-medium">Working Days:</span> {systemConfig.workingHours?.workingDays?.length || 5} days</div>
+            <div><span className="font-medium">Working Hours:</span> {systemConfig.workingHours?.startTime} - {systemConfig.workingHours?.endTime}</div>
+            <div><span className="font-medium">Period Duration:</span> {systemConfig.workingHours?.periodDuration || 60} min</div>
+            <div><span className="font-medium">Lunch Break:</span> {systemConfig.workingHours?.lunchBreakStart} - {systemConfig.workingHours?.lunchBreakEnd}</div>
           </div>
         </div>
       )}
@@ -732,13 +823,12 @@ const GenerateTimetable = () => {
       <div className="space-y-4">
         {generationSteps.map((step, index) => (
           <div key={step.id} className="flex items-center space-x-4">
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-              index < generationStep 
-                ? 'bg-green-500 text-white'
-                : index === generationStep
+            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${index < generationStep
+              ? 'bg-green-500 text-white'
+              : index === generationStep
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-            }`}>
+              }`}>
               {index < generationStep ? (
                 <CheckCircle2 className="w-4 h-4" />
               ) : index === generationStep ? (
@@ -748,9 +838,8 @@ const GenerateTimetable = () => {
               )}
             </div>
             <div className="flex-1">
-              <p className={`text-sm font-medium ${
-                index <= generationStep ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'
-              }`}>
+              <p className={`text-sm font-medium ${index <= generationStep ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'
+                }`}>
                 {step.name}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{step.description}</p>
@@ -768,7 +857,7 @@ const GenerateTimetable = () => {
           <span>{Math.round((generationStep / generationSteps.length) * 100)}%</span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div 
+          <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${(generationStep / generationSteps.length) * 100}%` }}
           ></div>
@@ -847,11 +936,10 @@ const GenerateTimetable = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b shadow-sm ${
-        isDarkMode 
-          ? 'bg-gray-900 border-gray-800' 
-          : 'bg-white border-gray-200'
-      }`}>
+      <header className={`sticky top-0 z-50 border-b shadow-sm ${isDarkMode
+        ? 'bg-gray-900 border-gray-800'
+        : 'bg-white border-gray-200'
+        }`}>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -869,27 +957,24 @@ const GenerateTimetable = () => {
             </div>
             <div className="flex items-center space-x-3">
               <ThemeToggle />
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
-                  : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                ? 'hover:bg-gray-800 text-gray-300'
+                : 'hover:bg-gray-100 text-gray-600'
+                }`}>
                 <Bell className="w-5 h-5" />
               </button>
-              <button className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-800 text-gray-300' 
-                  : 'hover:bg-gray-100 text-gray-600'
-              }`}>
+              <button className={`p-2 rounded-lg transition-colors ${isDarkMode
+                ? 'hover:bg-gray-800 text-gray-300'
+                : 'hover:bg-gray-100 text-gray-600'
+                }`}>
                 <Settings className="w-5 h-5" />
               </button>
               <button
                 onClick={handleLogout}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-800 text-gray-300' 
-                    : 'hover:bg-gray-100 text-gray-600'
-                }`}
+                className={`p-2 rounded-lg transition-colors ${isDarkMode
+                  ? 'hover:bg-gray-800 text-gray-300'
+                  : 'hover:bg-gray-100 text-gray-600'
+                  }`}
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -906,92 +991,94 @@ const GenerateTimetable = () => {
           <div className="mb-6">
             <button
               onClick={() => navigate('/admin-dashboard')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-800' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isDarkMode
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-600 hover:bg-gray-100'
+                }`}
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Dashboard</span>
             </button>
           </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">AI Timetable Generation</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Generate optimized timetables using artificial intelligence algorithms
-              </p>
-            </div>
-            <button 
-              onClick={handleTestAPI}
-              className="flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium shadow-sm"
-            >
-              <Activity className="w-4 h-4 mr-2" />
-              Test API Endpoint
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-8">
-          {/* Data Validation */}
-          {!isGenerating && !generationComplete && renderDataValidation()}
-
-          {/* Algorithm Selection */}
-          {!isGenerating && !generationComplete && renderAlgorithmSelection()}
-
-          {/* Generation Progress */}
-          {isGenerating && renderGenerationProgress()}
-
-          {/* Generation Complete */}
-          {generationComplete && renderGenerationComplete()}
-
-          {/* Generation Controls */}
-          {!isGenerating && !generationComplete && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ready to Generate</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    All data has been validated and algorithm settings are configured. 
-                    Click "Generate Timetable" to start the process.
-                  </p>
-                </div>
-                <button
-                  onClick={handleStartGeneration}
-                  disabled={!dataValidation.overall?.ready}
-                  className="flex items-center space-x-2 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium text-lg"
-                >
-                  <Zap className="w-5 h-5" />
-                  <span>Generate Timetable</span>
-                </button>
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">AI Timetable Generation</h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Generate optimized timetables using artificial intelligence algorithms
+                </p>
               </div>
+              <button
+                onClick={handleTestAPI}
+                className="flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium shadow-sm"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Test API Endpoint
+              </button>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Navigation */}
-        <div className="mt-8 flex justify-between">
-          <button 
-            onClick={handleBack}
-            className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </button>
-          
-          {generationComplete && (
-            <button 
-              onClick={handleViewTimetable}
-              className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          <div className="space-y-8">
+            {/* Basic Configuration */}
+            {!isGenerating && !generationComplete && renderBasicConfig()}
+
+            {/* Data Validation */}
+            {!isGenerating && !generationComplete && renderDataValidation()}
+
+            {/* Algorithm Selection */}
+            {!isGenerating && !generationComplete && renderAlgorithmSelection()}
+
+            {/* Generation Progress */}
+            {isGenerating && renderGenerationProgress()}
+
+            {/* Generation Complete */}
+            {generationComplete && renderGenerationComplete()}
+
+            {/* Generation Controls */}
+            {!isGenerating && !generationComplete && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ready to Generate</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      All data has been validated and algorithm settings are configured.
+                      Click "Generate Timetable" to start the process.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleStartGeneration}
+                    disabled={!dataValidation.overall?.ready}
+                    className="flex items-center space-x-2 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium text-lg"
+                  >
+                    <Zap className="w-5 h-5" />
+                    <span>Generate Timetable</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={handleBack}
+              className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
             >
-              View Generated Timetable
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
             </button>
-          )}
-        </div>
+
+            {generationComplete && (
+              <button
+                onClick={handleViewTimetable}
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                View Generated Timetable
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            )}
+          </div>
         </main>
       </div>
 
