@@ -5,13 +5,13 @@ import { useTheme } from '../context/ThemeContext';
 import Chatbot from '../components/Chatbot';
 import AdminSidebar from '../components/AdminSidebar';
 import { getTimetables, getQueries, createQuery, getPublishedTimetables } from '../services/api';
-import { 
-  Calendar, 
-  BookOpen, 
-  Clock, 
-  MapPin, 
-  User, 
-  LogOut, 
+import {
+  Calendar,
+  BookOpen,
+  Clock,
+  MapPin,
+  User,
+  LogOut,
   Bell,
   Download,
   Eye,
@@ -67,7 +67,7 @@ const TeacherDashboard = () => {
       // Fetch the most recently published timetable (final timetable)
       const response = await getPublishedTimetables();
       const timetable = response.data; // Now it's a single object, not an array
-      
+
       if (timetable) {
         setTimetableData(timetable);
         setAllTimetables([timetable]); // Wrap in array for compatibility
@@ -105,7 +105,7 @@ const TeacherDashboard = () => {
         type: newQuery.type,
         priority: newQuery.priority
       };
-      
+
       if (newQuery.timetableId) {
         queryData.timetableId = newQuery.timetableId;
       }
@@ -139,7 +139,7 @@ const TeacherDashboard = () => {
   // Generate week view from timetable data
   const getWeekSchedule = () => {
     if (!timetableData || !timetableData.schedule) return [];
-    
+
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return daysOfWeek.map(day => {
       const dayClasses = timetableData.schedule
@@ -152,7 +152,7 @@ const TeacherDashboard = () => {
           type: slot.sessionType,
           students: slot.studentCount
         }));
-      
+
       return {
         day,
         date: new Date().getDate(), // Simplified - should calculate actual dates
@@ -172,7 +172,7 @@ const TeacherDashboard = () => {
     // Create CSV content
     const rows = [];
     rows.push(['Day', 'Time', 'Course', 'Room', 'Type', 'Students']);
-    
+
     timetableData.schedule
       .sort((a, b) => {
         const dayOrder = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
@@ -243,7 +243,7 @@ const TeacherDashboard = () => {
             Error Loading Schedule
           </h3>
           <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-4`}>{error}</p>
-          <button 
+          <button
             onClick={fetchTeacherTimetable}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
@@ -283,24 +283,22 @@ const TeacherDashboard = () => {
                 <h4 className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{day.day}</h4>
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Classes: {day.classes.length}</p>
               </div>
-              
+
               <div className="space-y-3">
                 {day.classes.map((classItem, classIndex) => (
-                  <div key={classIndex} className={`p-3 rounded-lg border ${
-                    classItem.type === 'Theory' 
+                  <div key={classIndex} className={`p-3 rounded-lg border ${classItem.type === 'Theory'
                       ? (isDarkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50 border-blue-200')
                       : classItem.type === 'Practical'
-                      ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
-                      : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
-                  }`}>
+                        ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
+                        : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
+                    }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-medium ${
-                        classItem.type === 'Theory' 
+                      <span className={`text-xs font-medium ${classItem.type === 'Theory'
                           ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
                           : classItem.type === 'Practical'
-                          ? (isDarkMode ? 'text-green-300' : 'text-green-700')
-                          : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
-                      }`}>{classItem.time}</span>
+                            ? (isDarkMode ? 'text-green-300' : 'text-green-700')
+                            : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
+                        }`}>{classItem.time}</span>
                       <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{classItem.room}</span>
                     </div>
                     <h5 className={`font-medium text-sm mb-1 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{classItem.subject}</h5>
@@ -310,18 +308,17 @@ const TeacherDashboard = () => {
                         {classItem.students} students
                       </p>
                     )}
-                    <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded ${
-                      classItem.type === 'Theory' 
+                    <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded ${classItem.type === 'Theory'
                         ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
                         : classItem.type === 'Practical'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
-                    }`}>
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
+                      }`}>
                       {classItem.type}
                     </span>
                   </div>
                 ))}
-                
+
                 {day.classes.length === 0 && (
                   <div className={`text-center py-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                     <p className="text-sm">No classes</p>
@@ -334,7 +331,7 @@ const TeacherDashboard = () => {
       )}
 
       <div className="flex items-center space-x-4">
-        <button 
+        <button
           onClick={downloadTimetable}
           disabled={!timetableData}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -342,7 +339,7 @@ const TeacherDashboard = () => {
           <Download className="w-4 h-4" />
           <span>Download Schedule</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate(`/view-timetable/${timetableData?._id}`)}
           disabled={!timetableData}
           className={`px-4 py-2 border rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
@@ -378,7 +375,7 @@ const TeacherDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>My Queries</h3>
-        <button 
+        <button
           onClick={() => setShowQueryModal(true)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
@@ -386,7 +383,7 @@ const TeacherDashboard = () => {
           <span>Raise Query</span>
         </button>
       </div>
-      
+
       {queries.length === 0 ? (
         <div className="text-center py-12">
           <MessageSquare className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
@@ -403,18 +400,16 @@ const TeacherDashboard = () => {
             <div key={query._id} className={`rounded-xl border p-5 hover:shadow-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-400'}`}>
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4 flex-1">
-                  <div className={`p-3 rounded-lg ${
-                    query.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                    query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
-                    query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
-                    'bg-blue-100 dark:bg-blue-900/30'
-                  }`}>
-                    <MessageSquare className={`w-5 h-5 ${
-                      query.status === 'pending' ? 'text-yellow-600' :
-                      query.status === 'approved' ? 'text-green-600' :
-                      query.status === 'rejected' ? 'text-red-600' :
-                      'text-blue-600'
-                    }`} />
+                  <div className={`p-3 rounded-lg ${query.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                      query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
+                        query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
+                          'bg-blue-100 dark:bg-blue-900/30'
+                    }`}>
+                    <MessageSquare className={`w-5 h-5 ${query.status === 'pending' ? 'text-yellow-600' :
+                        query.status === 'approved' ? 'text-green-600' :
+                          query.status === 'rejected' ? 'text-red-600' :
+                            'text-blue-600'
+                      }`} />
                   </div>
                   <div className="flex-1">
                     <h4 className={`font-semibold mb-1 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{query.subject}</h4>
@@ -434,12 +429,11 @@ const TeacherDashboard = () => {
                     )}
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  query.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                  query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                  query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                  'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${query.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                      query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                  }`}>
                   {query.status}
                 </span>
               </div>
@@ -459,7 +453,7 @@ const TeacherDashboard = () => {
           <span>Export Report</span>
         </button>
       </div>
-      
+
       {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className={`rounded-xl border p-6 transition-all duration-300 hover:shadow-lg ${isDarkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-800/20 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'}`}>
@@ -511,7 +505,7 @@ const TeacherDashboard = () => {
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-        
+
         <div className="space-y-4">
           {[
             { name: 'Data Structures', progress: 85, students: 45, color: 'blue' },
@@ -531,7 +525,7 @@ const TeacherDashboard = () => {
                 </div>
               </div>
               <div className={`w-full rounded-full h-2 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                <div 
+                <div
                   className={`bg-${course.color}-600 h-2 rounded-full transition-all duration-300`}
                   style={{ width: `${course.progress}%` }}
                 ></div>
@@ -573,7 +567,7 @@ const TeacherDashboard = () => {
   const renderNotifications = () => (
     <div className="space-y-6">
       <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>Recent Notifications</h3>
-      
+
       {notifications.length === 0 ? (
         <div className="text-center py-12">
           <Bell className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
@@ -608,11 +602,11 @@ const TeacherDashboard = () => {
                 </p>
               </div>
             </div>
-            
+
             {/* Right Section - Actions & Profile */}
             <div className="flex items-center space-x-2 ml-auto">
               {/* Quick Actions */}
-              <button 
+              <button
                 className={`hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-700/50 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 <Plus className="w-4 h-4" />
@@ -621,7 +615,7 @@ const TeacherDashboard = () => {
 
               {/* Messages/Queries */}
               <div className="relative">
-                <button 
+                <button
                   className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
                   title="Student Queries"
                 >
@@ -634,7 +628,7 @@ const TeacherDashboard = () => {
 
               {/* Notifications */}
               <div className="relative">
-                <button 
+                <button
                   className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
                   title="Notifications"
                 >
@@ -644,24 +638,17 @@ const TeacherDashboard = () => {
                   </span>
                 </button>
               </div>
-              
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
-                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
+
+
 
               {/* Divider */}
               <div className={`h-8 w-px ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
-              
+
               {/* User Profile */}
               <div className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} cursor-pointer`}>
                 <div className="relative">
-                  <img 
-                    src={user?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'Teacher') + '&background=6366f1&color=fff'} 
+                  <img
+                    src={user?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'Teacher') + '&background=6366f1&color=fff'}
                     alt={user?.name}
                     className="w-9 h-9 rounded-full border-2 border-purple-500 shadow-md"
                   />
@@ -678,7 +665,7 @@ const TeacherDashboard = () => {
               </div>
 
               {/* Logout */}
-              <button 
+              <button
                 onClick={handleLogout}
                 className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-red-900/30 text-gray-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-600 hover:text-red-600'}`}
                 title="Logout"
@@ -692,9 +679,9 @@ const TeacherDashboard = () => {
 
       <div className="w-full px-0 pt-0 pb-0">
         <div className="w-full flex">
-          <AdminSidebar 
-            showQuickActions={false} 
-            userRole="teacher" 
+          <AdminSidebar
+            showQuickActions={false}
+            userRole="teacher"
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
@@ -731,7 +718,7 @@ const TeacherDashboard = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className={`rounded-xl p-5 border transition-all duration-300 hover:shadow-xl hover:scale-105 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-green-600' : 'bg-white border-gray-200 hover:border-green-400'}`}>
                   <div className="flex items-center justify-between">
                     <div>
@@ -743,7 +730,7 @@ const TeacherDashboard = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className={`rounded-xl p-5 border transition-all duration-300 hover:shadow-xl hover:scale-105 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-yellow-600' : 'bg-white border-gray-200 hover:border-yellow-400'}`}>
                   <div className="flex items-center justify-between">
                     <div>
@@ -755,7 +742,7 @@ const TeacherDashboard = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className={`rounded-xl p-5 border transition-all duration-300 hover:shadow-xl hover:scale-105 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-600' : 'bg-white border-gray-200 hover:border-purple-400'}`}>
                   <div className="flex items-center justify-between">
                     <div>
@@ -780,13 +767,12 @@ const TeacherDashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-300 font-medium ${
-                      activeTab === tab.id
+                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-300 font-medium ${activeTab === tab.id
                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30 scale-105'
-                        : isDarkMode 
-                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/70 hover:shadow-md' 
+                        : isDarkMode
+                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/70 hover:shadow-md'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 hover:shadow-md'
-                    }`}
+                      }`}
                   >
                     <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
                     <span className="text-sm">{tab.label}</span>
@@ -831,11 +817,10 @@ const TeacherDashboard = () => {
                 <select
                   value={newQuery.timetableId}
                   onChange={(e) => setNewQuery({ ...newQuery, timetableId: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
                       : 'bg-white border-gray-200 focus:border-blue-500'
-                  } focus:ring-4 focus:ring-blue-500/20 outline-none`}
+                    } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="">No specific timetable</option>
                   {allTimetables.map((tt) => (
@@ -855,11 +840,10 @@ const TeacherDashboard = () => {
                   type="text"
                   value={newQuery.subject}
                   onChange={(e) => setNewQuery({ ...newQuery, subject: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
                       : 'bg-white border-gray-200 focus:border-blue-500'
-                  } focus:ring-4 focus:ring-blue-500/20 outline-none`}
+                    } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                   placeholder="Brief subject of your query"
                   required
                 />
@@ -873,11 +857,10 @@ const TeacherDashboard = () => {
                 <textarea
                   value={newQuery.description}
                   onChange={(e) => setNewQuery({ ...newQuery, description: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
                       : 'bg-white border-gray-200 focus:border-blue-500'
-                  } focus:ring-4 focus:ring-blue-500/20 outline-none resize-none`}
+                    } focus:ring-4 focus:ring-blue-500/20 outline-none resize-none`}
                   rows="5"
                   placeholder="Provide detailed information about your query..."
                   required
@@ -892,11 +875,10 @@ const TeacherDashboard = () => {
                 <select
                   value={newQuery.type}
                   onChange={(e) => setNewQuery({ ...newQuery, type: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
                       : 'bg-white border-gray-200 focus:border-blue-500'
-                  } focus:ring-4 focus:ring-blue-500/20 outline-none`}
+                    } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="timetable-conflict">Timetable Conflict</option>
                   <option value="schedule-change">Schedule Change Request</option>
@@ -913,11 +895,10 @@ const TeacherDashboard = () => {
                 <select
                   value={newQuery.priority}
                   onChange={(e) => setNewQuery({ ...newQuery, priority: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
                       : 'bg-white border-gray-200 focus:border-blue-500'
-                  } focus:ring-4 focus:ring-blue-500/20 outline-none`}
+                    } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -930,11 +911,10 @@ const TeacherDashboard = () => {
             <div className={`sticky bottom-0 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} p-6 flex justify-end space-x-3`}>
               <button
                 onClick={() => setShowQueryModal(false)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${isDarkMode
+                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                } shadow-lg hover:shadow-xl`}
+                  } shadow-lg hover:shadow-xl`}
               >
                 Cancel
               </button>

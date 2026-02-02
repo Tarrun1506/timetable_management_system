@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Shield, 
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Shield,
   Calendar,
   ArrowRight,
   Brain,
@@ -25,10 +25,10 @@ const Auth = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { login, register } = useAuth();
-  
+
   // Determine initial mode based on URL
   const [isSignUp, setIsSignUp] = useState(location.pathname === '/register');
-  
+
   // Form states
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({
@@ -39,7 +39,7 @@ const Auth = () => {
     department: '',
     role: 'admin'
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -151,27 +151,25 @@ const Auth = () => {
   return (
     <div className="h-screen bg-gray-900 flex items-start justify-center pt-6 px-4 pb-8 overflow-hidden bg-landing">
       <div className="w-full max-w-3xl">
-        
+
         {/* Toggle Buttons */}
         <div className="flex gap-4 mb-6 p-2 sticky top-4 z-30">
           <div className="w-full bg-gray-800/40 backdrop-blur-sm rounded-full p-1 ring-1 ring-white/5 shadow-lg flex">
             <button
               onClick={() => toggleMode(false)}
-              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${
-                !isSignUp
+              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${!isSignUp
                   ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-[0_15px_40px_rgba(59,130,246,0.16)] -translate-y-1 scale-105 text-glow'
                   : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
-              }`}
+                }`}
             >
               Sign In
             </button>
             <button
               onClick={() => toggleMode(true)}
-              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${
-                isSignUp
+              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 text-sm text-center ${isSignUp
                   ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-[0_15px_40px_rgba(147,51,234,0.14)] -translate-y-1 scale-105 text-glow'
                   : 'text-gray-300 hover:text-white hover:bg-gray-700/20'
-              }`}
+                }`}
             >
               Sign Up
             </button>
@@ -180,11 +178,11 @@ const Auth = () => {
 
         {/* Card Container */}
         <div className="relative mt-2">
-          <div 
+          <div
             className={`card-container ${isSignUp ? 'flipped' : ''}`}
             style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
           >
-            
+
             {/* Sign In Card */}
             <div className="card-face card-front">
               <div className="bg-gray-800 rounded-3xl shadow-2xl overflow-hidden flex ring-1 ring-white/10">
@@ -289,37 +287,11 @@ const Auth = () => {
                       )}
                     </button>
 
-                    {/* Social Login */}
-                    <div className="flex items-center my-3">
-                      <div className="flex-1 border-t border-gray-600"></div>
-                      <span className="px-4 text-gray-500 text-sm">Or continue with</span>
-                      <div className="flex-1 border-t border-gray-600"></div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        className="flex items-center justify-center space-x-2 py-3 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                          G
-                        </div>
-                        <span className="text-gray-300">Google</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center justify-center space-x-2 py-3 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                          f
-                        </div>
-                        <span className="text-gray-300">Facebook</span>
-                      </button>
-                    </div>
                   </form>
 
                   <div className="mt-4 text-center">
-                    <button 
+                    <button
                       onClick={() => navigate('/')}
                       className="text-gray-500 hover:text-gray-400 text-sm transition-colors flex items-center space-x-1 mx-auto"
                     >
@@ -484,7 +456,7 @@ const Auth = () => {
                   </form>
 
                   <div className="mt-3 text-center">
-                    <button 
+                    <button
                       onClick={() => navigate('/')}
                       className="text-gray-500 hover:text-gray-400 text-sm transition-colors flex items-center space-x-1 mx-auto"
                     >

@@ -6,14 +6,14 @@ import AdminSidebar from '../components/AdminSidebar';
 import Chatbot from '../components/Chatbot';
 import QueryManagement from '../components/QueryManagement';
 import { getTeachers, getClassrooms, getCourses, getTimetables, getDataStatistics, getStudentStats } from '../services/api';
-import { 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  Settings, 
-  LogOut, 
-  Plus, 
-  Search, 
+import {
+  Calendar,
+  Users,
+  BarChart3,
+  Settings,
+  LogOut,
+  Plus,
+  Search,
   Filter,
   Edit,
   Trash2,
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
       setActiveTab(location.state.activeTab);
     }
   }, [location]);
-  
+
   // Real data states
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
   const [recentTimetables, setRecentTimetables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Analytics data
   const [analyticsData, setAnalyticsData] = useState({
     departmentDistribution: [],
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const [teachersRes, classroomsRes, coursesRes, timetablesRes, statsRes, studentStatsRes] = await Promise.allSettled([
         getTeachers(),
         getClassrooms(),
@@ -129,8 +129,8 @@ const AdminDashboard = () => {
       // studentStatsRes contains the response from /api/data/students/stats
       const totalStudents = studentStatsRes && studentStatsRes.status === 'fulfilled'
         ? (studentStatsRes.value && studentStatsRes.value.data && typeof studentStatsRes.value.data.totalStudents !== 'undefined'
-            ? studentStatsRes.value.data.totalStudents
-            : (studentStatsRes.value && studentStatsRes.value.totalStudents) || 0)
+          ? studentStatsRes.value.data.totalStudents
+          : (studentStatsRes.value && studentStatsRes.value.totalStudents) || 0)
         : 0;
 
       setStats({
@@ -164,36 +164,36 @@ const AdminDashboard = () => {
     // Department Distribution (mock data based on student stats)
     const departmentData = studentStatsRes.status === 'fulfilled' && studentStatsRes.value?.data?.byDepartment
       ? studentStatsRes.value.data.byDepartment.map(dept => ({
-          name: dept.department || 'Unknown',
-          value: dept.count || 0,
-          percentage: totalStudents > 0 ? ((dept.count / totalStudents) * 100).toFixed(1) : 0
-        }))
+        name: dept.department || 'Unknown',
+        value: dept.count || 0,
+        percentage: totalStudents > 0 ? ((dept.count / totalStudents) * 100).toFixed(1) : 0
+      }))
       : [
-          { name: 'Computer Science', value: Math.floor(totalStudents * 0.35), percentage: 35 },
-          { name: 'Electronics', value: Math.floor(totalStudents * 0.25), percentage: 25 },
-          { name: 'Mechanical', value: Math.floor(totalStudents * 0.20), percentage: 20 },
-          { name: 'Civil', value: Math.floor(totalStudents * 0.15), percentage: 15 },
-          { name: 'Others', value: Math.floor(totalStudents * 0.05), percentage: 5 }
-        ];
+        { name: 'Computer Science', value: Math.floor(totalStudents * 0.35), percentage: 35 },
+        { name: 'Electronics', value: Math.floor(totalStudents * 0.25), percentage: 25 },
+        { name: 'Mechanical', value: Math.floor(totalStudents * 0.20), percentage: 20 },
+        { name: 'Civil', value: Math.floor(totalStudents * 0.15), percentage: 15 },
+        { name: 'Others', value: Math.floor(totalStudents * 0.05), percentage: 5 }
+      ];
 
     // Timetable Status Distribution
     // Timetable Status Distribution
     const statusData = [
-      { 
-        name: 'Published', 
-        value: timetables.filter(tt => tt.status === 'published').length 
+      {
+        name: 'Published',
+        value: timetables.filter(tt => tt.status === 'published').length
       },
-      { 
-        name: 'Draft', 
-        value: timetables.filter(tt => tt.status === 'draft').length 
+      {
+        name: 'Draft',
+        value: timetables.filter(tt => tt.status === 'draft').length
       },
-      { 
-        name: 'Generating', 
-        value: timetables.filter(tt => tt.status === 'generating').length 
+      {
+        name: 'Generating',
+        value: timetables.filter(tt => tt.status === 'generating').length
       },
-      { 
-        name: 'Failed', 
-        value: timetables.filter(tt => tt.status === 'failed').length 
+      {
+        name: 'Failed',
+        value: timetables.filter(tt => tt.status === 'failed').length
       }
     ].filter(item => item.value > 0); // Only show statuses that have timetables
 
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
 
   // Color palettes for charts
   const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
-  
+
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Loading State */}
@@ -291,310 +291,286 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       {!loading && !error && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsDisplay.map((stat, index) => (
-          <div 
-            key={index} 
-            className={`group relative rounded-2xl p-6 border transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl cursor-pointer ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-gray-500 hover:shadow-blue-500/20' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-blue-500/20'
-            }`}
-            style={{
-              transformStyle: 'preserve-3d',
-              perspective: '1000px',
-              animationDelay: `${index * 100}ms`
-            }}
-          >
-            {/* 3D Background Glow */}
-            <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-              stat.color === 'blue' ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' :
-              stat.color === 'green' ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10' :
-              stat.color === 'purple' ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' :
-              'bg-gradient-to-r from-orange-500/10 to-red-500/10'
-            }`} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statsDisplay.map((stat, index) => (
+            <div
+              key={index}
+              className={`group relative rounded-2xl p-6 border transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl cursor-pointer ${isDarkMode
+                  ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-gray-500 hover:shadow-blue-500/20'
+                  : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-blue-500/20'
+                }`}
+              style={{
+                transformStyle: 'preserve-3d',
+                perspective: '1000px',
+                animationDelay: `${index * 100}ms`
+              }}
+            >
+              {/* 3D Background Glow */}
+              <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${stat.color === 'blue' ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' :
+                  stat.color === 'green' ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10' :
+                    stat.color === 'purple' ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' :
+                      'bg-gradient-to-r from-orange-500/10 to-red-500/10'
+                }`} />
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-600 group-hover:text-gray-700'}`}>{stat.title}</p>
-                  <p className={`text-2xl font-bold transition-all duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:text-glow`}>{stat.value}</p>
-                  <p className="text-sm text-green-600 font-medium">{stat.change}</p>
-                </div>
-                <div className={`p-3 rounded-xl transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl ${
-                  stat.color === 'blue' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800' :
-                  stat.color === 'green' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800' :
-                  stat.color === 'purple' ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800' :
-                  'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800'
-                }`}>
-                  <stat.icon className={`w-6 h-6 transition-all duration-300 ${
-                    stat.color === 'blue' ? 'text-blue-600 group-hover:text-blue-500' :
-                    stat.color === 'green' ? 'text-green-600 group-hover:text-green-500' :
-                    stat.color === 'purple' ? 'text-purple-600 group-hover:text-purple-500' :
-                    'text-orange-600 group-hover:text-orange-500'
-                  }`} />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-600 group-hover:text-gray-700'}`}>{stat.title}</p>
+                    <p className={`text-2xl font-bold transition-all duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:text-glow`}>{stat.value}</p>
+                    <p className="text-sm text-green-600 font-medium">{stat.change}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl ${stat.color === 'blue' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800' :
+                      stat.color === 'green' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800' :
+                        stat.color === 'purple' ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800' :
+                          'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800'
+                    }`}>
+                    <stat.icon className={`w-6 h-6 transition-all duration-300 ${stat.color === 'blue' ? 'text-blue-600 group-hover:text-blue-500' :
+                        stat.color === 'green' ? 'text-green-600 group-hover:text-green-500' :
+                          stat.color === 'purple' ? 'text-purple-600 group-hover:text-purple-500' :
+                            'text-orange-600 group-hover:text-orange-500'
+                      }`} />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
       {/* Quick Insights with Mini Charts */}
       {!loading && !error && (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Department Distribution */}
-        <div className={`rounded-xl border p-6 ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              Department Distribution
-            </h3>
-            <PieChart className="w-5 h-5 text-blue-600" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Department Distribution */}
+          <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Department Distribution
+              </h3>
+              <PieChart className="w-5 h-5 text-blue-600" />
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <RechartsPieChart>
+                <Pie
+                  data={analyticsData.departmentDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={({ name, percentage }) => `${name}: ${percentage}%`}
+                >
+                  {analyticsData.departmentDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
+                    borderRadius: '0.5rem',
+                    color: isDarkMode ? '#F9FAFB' : '#111827'
+                  }}
+                />
+              </RechartsPieChart>
+            </ResponsiveContainer>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <RechartsPieChart>
-              <Pie
-                data={analyticsData.departmentDistribution}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                fill="#8884d8"
-                paddingAngle={5}
-                dataKey="value"
-                label={({ name, percentage }) => `${name}: ${percentage}%`}
-              >
-                {analyticsData.departmentDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                  border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
-                  borderRadius: '0.5rem',
-                  color: isDarkMode ? '#F9FAFB' : '#111827'
-                }}
-              />
-            </RechartsPieChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Weekly Activity Trend */}
-        <div className={`rounded-xl border p-6 ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+          {/* Weekly Activity Trend */}
+          <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Weekly Activity
+              </h3>
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={analyticsData.weeklyActivity}>
+                <defs>
+                  <linearGradient id="colorTimetables" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorQueries" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
+                <XAxis
+                  dataKey="day"
+                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis
+                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                  style={{ fontSize: '12px' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
+                    borderRadius: '0.5rem'
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="timetables"
+                  stroke="#3B82F6"
+                  fillOpacity={1}
+                  fill="url(#colorTimetables)"
+                  name="Timetables"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="queries"
+                  stroke="#10B981"
+                  fillOpacity={1}
+                  fill="url(#colorQueries)"
+                  name="Queries"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Resource Utilization */}
+      {!loading && !error && (
+        <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              Weekly Activity
+              Resource Utilization
             </h3>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <Activity className="w-5 h-5 text-purple-600" />
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={analyticsData.weeklyActivity}>
-              <defs>
-                <linearGradient id="colorTimetables" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorQueries" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={analyticsData.resourceUtilization}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
-              <XAxis 
-                dataKey="day" 
+              <XAxis
+                dataKey="resource"
                 stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
                 style={{ fontSize: '12px' }}
               />
-              <YAxis 
+              <YAxis
                 stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
                 style={{ fontSize: '12px' }}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
                   border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
                   borderRadius: '0.5rem'
                 }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="timetables" 
-                stroke="#3B82F6" 
-                fillOpacity={1} 
-                fill="url(#colorTimetables)" 
-                name="Timetables"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="queries" 
-                stroke="#10B981" 
-                fillOpacity={1} 
-                fill="url(#colorQueries)"
-                name="Queries"
-              />
-            </AreaChart>
+              <Legend />
+              <Bar dataKey="utilized" fill="#3B82F6" name="Utilized" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="total" fill="#E5E7EB" name="Total Available" radius={[8, 8, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-      )}
-
-      {/* Resource Utilization */}
-      {!loading && !error && (
-      <div className={`rounded-xl border p-6 ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            Resource Utilization
-          </h3>
-          <Activity className="w-5 h-5 text-purple-600" />
-        </div>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={analyticsData.resourceUtilization}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
-            <XAxis 
-              dataKey="resource" 
-              stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis 
-              stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-              style={{ fontSize: '12px' }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
-                borderRadius: '0.5rem'
-              }}
-            />
-            <Legend />
-            <Bar dataKey="utilized" fill="#3B82F6" name="Utilized" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="total" fill="#E5E7EB" name="Total Available" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
       )}
 
       {/* Recent Timetables */}
       {!loading && !error && (
-      <div className={`rounded-xl border ${
-        isDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
-          : 'bg-white border-gray-200'
-      }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode 
-            ? 'border-gray-700' 
-            : 'border-gray-200'
-        }`}>
-          <h3 className={`text-lg font-semibold ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>Recent Timetables</h3>
-        </div>
-        <div className="p-6">
-          {recentTimetables.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className={`w-12 h-12 mx-auto mb-3 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                No timetables available. Create your first timetable to get started.
-              </p>
-            </div>
-          ) : (
-          <div className="space-y-4">
-            {recentTimetables.map((timetable) => (
-              <div key={timetable.id} className={`flex items-center justify-between p-4 rounded-lg ${
-                isDarkMode 
-                  ? 'bg-gray-700/50' 
-                  : 'bg-gray-50'
-              }`}>
-                <div className="flex items-center space-x-4">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <h4 className={`font-medium ${
-                      isDarkMode ? 'text-gray-200' : 'text-gray-900'
-                    }`}>{timetable.name}</h4>
-                    <p className={`text-sm ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>Updated {timetable.lastUpdated}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    timetable.status === 'Active' ? (isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') :
-                    timetable.status === 'Draft' ? (isDarkMode ? 'bg-yellow-900 text-yellow-300' : 'bg-yellow-100 text-yellow-800') :
-                    (isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800')
-                  }`}>
-                    {timetable.status}
-                  </span>
-                  {timetable.conflicts > 0 && (
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      isDarkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {timetable.conflicts} conflicts
-                    </span>
-                  )}
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
-                  }`}>
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
-                  }`}>
-                    <Edit className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+        <div className={`rounded-xl border ${isDarkMode
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
+          }`}>
+          <div className={`p-6 border-b ${isDarkMode
+              ? 'border-gray-700'
+              : 'border-gray-200'
+            }`}>
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>Recent Timetables</h3>
           </div>
-          )}
+          <div className="p-6">
+            {recentTimetables.length === 0 ? (
+              <div className="text-center py-8">
+                <Calendar className={`w-12 h-12 mx-auto mb-3 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  No timetables available. Create your first timetable to get started.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentTimetables.map((timetable) => (
+                  <div key={timetable.id} className={`flex items-center justify-between p-4 rounded-lg ${isDarkMode
+                      ? 'bg-gray-700/50'
+                      : 'bg-gray-50'
+                    }`}>
+                    <div className="flex items-center space-x-4">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <h4 className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                          }`}>{timetable.name}</h4>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}>Updated {timetable.lastUpdated}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${timetable.status === 'Active' ? (isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') :
+                          timetable.status === 'Draft' ? (isDarkMode ? 'bg-yellow-900 text-yellow-300' : 'bg-yellow-100 text-yellow-800') :
+                            (isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800')
+                        }`}>
+                        {timetable.status}
+                      </span>
+                      {timetable.conflicts > 0 && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
+                          }`}>
+                          {timetable.conflicts} conflicts
+                        </span>
+                      )}
+                      <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
+                        }`}>
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'
+                        }`}>
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       )}
 
       {/* Notifications */}
       {!loading && !error && notifications.length > 0 && (
-      <div className={`rounded-xl border ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
-        }`}>
-          <h3 className={`text-lg font-semibold ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>Recent Notifications</h3>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div key={notification.id} className={`flex items-start space-x-3 p-3 rounded-lg ${
-                isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-              }`}>
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  notification.type === 'warning' ? 'bg-yellow-500' :
-                  notification.type === 'success' ? 'bg-green-500' :
-                  'bg-blue-500'
-                }`} />
-                <div className="flex-1">
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-200' : 'text-gray-900'
-                  }`}>{notification.message}</p>
-                  <p className={`text-xs ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>{notification.time}</p>
+        <div className={`rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
+          <div className={`p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>Recent Notifications</h3>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              {notifications.map((notification) => (
+                <div key={notification.id} className={`flex items-start space-x-3 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                  }`}>
+                  <div className={`w-2 h-2 rounded-full mt-2 ${notification.type === 'warning' ? 'bg-yellow-500' :
+                      notification.type === 'success' ? 'bg-green-500' :
+                        'bg-blue-500'
+                    }`} />
+                  <div className="flex-1">
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}>{notification.message}</p>
+                    <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>{notification.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
@@ -604,103 +580,88 @@ const AdminDashboard = () => {
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div className="flex items-center space-x-4">
-          <button 
+          <button
             onClick={() => navigate('/create-timetable')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Timetable</span>
           </button>
-          <button className={`px-4 py-2 border rounded-lg transition-colors flex items-center space-x-2 ${
-            isDarkMode 
-              ? 'border-gray-600 text-gray-200 hover:bg-gray-700' 
+          <button className={`px-4 py-2 border rounded-lg transition-colors flex items-center space-x-2 ${isDarkMode
+              ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
               : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}>
+            }`}>
             <Upload className="w-4 h-4" />
             <span>Import</span>
           </button>
         </div>
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <Search className={`absolute left-3 top-3 w-4 h-4 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-400'
-            }`} />
+            <Search className={`absolute left-3 top-3 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'
+              }`} />
             <input
               type="text"
               placeholder="Search timetables..."
-              className={`pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode 
-                  ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
+              className={`pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isDarkMode
+                  ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400'
                   : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-              }`}
+                }`}
             />
           </div>
-          <button className={`p-2 border rounded-lg transition-colors ${
-            isDarkMode 
-              ? 'border-gray-600 hover:bg-gray-700' 
+          <button className={`p-2 border rounded-lg transition-colors ${isDarkMode
+              ? 'border-gray-600 hover:bg-gray-700'
               : 'border-gray-300 hover:bg-gray-50'
-          }`}>
+            }`}>
             <Filter className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Timetables List */}
-      <div className={`rounded-xl border ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
+      <div className={`rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
-          <h3 className={`text-lg font-semibold ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>All Timetables</h3>
+        <div className={`p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+          }`}>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>All Timetables</h3>
         </div>
         <div className="p-6">
           <div className="space-y-4">
             {recentTimetables.map((timetable) => (
-              <div key={timetable.id} className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'bg-gray-700 hover:bg-gray-600' 
+              <div key={timetable.id} className={`flex items-center justify-between p-4 rounded-lg transition-colors ${isDarkMode
+                  ? 'bg-gray-700 hover:bg-gray-600'
                   : 'bg-gray-50 hover:bg-gray-100'
-              }`}>
+                }`}>
                 <div className="flex items-center space-x-4">
                   <Calendar className="w-5 h-5 text-blue-600" />
                   <div>
-                    <h4 className={`font-medium ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{timetable.name}</h4>
-                    <p className={`text-sm ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>Updated {timetable.lastUpdated}</p>
+                    <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>{timetable.name}</h4>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>Updated {timetable.lastUpdated}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    timetable.status === 'Active' ? (isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') :
-                    timetable.status === 'Draft' ? (isDarkMode ? 'bg-yellow-900 text-yellow-300' : 'bg-yellow-100 text-yellow-800') :
-                    (isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800')
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${timetable.status === 'Active' ? (isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') :
+                      timetable.status === 'Draft' ? (isDarkMode ? 'bg-yellow-900 text-yellow-300' : 'bg-yellow-100 text-yellow-800') :
+                        (isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800')
+                    }`}>
                     {timetable.status}
                   </span>
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-600'
-                  }`}>
+                  <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-600'
+                    }`}>
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-green-400' : 'text-gray-400 hover:text-green-600'
-                  }`}>
+                  <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-green-400' : 'text-gray-400 hover:text-green-600'
+                    }`}>
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
-                  }`}>
+                  <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
+                    }`}>
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <button className={`p-2 transition-colors ${
-                    isDarkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-400 hover:text-purple-600'
-                  }`}>
+                  <button className={`p-2 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-400 hover:text-purple-600'
+                    }`}>
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
@@ -715,52 +676,41 @@ const AdminDashboard = () => {
   const renderUsers = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className={`text-lg font-semibold ${
-          isDarkMode ? 'text-white' : 'text-gray-900'
-        }`}>User Management</h3>
+        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>User Management</h3>
         <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
           <Plus className="w-4 h-4" />
           <span>Add User</span>
         </button>
       </div>
-      
-      <div className={`rounded-xl border ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
+
+      <div className={`rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={`text-center p-6 rounded-lg ${
-              isDarkMode ? 'bg-blue-900' : 'bg-blue-50'
-            }`}>
+            <div className={`text-center p-6 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-50'
+              }`}>
               <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h4 className={`text-xl font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>1,234</h4>
-              <p className={`${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>Total Students</p>
+              <h4 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>1,234</h4>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>Total Students</p>
             </div>
-            <div className={`text-center p-6 rounded-lg ${
-              isDarkMode ? 'bg-green-900' : 'bg-green-50'
-            }`}>
+            <div className={`text-center p-6 rounded-lg ${isDarkMode ? 'bg-green-900' : 'bg-green-50'
+              }`}>
               <GraduationCap className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h4 className={`text-xl font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>89</h4>
-              <p className={`${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>Total Teachers</p>
+              <h4 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>89</h4>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>Total Teachers</p>
             </div>
-            <div className={`text-center p-6 rounded-lg ${
-              isDarkMode ? 'bg-purple-900' : 'bg-purple-50'
-            }`}>
+            <div className={`text-center p-6 rounded-lg ${isDarkMode ? 'bg-purple-900' : 'bg-purple-50'
+              }`}>
               <Building2 className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <h4 className={`text-xl font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>23</h4>
-              <p className={`${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>Available Rooms</p>
+              <h4 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>23</h4>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>Available Rooms</p>
             </div>
           </div>
         </div>
@@ -779,164 +729,82 @@ const AdminDashboard = () => {
       )}
 
       {!loading && !error && (
-      <>
-        {/* Performance Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <CheckCircle className="w-8 h-8 text-blue-600" />
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-200 text-blue-800'
-              }`}>Active</span>
-            </div>
-            <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {recentTimetables.filter(tt => tt.status === 'Active').length}
-            </h4>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Active Timetables</p>
-          </div>
-
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700' : 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <Target className="w-8 h-8 text-green-600" />
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-200 text-green-800'
-              }`}>High</span>
-            </div>
-            <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>92%</h4>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Efficiency Rate</p>
-          </div>
-
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700' : 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <Award className="w-8 h-8 text-purple-600" />
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                isDarkMode ? 'bg-purple-900 text-purple-300' : 'bg-purple-200 text-purple-800'
-              }`}>Good</span>
-            </div>
-            <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>88%</h4>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>User Satisfaction</p>
-          </div>
-
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700' : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <AlertCircle className="w-8 h-8 text-orange-600" />
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                isDarkMode ? 'bg-orange-900 text-orange-300' : 'bg-orange-200 text-orange-800'
-              }`}>Low</span>
-            </div>
-            <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {recentTimetables.reduce((sum, tt) => sum + (tt.conflicts || 0), 0)}
-            </h4>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total Conflicts</p>
-          </div>
-        </div>
-
-        {/* Main Analytics Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Monthly Trends */}
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Monthly Trends
-              </h3>
-              <TrendingUp className="w-5 h-5 text-blue-600" />
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={analyticsData.monthlyTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
-                <XAxis 
-                  dataKey="month" 
-                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis 
-                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                  style={{ fontSize: '12px' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                    border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
-                    borderRadius: '0.5rem'
-                  }}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="timetables" 
-                  stroke="#3B82F6" 
-                  strokeWidth={2}
-                  name="Timetables"
-                  dot={{ fill: '#3B82F6', r: 4 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="students" 
-                  stroke="#10B981" 
-                  strokeWidth={2}
-                  name="Students"
-                  dot={{ fill: '#10B981', r: 4 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="teachers" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={2}
-                  name="Teachers"
-                  dot={{ fill: '#8B5CF6', r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Timetable Status Distribution */}
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Timetable Status
-              </h3>
-              <PieChart className="w-5 h-5 text-green-600" />
-            </div>
-            {analyticsData.timetableStatus.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[300px]">
-                <AlertCircle className={`w-12 h-12 mb-3 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  No timetables available yet
-                </p>
-                <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                  Create your first timetable to see statistics
-                </p>
+        <>
+          {/* Performance Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+              }`}>
+              <div className="flex items-center justify-between mb-2">
+                <CheckCircle className="w-8 h-8 text-blue-600" />
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-200 text-blue-800'
+                  }`}>Active</span>
               </div>
-            ) : (
+              <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {recentTimetables.filter(tt => tt.status === 'Active').length}
+              </h4>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Active Timetables</p>
+            </div>
+
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700' : 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
+              }`}>
+              <div className="flex items-center justify-between mb-2">
+                <Target className="w-8 h-8 text-green-600" />
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-200 text-green-800'
+                  }`}>High</span>
+              </div>
+              <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>92%</h4>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Efficiency Rate</p>
+            </div>
+
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700' : 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'
+              }`}>
+              <div className="flex items-center justify-between mb-2">
+                <Award className="w-8 h-8 text-purple-600" />
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${isDarkMode ? 'bg-purple-900 text-purple-300' : 'bg-purple-200 text-purple-800'
+                  }`}>Good</span>
+              </div>
+              <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>88%</h4>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>User Satisfaction</p>
+            </div>
+
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700' : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
+              }`}>
+              <div className="flex items-center justify-between mb-2">
+                <AlertCircle className="w-8 h-8 text-orange-600" />
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${isDarkMode ? 'bg-orange-900 text-orange-300' : 'bg-orange-200 text-orange-800'
+                  }`}>Low</span>
+              </div>
+              <h4 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {recentTimetables.reduce((sum, tt) => sum + (tt.conflicts || 0), 0)}
+              </h4>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total Conflicts</p>
+            </div>
+          </div>
+
+          {/* Main Analytics Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Monthly Trends */}
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Monthly Trends
+                </h3>
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+              </div>
               <ResponsiveContainer width="100%" height={300}>
-                <RechartsPieChart>
-                  <Pie
-                    data={analyticsData.timetableStatus}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {analyticsData.timetableStatus.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
+                <LineChart data={analyticsData.monthlyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
+                  <XAxis
+                    dataKey="month"
+                    stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis
+                    stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
                       border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
@@ -944,168 +812,231 @@ const AdminDashboard = () => {
                     }}
                   />
                   <Legend />
-                </RechartsPieChart>
+                  <Line
+                    type="monotone"
+                    dataKey="timetables"
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    name="Timetables"
+                    dot={{ fill: '#3B82F6', r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="students"
+                    stroke="#10B981"
+                    strokeWidth={2}
+                    name="Students"
+                    dot={{ fill: '#10B981', r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="teachers"
+                    stroke="#8B5CF6"
+                    strokeWidth={2}
+                    name="Teachers"
+                    dot={{ fill: '#8B5CF6', r: 4 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Performance Metrics Radar Chart */}
-        <div className={`rounded-xl border p-6 ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              System Performance Metrics
-            </h3>
-            <Activity className="w-5 h-5 text-purple-600" />
-          </div>
-          <ResponsiveContainer width="100%" height={400}>
-            <RadarChart data={analyticsData.performanceMetrics}>
-              <PolarGrid stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
-              <PolarAngleAxis 
-                dataKey="metric" 
-                stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                style={{ fontSize: '12px' }}
-              />
-              <PolarRadiusAxis 
-                angle={90} 
-                domain={[0, 100]}
-                stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                style={{ fontSize: '10px' }}
-              />
-              <Radar 
-                name="Performance" 
-                dataKey="value" 
-                stroke="#8B5CF6" 
-                fill="#8B5CF6" 
-                fillOpacity={0.6} 
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                  border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
-                  borderRadius: '0.5rem'
-                }}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Detailed Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <h3 className={`text-lg font-semibold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Timetable Statistics</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Timetables
-                </span>
-                <span className="font-semibold text-blue-600">{recentTimetables.length}</span>
+            {/* Timetable Status Distribution */}
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Timetable Status
+                </h3>
+                <PieChart className="w-5 h-5 text-green-600" />
               </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Active
-                </span>
-                <span className="font-semibold text-green-600">
-                  {recentTimetables.filter(tt => tt.status === 'Active').length}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Draft
-                </span>
-                <span className="font-semibold text-orange-600">
-                  {recentTimetables.filter(tt => tt.status === 'Draft').length}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Archived
-                </span>
-                <span className="font-semibold text-gray-600">
-                  {recentTimetables.filter(tt => tt.status === 'Archived').length}
-                </span>
-              </div>
+              {analyticsData.timetableStatus.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[300px]">
+                  <AlertCircle className={`w-12 h-12 mb-3 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    No timetables available yet
+                  </p>
+                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Create your first timetable to see statistics
+                  </p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={analyticsData.timetableStatus}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {analyticsData.timetableStatus.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                        border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
+                        borderRadius: '0.5rem'
+                      }}
+                    />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <h3 className={`text-lg font-semibold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Resource Statistics</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Classrooms
-                </span>
-                <span className="font-semibold text-blue-600">{stats.roomsAvailable}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Teachers
-                </span>
-                <span className="font-semibold text-green-600">{stats.totalTeachers}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Students
-                </span>
-                <span className="font-semibold text-purple-600">{stats.totalStudents}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Active Courses
-                </span>
-                <span className="font-semibold text-orange-600">{stats.activeClasses}</span>
-              </div>
+          {/* Performance Metrics Radar Chart */}
+          <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                System Performance Metrics
+              </h3>
+              <Activity className="w-5 h-5 text-purple-600" />
             </div>
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart data={analyticsData.performanceMetrics}>
+                <PolarGrid stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
+                <PolarAngleAxis
+                  dataKey="metric"
+                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                  style={{ fontSize: '12px' }}
+                />
+                <PolarRadiusAxis
+                  angle={90}
+                  domain={[0, 100]}
+                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                  style={{ fontSize: '10px' }}
+                />
+                <Radar
+                  name="Performance"
+                  dataKey="value"
+                  stroke="#8B5CF6"
+                  fill="#8B5CF6"
+                  fillOpacity={0.6}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
+                    borderRadius: '0.5rem'
+                  }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
 
-          <div className={`rounded-xl border p-6 ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <h3 className={`text-lg font-semibold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Quick Actions</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => navigate('/create-timetable')}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Create Timetable</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`w-full px-4 py-2 rounded-lg transition-colors text-sm ${
-                  isDarkMode 
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                View Overview
-              </button>
-              <button
-                onClick={() => navigate('/view-timetable')}
-                className={`w-full px-4 py-2 rounded-lg transition-colors text-sm ${
-                  isDarkMode 
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                View All Timetables
-              </button>
+          {/* Detailed Statistics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Timetable Statistics</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Total Timetables
+                  </span>
+                  <span className="font-semibold text-blue-600">{recentTimetables.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Active
+                  </span>
+                  <span className="font-semibold text-green-600">
+                    {recentTimetables.filter(tt => tt.status === 'Active').length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Draft
+                  </span>
+                  <span className="font-semibold text-orange-600">
+                    {recentTimetables.filter(tt => tt.status === 'Draft').length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Archived
+                  </span>
+                  <span className="font-semibold text-gray-600">
+                    {recentTimetables.filter(tt => tt.status === 'Archived').length}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Resource Statistics</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Total Classrooms
+                  </span>
+                  <span className="font-semibold text-blue-600">{stats.roomsAvailable}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Total Teachers
+                  </span>
+                  <span className="font-semibold text-green-600">{stats.totalTeachers}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Total Students
+                  </span>
+                  <span className="font-semibold text-purple-600">{stats.totalStudents}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Active Courses
+                  </span>
+                  <span className="font-semibold text-orange-600">{stats.activeClasses}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`rounded-xl border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+              }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Quick Actions</h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => navigate('/create-timetable')}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Timetable</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`w-full px-4 py-2 rounded-lg transition-colors text-sm ${isDarkMode
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  View Overview
+                </button>
+                <button
+                  onClick={() => navigate('/view-timetable')}
+                  className={`w-full px-4 py-2 rounded-lg transition-colors text-sm ${isDarkMode
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  View All Timetables
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </>
+        </>
       )}
     </div>
   );
@@ -1117,7 +1048,7 @@ const AdminDashboard = () => {
         <div className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
         <div className="absolute top-40 right-10 w-64 h-64 bg-gradient-to-r from-yellow-400/10 to-pink-400/10 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-64 h-64 bg-gradient-to-r from-green-400/10 to-blue-400/10 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
-        
+
         {/* Geometric shapes */}
         <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
           <div className="w-6 h-6 border border-blue-200/20 rotate-45 animate-spin-slow"></div>
@@ -1147,11 +1078,11 @@ const AdminDashboard = () => {
                 </p>
               </div>
             </div>
-            
+
             {/* Right Section - Actions & Profile */}
             <div className="flex items-center space-x-2 ml-auto">
               {/* Quick Actions */}
-              <button 
+              <button
                 className={`hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-700/50 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 <Plus className="w-4 h-4" />
@@ -1159,7 +1090,7 @@ const AdminDashboard = () => {
               </button>
 
               {/* Analytics Quick View */}
-              <button 
+              <button
                 onClick={() => setActiveTab('analytics')}
                 className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-700/50 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
@@ -1169,7 +1100,7 @@ const AdminDashboard = () => {
 
               {/* Notifications */}
               <div className="relative">
-                <button 
+                <button
                   className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
                   title="Notifications"
                 >
@@ -1179,24 +1110,17 @@ const AdminDashboard = () => {
                   </span>
                 </button>
               </div>
-              
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
-                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
+
+
 
               {/* Divider */}
               <div className={`h-8 w-px ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
-              
+
               {/* User Profile */}
               <div className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} cursor-pointer`}>
                 <div className="relative">
-                  <img 
-                    src={user?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'Admin') + '&background=3b82f6&color=fff'} 
+                  <img
+                    src={user?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'Admin') + '&background=3b82f6&color=fff'}
                     alt={user?.name}
                     className="w-9 h-9 rounded-full border-2 border-blue-500 shadow-md"
                   />
@@ -1213,7 +1137,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Logout */}
-              <button 
+              <button
                 onClick={handleLogout}
                 className={`p-2.5 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-red-900/30 text-gray-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-600 hover:text-red-600'}`}
                 title="Logout"
