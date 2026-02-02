@@ -168,12 +168,13 @@ const Auth = () => {
       return;
     }
 
+    const normalizedEmail = resetEmail.trim().toLowerCase();
     setIsLoading(true);
     setError('');
     setSuccessMessage('');
 
     try {
-      const response = await forgotPassword(resetEmail);
+      const response = await forgotPassword(normalizedEmail);
       if (response.success) {
         if (response.isSimulation) {
           setSimulatedOTP(response.otp);
@@ -199,11 +200,12 @@ const Auth = () => {
       return;
     }
 
+    const normalizedEmail = resetEmail.trim().toLowerCase();
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await verifyOTP(resetEmail, resetOTP);
+      const response = await verifyOTP(normalizedEmail, resetOTP);
       if (response.success) {
         // Code verified, navigate to reset password page with token
         navigate(`/reset-password/${response.token}`);

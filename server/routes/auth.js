@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Teacher = require('../models/Teacher');
+const Student = require('../models/Student');
 const logger = require('../utils/logger');
 const emailService = require('../utils/emailService');
 
@@ -776,8 +778,43 @@ router.post('/forgot-password', [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    const email = req.body.email.toLowerCase();
+    let user = await User.findOne({ email });
+
+    // If user not in authentication database, check profiles
+    if (!user) {
+      // Check Teachers
+      const teacher = await Teacher.findOne({ email });
+      if (teacher) {
+        user = new User({
+          name: teacher.name,
+          email: teacher.email,
+          password: Math.random().toString(36).slice(-10), // Random temp password
+          role: 'faculty',
+          department: teacher.department,
+          mustChangePassword: true,
+          isFirstLogin: true
+        });
+        await user.save();
+        logger.info('Auto-created User record for Teacher profile', { email: user.email });
+      } else {
+        // Check Students
+        const student = await Student.findOne({ 'personalInfo.email': email });
+        if (student) {
+          user = new User({
+            name: `${student.personalInfo.firstName} ${student.personalInfo.lastName}`,
+            email: student.personalInfo.email,
+            password: Math.random().toString(36).slice(-10),
+            role: 'student',
+            department: student.academicInfo.department,
+            mustChangePassword: true,
+            isFirstLogin: true
+          });
+          await user.save();
+          logger.info('Auto-created User record for Student profile', { email: user.email });
+        }
+      }
+    }
 
     // Generate token and OTP (simulation fallback)
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -799,6 +836,13 @@ router.post('/forgot-password', [
 
     // Handle Simulation Mode (No Email Service)
     if (!emailService.isConfigured()) {
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Account not found. Please check your email or register first.'
+        });
+      }
+
       logger.warn('Email service not configured. Returning OTP in simulation mode.', { email: req.body.email, otp });
       return res.json({
         success: true,
@@ -806,7 +850,7 @@ router.post('/forgot-password', [
         otp,
         resetLink,
         isSimulation: true,
-        userExists: !!user
+        userExists: true
       });
     }
 
@@ -833,7 +877,8 @@ router.post('/verify-otp', [
   body('otp').isLength({ min: 6, max: 6 }).withMessage('Invalid verification code')
 ], async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const email = req.body.email.toLowerCase();
+    const otp = req.body.otp;
     const user = await User.findOne({
       email,
       resetOTP: otp,
