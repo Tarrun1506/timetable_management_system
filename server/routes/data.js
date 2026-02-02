@@ -2588,13 +2588,13 @@ router.get('/students/stats', async (req, res) => {
       {
         $group: {
           _id: {
-            department: '$academicInfo.department',
-            program: '$academicInfo.program',
-            year: '$academicInfo.year',
-            semester: '$academicInfo.semester'
+            department: '$department',
+            program: '$program',
+            year: '$year',
+            semester: '$semester'
           },
           totalStudents: { $sum: 1 },
-          divisions: { $addToSet: '$academicInfo.division' }
+          divisions: { $addToSet: '$division' }
         }
       },
       {
@@ -2614,7 +2614,7 @@ router.get('/students/stats', async (req, res) => {
       }
     ]);
 
-    const totalStudents = await Student.countDocuments({ status: 'Active' });
+    const totalStudents = await Student.countDocuments({});
 
     res.json({
       success: true,

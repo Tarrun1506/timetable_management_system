@@ -131,6 +131,11 @@ const AdminDashboard = () => {
       const timetables = timetablesRes.status === 'fulfilled' ? (timetablesRes.value.data || timetablesRes.value.timetables || []) : [];
 
       // Calculate real statistics
+      // Use pagination total if available, otherwise fallback to array length
+      const totalTeachers = teachersRes.status === 'fulfilled' ? (teachersRes.value.pagination?.total || teachers.length) : 0;
+      const activeClasses = coursesRes.status === 'fulfilled' ? (coursesRes.value.pagination?.total || courses.length) : 0;
+      const roomsAvailable = classroomsRes.status === 'fulfilled' ? (classroomsRes.value.pagination?.total || classrooms.length) : 0;
+
       // studentStatsRes contains the response from /api/data/students/stats
       const totalStudents = studentStatsRes && studentStatsRes.status === 'fulfilled'
         ? (studentStatsRes.value && studentStatsRes.value.data && typeof studentStatsRes.value.data.totalStudents !== 'undefined'
@@ -140,9 +145,9 @@ const AdminDashboard = () => {
 
       setStats({
         totalStudents,
-        totalTeachers: teachers.length,
-        activeClasses: courses.length,
-        roomsAvailable: classrooms.length
+        totalTeachers,
+        activeClasses,
+        roomsAvailable
       });
 
       // Set recent timetables
@@ -186,11 +191,12 @@ const AdminDashboard = () => {
 
   const prepareAnalyticsData = (teachers, classrooms, courses, timetables, totalStudents, studentStatsRes) => {
     // Department Distribution (mock data based on student stats)
-    const departmentData = studentStatsRes.status === 'fulfilled' && studentStatsRes.value?.data?.byDepartment
-      ? studentStatsRes.value.data.byDepartment.map(dept => ({
-        name: dept.department || 'Unknown',
-        value: dept.count || 0,
-        percentage: totalStudents > 0 ? ((dept.count / totalStudents) * 100).toFixed(1) : 0
+    // Department Distribution
+    const departmentData = studentStatsRes.status === 'fulfilled' && studentStatsRes.value?.data?.departments
+      ? studentStatsRes.value.data.departments.map(dept => ({
+        name: dept._id || 'Unknown',
+        value: dept.departmentTotal || 0,
+        percentage: totalStudents > 0 ? ((dept.departmentTotal / totalStudents) * 100).toFixed(1) : 0
       }))
       : [
         { name: 'Computer Science', value: Math.floor(totalStudents * 0.35), percentage: 35 },
