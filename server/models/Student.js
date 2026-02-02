@@ -7,93 +7,92 @@ const studentSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  personalInfo: {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 50
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 50
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-    },
-    phone: {
-      type: String,
-      trim: true,
-      match: [/^\d{10}$/, 'Please enter a valid 10-digit phone number']
-    },
-    dateOfBirth: {
-      type: Date
-    },
-    gender: {
-      type: String,
-      enum: ['Male', 'Female', 'Other']
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: { type: String, default: 'India' }
-    }
+  firstName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 50
   },
-  academicInfo: {
-    department: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    program: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    year: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5
-    },
-    semester: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 2
-    },
-    division: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    batch: {
-      type: String,
-      trim: true
-    },
-    rollNumber: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    admissionDate: {
-      type: Date,
-      required: true
-    },
-    academicYear: {
-      type: String,
-      required: true
-    }
+  lastName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 50
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  dateOfBirth: {
+    type: Date
+  },
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other']
+  },
+  department: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  program: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  year: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  semester: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 2
+  },
+  division: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  batch: {
+    type: String,
+    trim: true
+  },
+  rollNumber: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  admissionDate: {
+    type: Date
+  },
+  academicYear: {
+    type: String
+  },
+  // Address fields flattened
+  street: String,
+  city: String,
+  state: String,
+  zipCode: String,
+  country: { type: String, default: 'India' },
+
+  // Guardian info flattened
+  guardianName: String,
+  guardianRelationship: String,
+  guardianPhone: String,
+  guardianEmail: String,
+
   enrolledCourses: [{
     courseId: {
       type: String,
@@ -121,50 +120,45 @@ const studentSchema = new mongoose.Schema({
     enum: ['Active', 'Inactive', 'Graduated', 'Suspended', 'Transferred'],
     default: 'Active'
   },
-  guardianInfo: {
-    name: String,
-    relationship: String,
-    phone: String,
-    email: String
-  },
   notes: [{
     date: { type: Date, default: Date.now },
     content: String,
     addedBy: String
   }]
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false // Allow other fields if they exist
 });
 
 // Index for efficient queries
-studentSchema.index({ 'academicInfo.department': 1, 'academicInfo.year': 1, 'academicInfo.semester': 1 });
-studentSchema.index({ 'academicInfo.program': 1, 'academicInfo.division': 1 });
+studentSchema.index({ department: 1, year: 1, semester: 1 });
+studentSchema.index({ program: 1, division: 1 });
 
 // Virtual for full name
-studentSchema.virtual('fullName').get(function() {
-  return `${this.personalInfo.firstName} ${this.personalInfo.lastName}`;
+studentSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
 });
 
 // Method to update attendance
-studentSchema.methods.updateAttendance = function() {
+studentSchema.methods.updateAttendance = function () {
   if (this.attendance.totalClasses > 0) {
     this.attendance.attendancePercentage = (this.attendance.classesAttended / this.attendance.totalClasses) * 100;
   }
 };
 
 // Static method to find students by course
-studentSchema.statics.findByCourse = function(courseId) {
+studentSchema.statics.findByCourse = function (courseId) {
   return this.find({ 'enrolledCourses.courseId': courseId, status: 'Active' });
 };
 
 // Static method to find students by division
-studentSchema.statics.findByDivision = function(department, program, year, semester, division) {
+studentSchema.statics.findByDivision = function (department, program, year, semester, division) {
   return this.find({
-    'academicInfo.department': department,
-    'academicInfo.program': program,
-    'academicInfo.year': year,
-    'academicInfo.semester': semester,
-    'academicInfo.division': division,
+    department: department,
+    program: program,
+    year: year,
+    semester: semester,
+    division: division,
     status: 'Active'
   });
 };

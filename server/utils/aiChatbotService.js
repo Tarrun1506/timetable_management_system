@@ -14,7 +14,7 @@ class AIChatbotService {
   constructor() {
     this.geminiApiKey = process.env.GEMINI_API_KEY;
     this.useAI = !!this.geminiApiKey;
-    
+
     if (this.useAI) {
       try {
         this.genAI = new GoogleGenerativeAI(this.geminiApiKey);
@@ -90,7 +90,7 @@ class AIChatbotService {
    */
   buildSystemPrompt(context, userRole) {
     let prompt = `You are an intelligent AI assistant for a College Timetable Management System. You help ${userRole}s with their queries.\n\n`;
-    
+
     prompt += `=== SYSTEM INFORMATION ===\n`;
     prompt += `Current Date & Time: ${new Date().toLocaleString()}\n`;
     prompt += `Current Day: ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()]}\n\n`;
@@ -172,7 +172,7 @@ class AIChatbotService {
       // Add complete schedule information
       if (context.timetable.schedule && context.timetable.schedule.length > 0) {
         prompt += `=== FULL TIMETABLE SCHEDULE ===\n`;
-        
+
         const scheduleByDay = {};
         context.timetable.schedule.forEach(slot => {
           const day = slot.day || 'Unknown';
@@ -207,7 +207,7 @@ class AIChatbotService {
       // Add today's schedule if available
       const today = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
       const todayClasses = context.timetable.schedule.filter(s => s.day === today);
-      
+
       if (todayClasses.length > 0) {
         prompt += `=== TODAY'S SCHEDULE (${today.toUpperCase()}) ===\n`;
         todayClasses
@@ -251,74 +251,79 @@ class AIChatbotService {
    */
   detectIntent(message) {
     const msg = message.toLowerCase();
-    
+
     // Priority-based intent detection (more specific patterns first)
-    
+
+    // Count queries (how many...)
+    if (/\b(how many|count of|total number of|number of)\b.*\b(student|teacher|faculty|professor|room|class|course)s?\b/i.test(message)) {
+      return 'countQuery';
+    }
+
     // Teacher location (highest priority for "where is" queries)
     if (/\b(where is|where's|where are|find|locate|location of|position of)\b.*\b(teacher|professor|dr\.|mr\.|ms\.|mrs\.|faculty|sir|ma'am|mam)\b/i.test(message)) {
       return 'teacherLocation';
     }
-    
+
     // Free teachers
     if (/\b(free|available|vacant)\b.*\b(teacher|faculty|professor|instructor)s?\b/i.test(message) ||
-        /\b(teacher|faculty|professor)s?\b.*\b(free|available|vacant)\b/i.test(message)) {
+      /\b(teacher|faculty|professor)s?\b.*\b(free|available|vacant)\b/i.test(message)) {
       return 'freeTeachers';
     }
-    
+
     // Room availability
     if (/\b(room|classroom|lab|laboratory|hall|auditorium)s?\b.*\b(available|free|vacant|empty)\b/i.test(message) ||
-        /\b(available|free|vacant|empty)\b.*\b(room|classroom|lab|hall)s?\b/i.test(message) ||
-        /\b(which|show|list)\b.*\b(room|classroom|lab)s?\b.*\b(free|available)\b/i.test(message)) {
+      /\b(available|free|vacant|empty)\b.*\b(room|classroom|lab|hall)s?\b/i.test(message) ||
+      /\b(which|show|list)\b.*\b(room|classroom|lab)s?\b.*\b(free|available)\b/i.test(message)) {
       return 'roomAvailability';
     }
-    
+
     // Schedule queries
     if (/\b(my|show my|display my|get my)\b.*\b(schedule|timetable|class|routine)\b/i.test(message) ||
-        /\b(schedule|timetable|routine)\b.*\b(today|tomorrow|this week)\b/i.test(message) ||
-        /\b(when|what time)\b.*\b(class|lecture|lab)\b/i.test(message)) {
+      /\b(schedule|timetable|routine)\b.*\b(today|tomorrow|this week)\b/i.test(message) ||
+      /\b(when|what time)\b.*\b(class|lecture|lab)\b/i.test(message)) {
       return 'schedule';
     }
-    
+
     // Teacher list
     if (/\b(show|list|display|all|get|view|see)\b.*\b(teacher|faculty|professor|instructor)s?\b/i.test(message) ||
-        /\b(teacher|faculty|professor)s?\b.*\b(list|all)\b/i.test(message)) {
+      /\b(teacher|faculty|professor)s?\b.*\b(list|all)\b/i.test(message)) {
       return 'teacherList';
     }
-    
+
     // Student list
     if (/\b(show|list|display|all|get|view|see)\b.*\b(student)s?\b/i.test(message) ||
-        /\b(student)s?\b.*\b(list|all)\b/i.test(message)) {
+      /\b(student)s?\b.*\b(list|all)\b/i.test(message)) {
       return 'studentList';
     }
-    
+
     // Course list
     if (/\b(show|list|display|all|get|view|see)\b.*\b(course|subject|class|module)s?\b/i.test(message) ||
-        /\b(course|subject)s?\b.*\b(list|all|available)\b/i.test(message) ||
-        /\bwhat\b.*\b(course|subject)s?\b/i.test(message)) {
+      /\b(course|subject)s?\b.*\b(list|all|available)\b/i.test(message) ||
+      /\bwhat\b.*\b(course|subject)s?\b/i.test(message)) {
       return 'courseList';
     }
-    
+
     // Timetable info
     if (/\b(timetable|time table)\b.*\b(info|information|status|details|published|active|current)\b/i.test(message) ||
-        /\b(show|display|view)\b.*\b(timetable|time table)\b/i.test(message)) {
+      /\b(show|display|view)\b.*\b(timetable|time table)\b/i.test(message)) {
       return 'timetableInfo';
     }
-    
+
     // Optimization queries
     if (/\b(optimi[sz]e|optimi[sz]ation|algorithm|genetic|ga|improve|enhancement|efficiency|performance)\b/i.test(message)) {
       return 'optimization';
     }
-    
+
     // Greeting
     if (/^(hello|hi|hey|greetings|good morning|good afternoon|good evening|namaste|hola)[\s!?,.]*$/i.test(message)) {
       return 'greeting';
     }
-    
+
     // Thanks
     if (/\b(thank you|thanks|thank|appreciate|grateful|thx)\b/i.test(message)) {
       return 'thanks';
     }
-    
+
     // Help
     if (/\b(help|assist|support|guide|how to|what can you)\b/i.test(message)) {
       return 'help';
@@ -359,10 +364,17 @@ class AIChatbotService {
 
       // Fetch students if query mentions them
       if (message.includes('student')) {
-        context.students = await Student.find({})
-          .select('name email rollNumber division program')
+        const rawStudents = await Student.find({})
+          // Select fields that actually exist in the DB (flat structure)
+          .select('firstName lastName email rollNumber division program')
           .limit(100)
           .lean();
+
+        // Map to include a 'name' property for compatibility
+        context.students = rawStudents.map(s => ({
+          ...s,
+          name: `${s.firstName || ''} ${s.lastName || ''}`.trim()
+        }));
       }
 
       // Fetch classrooms if query mentions rooms
@@ -381,9 +393,9 @@ class AIChatbotService {
       }
 
       // Fetch active timetable - use the most recently published one
-      context.timetable = await Timetable.findOne({ 
-        status: 'published', 
-        isActive: true 
+      context.timetable = await Timetable.findOne({
+        status: 'published',
+        isActive: true
       })
         .sort({ publishedAt: -1 })
         .limit(1)
@@ -403,40 +415,43 @@ class AIChatbotService {
     switch (intent) {
       case 'greeting':
         return this.handleGreeting(userRole);
-      
+
       case 'thanks':
         return "You're welcome! 😊 Feel free to ask me anything about timetables, teachers, students, or schedules.";
-      
+
       case 'help':
         return this.handleHelp(userRole);
-      
+
       case 'teacherLocation':
         return await this.handleTeacherLocation(message, context);
-      
+
       case 'freeTeachers':
         return await this.handleFreeTeachers(context);
-      
+
       case 'teacherList':
         return this.handleTeacherList(context);
-      
+
       case 'studentList':
         return this.handleStudentList(context);
-      
+
       case 'roomAvailability':
         return await this.handleRoomAvailability(context);
-      
+
       case 'schedule':
         return await this.handleSchedule(userRole, userId, context);
-      
+
       case 'courseList':
         return this.handleCourseList(context);
-      
+
       case 'optimization':
         return this.handleOptimization();
-      
+
       case 'timetableInfo':
         return await this.handleTimetableInfo(context);
-      
+
+      case 'countQuery':
+        return this.handleCountQuery(message, context);
+
       default:
         return this.handleGeneral(message, context, userRole);
     }
@@ -461,40 +476,40 @@ class AIChatbotService {
   handleHelp(userRole) {
     let response = `🤖 **AI Chatbot Help Guide**\n\n`;
     response += `I'm here to help you with timetable-related queries!\n\n`;
-    
+
     response += `**📍 Teacher Queries:**\n`;
     response += `• "Where is Dr. Smith?"\n`;
     response += `• "Find Teacher John"\n`;
     response += `• "Location of Professor Kumar"\n`;
     response += `• "Which teachers are free?"\n`;
     response += `• "Show all teachers"\n\n`;
-    
+
     response += `**🏫 Room Queries:**\n`;
     response += `• "Which rooms are available?"\n`;
     response += `• "Show free classrooms"\n`;
     response += `• "Available labs right now"\n`;
     response += `• "Room availability"\n\n`;
-    
+
     response += `**📅 Schedule Queries:**\n`;
     response += `• "My schedule"\n`;
     response += `• "Show my classes today"\n`;
     response += `• "What's my timetable?"\n`;
     response += `• "When is my next class?"\n\n`;
-    
+
     response += `**📚 Information Queries:**\n`;
     response += `• "Show all courses"\n`;
     response += `• "List students"\n`;
     response += `• "Timetable information"\n`;
     response += `• "Show optimization details"\n\n`;
-    
+
     response += `💡 **Tips:**\n`;
     response += `• Ask in natural language\n`;
     response += `• Be specific for better results\n`;
     response += `• Use teacher names for location queries\n`;
     response += `• I understand context and follow-up questions\n\n`;
-    
+
     response += `Need something specific? Just ask! 😊`;
-    
+
     return response;
   }
 
@@ -597,7 +612,7 @@ class AIChatbotService {
     try {
       // Try to extract teacher name from the message
       const nameMatch = message.match(/(?:where is|where's|find|locate|location of)\s+(?:teacher|professor|dr\.|mr\.|ms\.|faculty)?\s*([a-z\s.]+?)(?:\?|$|right|now|teaching|at)/i);
-      
+
       if (!nameMatch || !nameMatch[1]) {
         if (context.teachers && context.teachers.length > 0) {
           const teacherList = context.teachers.slice(0, 5)
@@ -609,7 +624,7 @@ class AIChatbotService {
       }
 
       const searchName = nameMatch[1].trim().toLowerCase();
-      
+
       // Find the teacher - more flexible matching
       const teacher = context.teachers?.find(t => {
         const tName = t.name.toLowerCase();
@@ -629,19 +644,19 @@ class AIChatbotService {
 
       if (!context.timetable || !context.timetable.schedule) {
         return `**${teacher.name}** 👨‍🏫\n\n` +
-               `📧 Email: ${teacher.email}\n` +
-               `🏢 Department: ${teacher.department}\n` +
-               `� Designation: ${teacher.designation || 'Faculty'}\n\n` +
-               `⚠️ No published timetable available to check current location.\n` +
-               `📍 Likely at: Faculty room, ${teacher.department} department`;
+          `📧 Email: ${teacher.email}\n` +
+          `🏢 Department: ${teacher.department}\n` +
+          `� Designation: ${teacher.designation || 'Faculty'}\n\n` +
+          `⚠️ No published timetable available to check current location.\n` +
+          `📍 Likely at: Faculty room, ${teacher.department} department`;
       }
 
       // Find current class for this teacher
       const currentClass = context.timetable.schedule.find(slot => {
         // Match by teacher ID or teacher name
-        const teacherMatch = slot.teacherId === teacher._id.toString() || 
-                            slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase());
-        
+        const teacherMatch = slot.teacherId === teacher._id.toString() ||
+          slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase());
+
         if (!teacherMatch) return false;
         if (slot.day !== currentDay) return false;
 
@@ -654,22 +669,22 @@ class AIChatbotService {
 
       if (currentClass) {
         return `📍 **${teacher.name}** is currently teaching:\n\n` +
-               `🏫 **Room:** ${currentClass.classroomName || 'TBA'}\n` +
-               `📚 **Course:** ${currentClass.courseName || currentClass.courseCode || 'N/A'}\n` +
-               `📖 **Type:** ${currentClass.sessionType || 'Lecture'}\n` +
-               `⏰ **Time:** ${currentClass.startTime} - ${currentClass.endTime}\n` +
-               `👥 **Students:** ${currentClass.studentCount || 'N/A'}\n\n` +
-               `✅ You can find them there right now!`;
+          `🏫 **Room:** ${currentClass.classroomName || 'TBA'}\n` +
+          `📚 **Course:** ${currentClass.courseName || currentClass.courseCode || 'N/A'}\n` +
+          `📖 **Type:** ${currentClass.sessionType || 'Lecture'}\n` +
+          `⏰ **Time:** ${currentClass.startTime} - ${currentClass.endTime}\n` +
+          `👥 **Students:** ${currentClass.studentCount || 'N/A'}\n\n` +
+          `✅ You can find them there right now!`;
       }
 
       // Find next class
       const upcomingClasses = context.timetable.schedule
         .filter(slot => {
-          const teacherMatch = slot.teacherId === teacher._id.toString() || 
-                              slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase());
+          const teacherMatch = slot.teacherId === teacher._id.toString() ||
+            slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase());
           if (!teacherMatch) return false;
           if (slot.day !== currentDay) return false;
-          
+
           const slotStart = this.timeToMinutes(slot.startTime);
           const current = this.timeToMinutes(currentTime);
           return slotStart > current;
@@ -680,24 +695,24 @@ class AIChatbotService {
 
       if (nextClass) {
         return `**${teacher.name}** 👨‍🏫\n\n` +
-               `🏢 Department: ${teacher.department}\n` +
-               `📧 Email: ${teacher.email}\n` +
-               `💼 ${teacher.designation || 'Faculty'}\n\n` +
-               `⏰ **Currently:** Not teaching (Free time)\n` +
-               `📍 **Likely at:** Faculty room / Office\n\n` +
-               `� **Next Class:**\n` +
-               `   🏫 Room: ${nextClass.classroomName || 'TBA'}\n` +
-               `   ⏰ Time: ${nextClass.startTime} - ${nextClass.endTime}\n` +
-               `   📚 Course: ${nextClass.courseName || nextClass.courseCode}`;
+          `🏢 Department: ${teacher.department}\n` +
+          `📧 Email: ${teacher.email}\n` +
+          `💼 ${teacher.designation || 'Faculty'}\n\n` +
+          `⏰ **Currently:** Not teaching (Free time)\n` +
+          `📍 **Likely at:** Faculty room / Office\n\n` +
+          `� **Next Class:**\n` +
+          `   🏫 Room: ${nextClass.classroomName || 'TBA'}\n` +
+          `   ⏰ Time: ${nextClass.startTime} - ${nextClass.endTime}\n` +
+          `   📚 Course: ${nextClass.courseName || nextClass.courseCode}`;
       }
 
       return `**${teacher.name}** 👨‍🏫\n\n` +
-             `🏢 Department: ${teacher.department}\n` +
-             `📧 Email: ${teacher.email}\n` +
-             `💼 ${teacher.designation || 'Faculty'}\n\n` +
-             `✅ **Currently:** Not teaching today\n` +
-             `📍 **Likely at:** Faculty room / Office, ${teacher.department} department\n\n` +
-             `No more classes scheduled for today.`;
+        `🏢 Department: ${teacher.department}\n` +
+        `📧 Email: ${teacher.email}\n` +
+        `💼 ${teacher.designation || 'Faculty'}\n\n` +
+        `✅ **Currently:** Not teaching today\n` +
+        `📍 **Likely at:** Faculty room / Office, ${teacher.department} department\n\n` +
+        `No more classes scheduled for today.`;
 
     } catch (error) {
       console.error('Error finding teacher location:', error);
@@ -714,7 +729,7 @@ class AIChatbotService {
     }
 
     let response = `👨‍🏫 **All Faculty Members** (${context.teachers.length} total):\n\n`;
-    
+
     // Group by department
     const byDepartment = {};
     context.teachers.forEach(teacher => {
@@ -754,7 +769,7 @@ class AIChatbotService {
     }
 
     let response = `👨‍🎓 **Student Directory** (${context.students.length} total):\n\n`;
-    
+
     // Group by division
     const byDivision = {};
     context.students.forEach(student => {
@@ -804,7 +819,7 @@ class AIChatbotService {
 
     const occupiedRooms = new Set();
     const currentClasses = [];
-    
+
     context.timetable.schedule.forEach(slot => {
       if (slot.day === currentDay) {
         const slotStart = this.timeToMinutes(slot.startTime);
@@ -823,7 +838,7 @@ class AIChatbotService {
       }
     });
 
-    const availableRooms = context.classrooms.filter(room => 
+    const availableRooms = context.classrooms.filter(room =>
       !occupiedRooms.has(room._id.toString())
     );
 
@@ -881,7 +896,7 @@ class AIChatbotService {
       const currentDay = days[now.getDay()];
 
       const todayClasses = context.timetable.schedule
-        .filter(slot => 
+        .filter(slot =>
           slot.day === currentDay &&
           (slot.division === student.division || slot.batch === student.batch)
         )
@@ -914,10 +929,10 @@ class AIChatbotService {
       const currentDay = days[now.getDay()];
 
       const todayClasses = context.timetable.schedule
-        .filter(slot => 
+        .filter(slot =>
           slot.day === currentDay &&
-          (slot.teacherId === teacher._id.toString() || 
-           slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase()))
+          (slot.teacherId === teacher._id.toString() ||
+            slot.teacherName?.toLowerCase().includes(teacher.name.toLowerCase()))
         )
         .sort((a, b) => this.timeToMinutes(a.startTime) - this.timeToMinutes(b.startTime));
 
@@ -949,7 +964,7 @@ class AIChatbotService {
     }
 
     let response = `📚 **Course Catalog** (${context.courses.length} total):\n\n`;
-    
+
     // Group by department
     const byDepartment = {};
     context.courses.forEach(course => {
@@ -980,26 +995,26 @@ class AIChatbotService {
    */
   handleOptimization() {
     return `🎯 **Timetable Optimization Guide:**\n\n` +
-           `**1. Genetic Algorithm** 🧬\n` +
-           `   • Evolves schedules over generations\n` +
-           `   • Best for: Complex constraints\n` +
-           `   • Advantages: Global optimization\n\n` +
-           `**2. Simulated Annealing** 🌡️\n` +
-           `   • Gradually refines solutions\n` +
-           `   • Best for: Quick optimization\n` +
-           `   • Advantages: Escapes local optima\n\n` +
-           `**3. Greedy Algorithm** ⚡\n` +
-           `   • Makes optimal choices at each step\n` +
-           `   • Best for: Fast generation\n` +
-           `   • Advantages: Quick execution\n\n` +
-           `**4. Hybrid Approach** 🔄\n` +
-           `   • Combines multiple algorithms\n` +
-           `   • Best for: Maximum quality\n` +
-           `   • Advantages: Best of all methods\n\n` +
-           `💡 **Tips:**\n` +
-           `• Update teacher availability\n` +
-           `• Define clear constraints\n` +
-           `• Use larger populations for Genetic Algorithm`;
+      `**1. Genetic Algorithm** 🧬\n` +
+      `   • Evolves schedules over generations\n` +
+      `   • Best for: Complex constraints\n` +
+      `   • Advantages: Global optimization\n\n` +
+      `**2. Simulated Annealing** 🌡️\n` +
+      `   • Gradually refines solutions\n` +
+      `   • Best for: Quick optimization\n` +
+      `   • Advantages: Escapes local optima\n\n` +
+      `**3. Greedy Algorithm** ⚡\n` +
+      `   • Makes optimal choices at each step\n` +
+      `   • Best for: Fast generation\n` +
+      `   • Advantages: Quick execution\n\n` +
+      `**4. Hybrid Approach** 🔄\n` +
+      `   • Combines multiple algorithms\n` +
+      `   • Best for: Maximum quality\n` +
+      `   • Advantages: Best of all methods\n\n` +
+      `💡 **Tips:**\n` +
+      `• Update teacher availability\n` +
+      `• Define clear constraints\n` +
+      `• Use larger populations for Genetic Algorithm`;
   }
 
   /**
@@ -1011,17 +1026,17 @@ class AIChatbotService {
     }
 
     const tt = context.timetable;
-    
+
     // Calculate statistics
     const dayStats = {};
     const roomUsage = new Set();
     const teacherCount = new Set();
     const courseCount = new Set();
-    
+
     tt.schedule.forEach(slot => {
       // Day-wise count
       dayStats[slot.day] = (dayStats[slot.day] || 0) + 1;
-      
+
       // Unique counts
       if (slot.classroomId) roomUsage.add(slot.classroomId.toString());
       if (slot.teacherId) teacherCount.add(slot.teacherId.toString());
@@ -1029,7 +1044,7 @@ class AIChatbotService {
     });
 
     let response = `� **Published Timetable Information**\n\n`;
-    
+
     response += `**📋 Basic Details:**\n`;
     response += `• Name: ${tt.name || 'Untitled'}\n`;
     response += `• Semester: ${tt.semester || 'N/A'}\n`;
@@ -1075,29 +1090,29 @@ class AIChatbotService {
    */
   handleGeneral(message, context, userRole) {
     return `🤖 I'm here to help! You can ask me about:\n\n` +
-           `**👨‍🏫 Teachers:**\n` +
-           `  • "Show all teachers"\n` +
-           `  • "Where is Dr. Smith?"\n` +
-           `  • "Which teachers are free?"\n\n` +
-           `**👨‍🎓 Students:**\n` +
-           `  • "Show all students"\n` +
-           `  • "List students by division"\n\n` +
-           `**🏫 Rooms:**\n` +
-           `  • "Which rooms are free?"\n` +
-           `  • "Available classrooms"\n` +
-           `  • "Show labs"\n\n` +
-           `**📅 Schedule:**\n` +
-           `  • "My schedule"\n` +
-           `  • "Today's classes"\n` +
-           `  • "Show my timetable"\n\n` +
-           `**📚 Courses:**\n` +
-           `  • "List all courses"\n` +
-           `  • "Show subjects"\n\n` +
-           `**📊 Information:**\n` +
-           `  • "Timetable information"\n` +
-           `  • "Show optimization details"\n` +
-           `  • "Help"\n\n` +
-           `What would you like to know? 😊`;
+      `**👨‍🏫 Teachers:**\n` +
+      `  • "Show all teachers"\n` +
+      `  • "Where is Dr. Smith?"\n` +
+      `  • "Which teachers are free?"\n\n` +
+      `**👨‍🎓 Students:**\n` +
+      `  • "Show all students"\n` +
+      `  • "List students by division"\n\n` +
+      `**🏫 Rooms:**\n` +
+      `  • "Which rooms are free?"\n` +
+      `  • "Available classrooms"\n` +
+      `  • "Show labs"\n\n` +
+      `**📅 Schedule:**\n` +
+      `  • "My schedule"\n` +
+      `  • "Today's classes"\n` +
+      `  • "Show my timetable"\n\n` +
+      `**📚 Courses:**\n` +
+      `  • "List all courses"\n` +
+      `  • "Show subjects"\n\n` +
+      `**📊 Information:**\n` +
+      `  • "Timetable information"\n` +
+      `  • "Show optimization details"\n` +
+      `  • "Help"\n\n` +
+      `What would you like to know? 😊`;
   }
 
   /**
@@ -1106,6 +1121,31 @@ class AIChatbotService {
   timeToMinutes(timeStr) {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+
+  /**
+   * Handle count queries
+   */
+  handleCountQuery(message, context) {
+    const msg = message.toLowerCase();
+
+    if (msg.includes('student')) {
+      return `👨‍🎓 **Students:** There are **${context.counts?.students || 0}** registered students in the system.`;
+    }
+
+    if (msg.includes('teacher') || msg.includes('faculty') || msg.includes('professor')) {
+      return `👨‍🏫 **Teachers:** There are **${context.counts?.teachers || 0}** faculty members in the system.`;
+    }
+
+    if (msg.includes('room') || msg.includes('class') || msg.includes('lab')) {
+      return `🏫 **Classrooms:** There are **${context.counts?.classrooms || 0}** rooms/labs available.`;
+    }
+
+    if (msg.includes('course') || msg.includes('subject')) {
+      return `📚 **Courses:** There are **${context.counts?.courses || 0}** courses offered.`;
+    }
+
+    return "I can count students, teachers, classrooms, and courses. What would you like to count?";
   }
 }
 
