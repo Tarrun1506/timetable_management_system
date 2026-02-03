@@ -413,7 +413,7 @@ const ClassroomsData = () => {
                         <td key={`${day}-${slot}`} className="px-2 py-2 text-center">
                           <input
                             type="checkbox"
-                            checked={roomForm.availability[day]?.includes(slot) || false}
+                            checked={(Array.isArray(roomForm.availability[day]) && roomForm.availability[day].includes(slot)) || false}
                             onChange={() => handleAvailabilityToggle(day, slot)}
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />

@@ -1256,7 +1256,7 @@ router.get('/courses', [
       });
     }
 
-    const { department, program, year, semester, teacher, isActive, page = 1, limit = 50 } = req.query;
+    const { department, program, year, semester, teacher, isActive, page = 1, limit = 100 } = req.query;
 
     // Build query
     const query = {};
@@ -1387,18 +1387,76 @@ router.put('/courses/:id', [
       });
     }
 
-    const course = await Course.findOneAndUpdate(
-      { id: req.params.id },
-      req.body,
-      { new: true, runValidators: true }
-    );
+    // Try to find by id field first, then by MongoDB _id
+    const mongoose = require('mongoose');
+    let query = { id: req.params.id };
 
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+    // If the id looks like a MongoDB ObjectId, also try matching by _id
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      query = { $or: [{ id: req.params.id }, { _id: req.params.id }] };
     }
+
+    // Map frontend field names to backend model field names
+    const updateData = {};
+    const allowedFields = [
+      'name', 'code', 'department', 'program', 'year', 'semester',
+      'credits', 'enrolledStudents', 'assignedTeachers', 'totalHoursPerWeek',
+      'hoursPerWeek', 'status'
+    ];
+
+    // Only pick fields that are actually in the request body
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        updateData[key] = req.body[key];
+      }
+    });
+
+    // Handle hoursPerWeek mapping
+    if (updateData.hoursPerWeek !== undefined && updateData.totalHoursPerWeek === undefined) {
+      updateData.totalHoursPerWeek = updateData.hoursPerWeek;
+      delete updateData.hoursPerWeek;
+    }
+
+    // Convert numeric strings to numbers, and remove empty strings for numeric fields
+    ['year', 'semester', 'credits', 'enrolledStudents', 'totalHoursPerWeek'].forEach(field => {
+      if (updateData[field] !== undefined) {
+        if (updateData[field] === '' || updateData[field] === null) {
+          delete updateData[field];
+        } else {
+          const val = parseInt(updateData[field]);
+          if (!isNaN(val)) {
+            updateData[field] = val;
+          } else {
+            delete updateData[field];
+          }
+        }
+      }
+    });
+
+    // Map status to isActive
+    if (updateData.status !== undefined) {
+      updateData.isActive = updateData.status === 'Active';
+      delete updateData.status;
+    }
+
+    console.log('UPDATING COURSE:', { query, updateData });
+
+    // If code is being changed, check for duplicates
+    if (updateData.code) {
+      const existingCourseCode = await Course.findOne({
+        code: updateData.code,
+        _id: { $ne: course._id }
+      });
+      if (existingCourseCode) {
+        return res.status(409).json({
+          success: false,
+          message: 'A course with this code already exists'
+        });
+      }
+    }
+
+    Object.assign(course, updateData);
+    await course.save();
 
     logger.info('Course updated', { courseId: course.id, updatedBy: req.user.userId });
 
@@ -1409,10 +1467,23 @@ router.put('/courses/:id', [
     });
 
   } catch (error) {
+    console.error('COURSE UPDATE ERROR:', error);
     logger.error('Error updating course:', error);
+
+    // Handle duplicate key error from MongoDB
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'A course with this code or ID already exists',
+        error: error.message
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Internal server error while updating course'
+      message: 'Internal server error while updating course',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -1848,7 +1919,7 @@ router.get('/students', [
       division,
       status = 'Active',
       page = 1,
-      limit = 50
+      limit = 100
     } = req.query;
 
     // Build filter object
@@ -2834,10 +2905,10 @@ router.delete('/students/:id', async (req, res) => {
     }
 
     // Delete associated user account first
-    const deletedUser = await User.findOneAndDelete({ email: student.personalInfo.email });
+    const deletedUser = await User.findOneAndDelete({ email: student.email });
 
     if (deletedUser) {
-      logger.info(`User account deleted for student: ${student.personalInfo.email}`);
+      logger.info(`User account deleted for student: ${student.email}`);
     }
 
     // Delete student record
@@ -2956,7 +3027,7 @@ router.post('/students/bulk-delete', [
  * @access  Private
  */
 router.get('/programs', [
-  query('school').optional().trim(),
+  query('department').optional().trim(),
   query('type').optional().isIn(['Bachelor', 'Master', 'Doctorate', 'Diploma', 'Certificate']),
   query('status').optional().isIn(['Active', 'Inactive', 'Archived']),
   query('page').optional().isInt({ min: 1 }),
@@ -2971,11 +3042,11 @@ router.get('/programs', [
       });
     }
 
-    const { school, type, status, page = 1, limit = 50 } = req.query;
+    const { department, type, status, page = 1, limit = 100 } = req.query;
 
     // Build query
     const query = {};
-    if (school) query.school = school;
+    if (department) query.department = department;
     if (type) query.type = type;
     if (status) query.status = status;
     else query.status = 'Active'; // Default to active programs
@@ -2985,7 +3056,7 @@ router.get('/programs', [
     const programs = await Program.find(query)
       .skip(skip)
       .limit(parseInt(limit))
-      .sort({ school: 1, name: 1 });
+      .sort({ department: 1, name: 1 });
 
     const total = await Program.countDocuments(query);
 
@@ -3048,7 +3119,7 @@ router.post('/programs', [
   body('id').trim().notEmpty().withMessage('Program ID is required'),
   body('name').trim().isLength({ min: 2, max: 150 }).withMessage('Name must be between 2 and 150 characters'),
   body('code').trim().notEmpty().withMessage('Program code is required'),
-  body('school').trim().notEmpty().withMessage('School is required'),
+  body('department').trim().notEmpty().withMessage('Department is required'),
   body('type').isIn(['Bachelor', 'Master', 'Doctorate', 'Diploma', 'Certificate']).withMessage('Invalid program type'),
   body('duration').isInt({ min: 1, max: 8 }).withMessage('Duration must be between 1 and 8 years'),
   body('totalSemesters').isInt({ min: 1, max: 16 }).withMessage('Total semesters must be between 1 and 16')
@@ -3108,7 +3179,7 @@ router.post('/programs', [
 router.put('/programs/:id', [
   body('name').optional().trim().isLength({ min: 2, max: 150 }),
   body('code').optional().trim().notEmpty(),
-  body('school').optional().trim().notEmpty(),
+  body('department').optional().trim().notEmpty(),
   body('type').optional().isIn(['Bachelor', 'Master', 'Doctorate', 'Diploma', 'Certificate']),
   body('duration').optional().isInt({ min: 1, max: 8 }),
   body('totalSemesters').optional().isInt({ min: 1, max: 16 }),
@@ -3209,7 +3280,7 @@ router.get('/divisions', [
       });
     }
 
-    const { program, year, semester, status, page = 1, limit = 50 } = req.query;
+    const { program, year, semester, status, page = 1, limit = 100 } = req.query;
 
     // Build query
     const query = {};

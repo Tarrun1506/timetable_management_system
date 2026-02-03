@@ -51,6 +51,17 @@ class GeneticAlgorithm {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Generate all possible time slots
    */
   generateTimeSlots() {
@@ -290,14 +301,14 @@ class GeneticAlgorithm {
         chromosome.push({
           sessionId: session.id,
           timeSlotId: randomAssignment.timeSlotId,
-          teacherId: randomAssignment.teacherId,
-          classroomId: randomAssignment.classroomId
+          teacherId: this.normalizeId(randomAssignment.teacherId),
+          classroomId: this.normalizeId(randomAssignment.classroomId)
         });
       } else {
         // Validate we have a real teacher (not 'unknown')
-        const fallbackTeacherId = session.assignedTeachers[0]?.teacherId ||
+        const fallbackTeacherId = this.normalizeId(session.assignedTeachers[0]?.teacherId ||
           session.assignedTeachers[0]?._id ||
-          String(session.assignedTeachers[0]);
+          session.assignedTeachers[0]);
 
         if (!fallbackTeacherId || fallbackTeacherId === 'unknown' || fallbackTeacherId === 'undefined' || fallbackTeacherId === '[object Object]') {
           logger.error(`GA: Cannot create fallback for session ${session.courseCode} ${session.sessionType} - invalid teacher ID`);
@@ -341,7 +352,7 @@ class GeneticAlgorithm {
 
     for (const timeSlot of this.timeSlots) {
       for (const teacher of session.assignedTeachers) {
-        const teacherId = teacher.teacherId || teacher._id || String(teacher);
+        const teacherId = this.normalizeId(teacher.teacherId || teacher._id || teacher);
         const teacherObj = this.teachers.find(t =>
           (t.id && t.id === teacherId) ||
           (t._id && String(t._id) === teacherId)
@@ -774,16 +785,16 @@ class GeneticAlgorithm {
       return {
         sessionId,
         timeSlotId: randomAssignment.timeSlotId,
-        teacherId: randomAssignment.teacherId,
-        classroomId: randomAssignment.classroomId
+        teacherId: this.normalizeId(randomAssignment.teacherId),
+        classroomId: this.normalizeId(randomAssignment.classroomId)
       };
     }
 
     return {
       sessionId,
       timeSlotId: Math.floor(Math.random() * this.timeSlots.length),
-      teacherId: session.assignedTeachers[0]?.teacherId || 'unknown',
-      classroomId: this.classrooms[0]?.id || 'unknown'
+      teacherId: this.normalizeId(session.assignedTeachers[0]?.teacherId || session.assignedTeachers[0]?._id || session.assignedTeachers[0]),
+      classroomId: this.normalizeId(this.classrooms[0]?.id || this.classrooms[0]?._id || this.classrooms[0])
     };
   }
 
@@ -843,8 +854,10 @@ class GeneticAlgorithm {
     for (const gene of individual.chromosome) {
       const session = this.sessions.find(s => s.id === gene.sessionId);
       const timeSlot = this.timeSlots[gene.timeSlotId];
-      const teacher = this.teachers.find(t => t.id === gene.teacherId);
-      const classroom = this.classrooms.find(c => c.id === gene.classroomId);
+      const teacherId = this.normalizeId(gene.teacherId);
+      const classroomId = this.normalizeId(gene.classroomId);
+      const teacher = this.teachers.find(t => t.id === teacherId || String(t._id) === teacherId);
+      const classroom = this.classrooms.find(c => c.id === classroomId || String(c._id) === classroomId);
 
       if (session && timeSlot) {
         schedule.push({

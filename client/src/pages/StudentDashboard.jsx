@@ -298,27 +298,27 @@ const StudentDashboard = () => {
               <div className="space-y-3">
                 {day.classes.map((classItem, classIndex) => (
                   <div key={classIndex} className={`p-3 rounded-lg border transition-colors duration-300 ${classItem.type === 'Theory'
-                      ? (isDarkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50 border-blue-200')
-                      : classItem.type === 'Practical'
-                        ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
-                        : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
+                    ? (isDarkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50 border-blue-200')
+                    : classItem.type === 'Practical'
+                      ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
+                      : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
                     }`}>
                     <div className="flex items-center justify-between mb-2">
                       <span className={`text-xs font-medium ${classItem.type === 'Theory'
-                          ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
-                          : classItem.type === 'Practical'
-                            ? (isDarkMode ? 'text-green-300' : 'text-green-700')
-                            : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
+                        ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
+                        : classItem.type === 'Practical'
+                          ? (isDarkMode ? 'text-green-300' : 'text-green-700')
+                          : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
                         }`}>{classItem.time}</span>
                       <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{classItem.room}</span>
                     </div>
                     <h5 className={`font-medium text-sm mb-1 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{classItem.subject}</h5>
                     <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{classItem.teacher}</p>
                     <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded ${classItem.type === 'Theory'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
-                        : classItem.type === 'Practical'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
+                      : classItem.type === 'Practical'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
                       }`}>
                       {classItem.type}
                     </span>
@@ -387,10 +387,10 @@ const StudentDashboard = () => {
                   <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.grade === 'A' || course.grade === 'A-' ?
-                    (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800') :
-                    course.grade === 'B+' || course.grade === 'B' ?
-                      (isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-800') :
-                      (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-800')
+                  (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800') :
+                  course.grade === 'B+' || course.grade === 'B' ?
+                    (isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-800') :
+                    (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-800')
                   }`}>
                   {course.grade}
                 </span>
@@ -448,14 +448,14 @@ const StudentDashboard = () => {
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4 flex-1">
                   <div className={`p-3 rounded-lg ${query.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                      query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
-                        query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
-                          'bg-blue-100 dark:bg-blue-900/30'
+                    query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
+                      query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
+                        'bg-blue-100 dark:bg-blue-900/30'
                     }`}>
                     <MessageSquare className={`w-5 h-5 ${query.status === 'pending' ? 'text-yellow-600' :
-                        query.status === 'approved' ? 'text-green-600' :
-                          query.status === 'rejected' ? 'text-red-600' :
-                            'text-blue-600'
+                      query.status === 'approved' ? 'text-green-600' :
+                        query.status === 'rejected' ? 'text-red-600' :
+                          'text-blue-600'
                       }`} />
                   </div>
                   <div className="flex-1">
@@ -477,9 +477,9 @@ const StudentDashboard = () => {
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${query.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                    query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                      query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                  query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                    query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                   }`}>
                   {query.status}
                 </span>
@@ -568,7 +568,7 @@ const StudentDashboard = () => {
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${course.grade.startsWith('A') ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                     }`}>
                     {course.grade}
                   </span>
@@ -635,8 +635,8 @@ const StudentDashboard = () => {
             <div key={notification.id} className={`rounded-xl border p-4 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-start space-x-3">
                 <div className={`w-2 h-2 rounded-full mt-2 ${notification.type === 'warning' ? 'bg-yellow-500' :
-                    notification.type === 'success' ? 'bg-green-500' :
-                      'bg-blue-500'
+                  notification.type === 'success' ? 'bg-green-500' :
+                    'bg-blue-500'
                   }`} />
                 <div className="flex-1">
                   <p className={`text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{notification.message}</p>
@@ -820,10 +820,10 @@ const StudentDashboard = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center space-x-2 px-3 py-1.5 rounded-md transition-all duration-300 text-sm ${activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                        : isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                      : isDarkMode
+                        ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                       }`}
                   >
                     <tab.icon className="w-4 h-4" />
@@ -872,8 +872,8 @@ const StudentDashboard = () => {
                   value={newQuery.timetableId}
                   onChange={(e) => setNewQuery({ ...newQuery, timetableId: e.target.value })}
                   className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-900'
+                    ? 'bg-gray-700 border-gray-600 text-gray-200'
+                    : 'bg-white border-gray-300 text-gray-900'
                     }`}
                 >
                   <option value="">-- Select a timetable (if applicable) --</option>
@@ -897,8 +897,8 @@ const StudentDashboard = () => {
                   value={newQuery.subject}
                   onChange={(e) => setNewQuery({ ...newQuery, subject: e.target.value })}
                   className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-900'
+                    ? 'bg-gray-700 border-gray-600 text-gray-200'
+                    : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   placeholder="e.g., Class timing conflict on Monday"
                 />
@@ -913,8 +913,8 @@ const StudentDashboard = () => {
                   onChange={(e) => setNewQuery({ ...newQuery, description: e.target.value })}
                   rows={4}
                   className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-900'
+                    ? 'bg-gray-700 border-gray-600 text-gray-200'
+                    : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   placeholder="Describe your query in detail (e.g., Both CS101 and MATH201 scheduled at 10 AM on Monday)"
                 />
@@ -929,8 +929,8 @@ const StudentDashboard = () => {
                     value={newQuery.type}
                     onChange={(e) => setNewQuery({ ...newQuery, type: e.target.value })}
                     className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-gray-200'
-                        : 'bg-white border-gray-300 text-gray-900'
+                      ? 'bg-gray-700 border-gray-600 text-gray-200'
+                      : 'bg-white border-gray-300 text-gray-900'
                       }`}
                   >
                     <option value="timetable-conflict">Timetable Conflict</option>
@@ -948,8 +948,8 @@ const StudentDashboard = () => {
                     value={newQuery.priority}
                     onChange={(e) => setNewQuery({ ...newQuery, priority: e.target.value })}
                     className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-gray-200'
-                        : 'bg-white border-gray-300 text-gray-900'
+                      ? 'bg-gray-700 border-gray-600 text-gray-200'
+                      : 'bg-white border-gray-300 text-gray-900'
                       }`}
                   >
                     <option value="low">Low</option>
@@ -975,8 +975,8 @@ const StudentDashboard = () => {
                     setNewQuery({ subject: '', description: '', type: 'timetable-conflict', priority: 'medium', timetableId: '' });
                   }}
                   className={`px-4 py-2 rounded-lg ${isDarkMode
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                 >
                   Cancel

@@ -29,6 +29,17 @@ class GreedyScheduler {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Generate time slots
    */
   generateTimeSlots() {
@@ -80,9 +91,10 @@ class GreedyScheduler {
    * Check if teacher is available at given time
    */
   isTeacherAvailable(teacherId, day, startTime, endTime) {
-    const teacher = this.teachers.find(t => t.id === teacherId || String(t._id) === teacherId);
+    const normalizedTeacherId = this.normalizeId(teacherId);
+    const teacher = this.teachers.find(t => t.id === normalizedTeacherId || String(t._id) === normalizedTeacherId);
     if (!teacher) {
-      logger.warn(`[GREEDY] Teacher ${teacherId} not found`);
+      logger.warn(`[GREEDY] Teacher ${normalizedTeacherId} not found`);
       return false;
     }
 
@@ -93,7 +105,7 @@ class GreedyScheduler {
     }
 
     // Check if teacher already has a class at this time
-    const teacherSlots = this.teacherSchedule.get(teacherId) || [];
+    const teacherSlots = this.teacherSchedule.get(normalizedTeacherId) || [];
     const hasConflict = teacherSlots.some(slot =>
       slot.day === day && this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)
     );
@@ -114,8 +126,9 @@ class GreedyScheduler {
    * Check if classroom is available at given time
    */
   isClassroomAvailable(classroomId, day, startTime, endTime) {
-    const classroom = this.classrooms.find(c => c.id === classroomId || String(c._id) === classroomId);
-    const classroomSlots = this.classroomSchedule.get(classroomId) || [];
+    const normalizedClassroomId = this.normalizeId(classroomId);
+    const classroom = this.classrooms.find(c => c.id === normalizedClassroomId || String(c._id) === normalizedClassroomId);
+    const classroomSlots = this.classroomSchedule.get(normalizedClassroomId) || [];
     const hasConflict = classroomSlots.some(slot =>
       slot.day === day && this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)
     );
@@ -242,7 +255,8 @@ class GreedyScheduler {
    * Get teacher information
    */
   getTeacherInfo(teacherId) {
-    return this.teachers.find(t => t.id === teacherId || String(t._id) === teacherId);
+    const normalizedTeacherId = this.normalizeId(teacherId);
+    return this.teachers.find(t => t.id === normalizedTeacherId || String(t._id) === normalizedTeacherId);
   }
 
   /**
@@ -315,11 +329,11 @@ class GreedyScheduler {
           continue;
         }
 
-        const teacherId = assignedTeacher.teacherId;
+        const teacherId = this.normalizeId(assignedTeacher.teacherId);
         const teacher = this.getTeacherInfo(teacherId);
 
         if (!teacher) {
-          logger.warn(`[GREEDY] Teacher ${teacherId} not found`);
+          logger.warn(`[GREEDY] Teacher ${teacherId || assignedTeacher.teacherId} not found`);
           continue;
         }
 

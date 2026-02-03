@@ -46,7 +46,7 @@ const ProgramsData = () => {
   const [programForm, setProgramForm] = useState({
     name: '',
     code: '',
-    school: '',
+    department: '',
     type: '',
     duration: '',
     totalSemesters: '',
@@ -279,7 +279,7 @@ const ProgramsData = () => {
     setProgramForm({
       name: '',
       code: '',
-      school: '',
+      department: '',
       type: '',
       duration: '',
       totalSemesters: '',
@@ -310,8 +310,8 @@ const ProgramsData = () => {
       };
 
       // Validate required fields
-      if (!programData.name || !programData.code || !programData.school || !programData.type) {
-        alert('Please fill in all required fields: Name, Code, School, and Type');
+      if (!programData.name || !programData.code || !programData.department || !programData.type) {
+        alert('Please fill in all required fields: Name, Code, Department, and Type');
         setLoading(false);
         return;
       }
@@ -490,15 +490,15 @@ const ProgramsData = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">School/Faculty</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
               <select
-                value={programForm.school}
-                onChange={(e) => setProgramForm({ ...programForm, school: e.target.value })}
+                value={programForm.department}
+                onChange={(e) => setProgramForm({ ...programForm, department: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="">Select School</option>
-                {schools.map(school => (
-                  <option key={school} value={school}>{school}</option>
+                <option value="">Select Department</option>
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
             </div>
@@ -570,11 +570,12 @@ const ProgramsData = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Add New Course
+            {editingItem ? 'Edit Course' : 'Add New Course'}
           </h3>
           <button
             onClick={() => {
               setShowAddForm(false);
+              setEditingItem(null);
               resetCourseForm();
             }}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -613,8 +614,8 @@ const ProgramsData = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Department</option>
-                {schools.map(school => (
-                  <option key={school} value={school}>{school}</option>
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
             </div>
@@ -737,6 +738,7 @@ const ProgramsData = () => {
           <button
             onClick={() => {
               setShowAddForm(false);
+              setEditingItem(null);
               resetCourseForm();
             }}
             className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
@@ -744,11 +746,11 @@ const ProgramsData = () => {
             Cancel
           </button>
           <button
-            onClick={handleAddCourse}
+            onClick={editingItem ? handleUpdateCourse : handleAddCourse}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
           >
             <Save className="w-4 h-4" />
-            <span>Add Course</span>
+            <span>{editingItem ? 'Update Course' : 'Add Course'}</span>
           </button>
         </div>
       </div>
@@ -957,9 +959,9 @@ const ProgramsData = () => {
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Schools</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Departments</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {new Set(programs.map(p => p.school)).size}
+                      {new Set(programs.map(p => p.department)).size}
                     </p>
                   </div>
                   <School className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -1038,7 +1040,7 @@ const ProgramsData = () => {
                             Program Details
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            School
+                            Department
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Duration
@@ -1056,7 +1058,7 @@ const ProgramsData = () => {
                       </thead>
                       <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {programs.map((program) => (
-                          <tr key={program.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <tr key={program._id || program.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <div className="text-sm font-medium text-gray-900 dark:text-white">{program.name}</div>
@@ -1064,7 +1066,7 @@ const ProgramsData = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {program.school}
+                              {program.department}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                               {program.duration} Years ({program.totalSemesters} Semesters)
@@ -1187,7 +1189,7 @@ const ProgramsData = () => {
                         </thead>
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                           {courses.map((course) => (
-                            <tr key={course.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <tr key={course._id || course.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div>
                                   <div className="text-sm font-medium text-gray-900 dark:text-white">{course.name}</div>

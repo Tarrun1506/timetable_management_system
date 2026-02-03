@@ -287,17 +287,17 @@ const TeacherDashboard = () => {
               <div className="space-y-3">
                 {day.classes.map((classItem, classIndex) => (
                   <div key={classIndex} className={`p-3 rounded-lg border ${classItem.type === 'Theory'
-                      ? (isDarkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50 border-blue-200')
-                      : classItem.type === 'Practical'
-                        ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
-                        : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
+                    ? (isDarkMode ? 'bg-blue-900/30 border-blue-700/50' : 'bg-blue-50 border-blue-200')
+                    : classItem.type === 'Practical'
+                      ? (isDarkMode ? 'bg-green-900/30 border-green-700/50' : 'bg-green-50 border-green-200')
+                      : (isDarkMode ? 'bg-purple-900/30 border-purple-700/50' : 'bg-purple-50 border-purple-200')
                     }`}>
                     <div className="flex items-center justify-between mb-2">
                       <span className={`text-xs font-medium ${classItem.type === 'Theory'
-                          ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
-                          : classItem.type === 'Practical'
-                            ? (isDarkMode ? 'text-green-300' : 'text-green-700')
-                            : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
+                        ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
+                        : classItem.type === 'Practical'
+                          ? (isDarkMode ? 'text-green-300' : 'text-green-700')
+                          : (isDarkMode ? 'text-purple-300' : 'text-purple-700')
                         }`}>{classItem.time}</span>
                       <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{classItem.room}</span>
                     </div>
@@ -309,10 +309,10 @@ const TeacherDashboard = () => {
                       </p>
                     )}
                     <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded ${classItem.type === 'Theory'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
-                        : classItem.type === 'Practical'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
+                      : classItem.type === 'Practical'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
                       }`}>
                       {classItem.type}
                     </span>
@@ -401,14 +401,14 @@ const TeacherDashboard = () => {
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4 flex-1">
                   <div className={`p-3 rounded-lg ${query.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                      query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
-                        query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
-                          'bg-blue-100 dark:bg-blue-900/30'
+                    query.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30' :
+                      query.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' :
+                        'bg-blue-100 dark:bg-blue-900/30'
                     }`}>
                     <MessageSquare className={`w-5 h-5 ${query.status === 'pending' ? 'text-yellow-600' :
-                        query.status === 'approved' ? 'text-green-600' :
-                          query.status === 'rejected' ? 'text-red-600' :
-                            'text-blue-600'
+                      query.status === 'approved' ? 'text-green-600' :
+                        query.status === 'rejected' ? 'text-red-600' :
+                          'text-blue-600'
                       }`} />
                   </div>
                   <div className="flex-1">
@@ -430,9 +430,9 @@ const TeacherDashboard = () => {
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${query.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                    query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                      query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                  query.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                    query.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                   }`}>
                   {query.status}
                 </span>
@@ -768,10 +768,10 @@ const TeacherDashboard = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-300 font-medium ${activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30 scale-105'
-                        : isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/70 hover:shadow-md'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 hover:shadow-md'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30 scale-105'
+                      : isDarkMode
+                        ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/70 hover:shadow-md'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 hover:shadow-md'
                       }`}
                   >
                     <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
@@ -818,8 +818,8 @@ const TeacherDashboard = () => {
                   value={newQuery.timetableId}
                   onChange={(e) => setNewQuery({ ...newQuery, timetableId: e.target.value })}
                   className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-200 focus:border-blue-500'
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+                    : 'bg-white border-gray-200 focus:border-blue-500'
                     } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="">No specific timetable</option>
@@ -841,8 +841,8 @@ const TeacherDashboard = () => {
                   value={newQuery.subject}
                   onChange={(e) => setNewQuery({ ...newQuery, subject: e.target.value })}
                   className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-200 focus:border-blue-500'
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+                    : 'bg-white border-gray-200 focus:border-blue-500'
                     } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                   placeholder="Brief subject of your query"
                   required
@@ -858,8 +858,8 @@ const TeacherDashboard = () => {
                   value={newQuery.description}
                   onChange={(e) => setNewQuery({ ...newQuery, description: e.target.value })}
                   className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-200 focus:border-blue-500'
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+                    : 'bg-white border-gray-200 focus:border-blue-500'
                     } focus:ring-4 focus:ring-blue-500/20 outline-none resize-none`}
                   rows="5"
                   placeholder="Provide detailed information about your query..."
@@ -876,8 +876,8 @@ const TeacherDashboard = () => {
                   value={newQuery.type}
                   onChange={(e) => setNewQuery({ ...newQuery, type: e.target.value })}
                   className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-200 focus:border-blue-500'
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+                    : 'bg-white border-gray-200 focus:border-blue-500'
                     } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="timetable-conflict">Timetable Conflict</option>
@@ -896,8 +896,8 @@ const TeacherDashboard = () => {
                   value={newQuery.priority}
                   onChange={(e) => setNewQuery({ ...newQuery, priority: e.target.value })}
                   className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ${isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-200 focus:border-blue-500'
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+                    : 'bg-white border-gray-200 focus:border-blue-500'
                     } focus:ring-4 focus:ring-blue-500/20 outline-none`}
                 >
                   <option value="low">Low</option>
@@ -912,8 +912,8 @@ const TeacherDashboard = () => {
               <button
                 onClick={() => setShowQueryModal(false)}
                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${isDarkMode
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   } shadow-lg hover:shadow-xl`}
               >
                 Cancel

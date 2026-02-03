@@ -46,6 +46,17 @@ class SimulatedAnnealing {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Main solve method
    */
   async solve(progressCallback = null) {
@@ -103,7 +114,7 @@ class SimulatedAnnealing {
         if (progressCallback && this.iteration % 100 === 0) {
           const progress = (this.iteration / this.settings.maxIterations) * 100;
           await progressCallback(
-            progress, 
+            progress,
             `SA: Iter ${this.iteration}, Temp ${this.temperature.toFixed(2)}, Best ${this.bestEnergy.toFixed(4)}`
           );
         }
@@ -164,14 +175,14 @@ class SimulatedAnnealing {
    */
   generateInitialSolution() {
     const solution = [];
-    
+
     for (const session of this.sessions) {
       const assignment = this.generateRandomAssignment(session, solution);
       if (assignment) {
         solution.push(assignment);
       }
     }
-    
+
     return solution;
   }
 
@@ -181,42 +192,42 @@ class SimulatedAnnealing {
   generateRandomAssignment(session, existingSolution) {
     const maxAttempts = 50;
     let attempts = 0;
-    
+
     while (attempts < maxAttempts) {
       attempts++;
-      
+
       // Random time slot
       const slot = this.timeSlots[Math.floor(Math.random() * this.timeSlots.length)];
-      
+
       // Random teacher from eligible teachers
       const teacherIds = session.teacherIds || [];
       if (teacherIds.length === 0) continue;
-      const teacherId = teacherIds[Math.floor(Math.random() * teacherIds.length)];
-      const teacher = this.teachers.find(t => (t.id || String(t._id)) === teacherId);
-      
+      const teacherId = this.normalizeId(teacherIds[Math.floor(Math.random() * teacherIds.length)]);
+      const teacher = this.teachers.find(t => this.normalizeId(t.id || t._id) === teacherId);
+
       // Random classroom
       const eligibleClassrooms = this.classrooms.filter(c => {
         if (session.requiresLab) return c.type?.includes('Lab');
         return c.capacity >= session.studentCount;
       });
-      
+
       if (eligibleClassrooms.length === 0) continue;
       const classroom = eligibleClassrooms[Math.floor(Math.random() * eligibleClassrooms.length)];
       const classroomId = classroom.id || String(classroom._id);
-      
+
       const assignment = {
         ...session,
         ...slot,
         teacherId,
         teacherName: teacher?.name || '',
-        classroomId,
+        classroomId: this.normalizeId(classroomId),
         classroomName: classroom.name,
         id: `${session.courseId}_${slot.day}_${slot.startTime}_${classroomId}`
       };
-      
+
       // Check constraints
       const check = this.constraintChecker.checkHardConstraints(assignment, existingSolution);
-      
+
       if (check.valid) {
         assignment.hasViolation = false;
         return assignment;
@@ -227,7 +238,7 @@ class SimulatedAnnealing {
         return assignment;
       }
     }
-    
+
     return null;
   }
 
@@ -236,10 +247,10 @@ class SimulatedAnnealing {
    */
   generateNeighbor(solution) {
     const neighbor = [...solution];
-    
+
     // Choose perturbation type randomly
     const perturbationType = Math.random();
-    
+
     if (perturbationType < 0.5) {
       // Swap two sessions
       this.swapSessions(neighbor);
@@ -250,7 +261,7 @@ class SimulatedAnnealing {
       // Change classroom for one session
       this.changeClassroom(neighbor);
     }
-    
+
     return neighbor;
   }
 
@@ -259,10 +270,10 @@ class SimulatedAnnealing {
    */
   swapSessions(solution) {
     if (solution.length < 2) return;
-    
+
     const i = Math.floor(Math.random() * solution.length);
     const j = Math.floor(Math.random() * solution.length);
-    
+
     if (i !== j) {
       // Swap time and classroom
       const tempDay = solution[i].day;
@@ -270,13 +281,13 @@ class SimulatedAnnealing {
       const tempEndTime = solution[i].endTime;
       const tempClassroom = solution[i].classroomId;
       const tempClassroomName = solution[i].classroomName;
-      
+
       solution[i].day = solution[j].day;
       solution[i].startTime = solution[j].startTime;
       solution[i].endTime = solution[j].endTime;
       solution[i].classroomId = solution[j].classroomId;
       solution[i].classroomName = solution[j].classroomName;
-      
+
       solution[j].day = tempDay;
       solution[j].startTime = tempStartTime;
       solution[j].endTime = tempEndTime;
@@ -290,10 +301,10 @@ class SimulatedAnnealing {
    */
   changeTimeSlot(solution) {
     if (solution.length === 0) return;
-    
+
     const i = Math.floor(Math.random() * solution.length);
     const slot = this.timeSlots[Math.floor(Math.random() * this.timeSlots.length)];
-    
+
     solution[i].day = slot.day;
     solution[i].startTime = slot.startTime;
     solution[i].endTime = slot.endTime;
@@ -304,18 +315,18 @@ class SimulatedAnnealing {
    */
   changeClassroom(solution) {
     if (solution.length === 0) return;
-    
+
     const i = Math.floor(Math.random() * solution.length);
     const session = solution[i];
-    
+
     const eligibleClassrooms = this.classrooms.filter(c => {
       if (session.requiresLab) return c.type?.includes('Lab');
       return c.capacity >= session.studentCount;
     });
-    
+
     if (eligibleClassrooms.length > 0) {
       const classroom = eligibleClassrooms[Math.floor(Math.random() * eligibleClassrooms.length)];
-      solution[i].classroomId = classroom.id || String(classroom._id);
+      solution[i].classroomId = this.normalizeId(classroom.id || classroom._id);
       solution[i].classroomName = classroom.name;
     }
   }
@@ -326,23 +337,23 @@ class SimulatedAnnealing {
    */
   calculateEnergy(solution) {
     let energy = 0;
-    
+
     // Count hard constraint violations (high penalty)
     for (let i = 0; i < solution.length; i++) {
       const assignment = solution[i];
       const otherAssignments = solution.slice(0, i).concat(solution.slice(i + 1));
-      
+
       const check = this.constraintChecker.checkHardConstraints(assignment, otherAssignments);
-      
+
       if (!check.valid) {
         energy += check.violations.length * 100; // High penalty for violations
       }
-      
+
       // Soft constraint penalties
       const softCheck = this.constraintChecker.evaluateSoftConstraints(assignment, otherAssignments);
       energy += (1 - softCheck.score) * 10; // Moderate penalty for soft constraint violations
     }
-    
+
     return energy;
   }
 
@@ -354,11 +365,11 @@ class SimulatedAnnealing {
     if (neighborEnergy < currentEnergy) {
       return true;
     }
-    
+
     // Accept worse solutions with probability exp(-ΔE / T)
     const delta = neighborEnergy - currentEnergy;
     const probability = Math.exp(-delta / temperature);
-    
+
     return Math.random() < probability;
   }
 
@@ -367,35 +378,35 @@ class SimulatedAnnealing {
    */
   generateTimeSlots() {
     const slots = [];
-    
+
     for (const day of this.settings.workingDays) {
       const [startH, startM] = this.settings.startTime.split(':').map(Number);
       const [endH, endM] = this.settings.endTime.split(':').map(Number);
-      
+
       let hour = startH;
       let minute = startM;
-      
+
       while (hour < endH || (hour === endH && minute < endM)) {
         const startTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-        
+
         let endMinute = minute + this.settings.slotDuration;
         let endHour = hour;
         if (endMinute >= 60) {
           endHour += Math.floor(endMinute / 60);
           endMinute = endMinute % 60;
         }
-        
+
         const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
-        
+
         const isBreak = this.settings.breakSlots.some(breakSlot => {
           const [breakStart, breakEnd] = breakSlot.split('-');
           return startTime >= breakStart && startTime < breakEnd;
         });
-        
+
         if (!isBreak) {
           slots.push({ day, startTime, endTime });
         }
-        
+
         minute += this.settings.slotDuration;
         if (minute >= 60) {
           hour += Math.floor(minute / 60);
@@ -403,7 +414,7 @@ class SimulatedAnnealing {
         }
       }
     }
-    
+
     return slots;
   }
 
@@ -412,7 +423,7 @@ class SimulatedAnnealing {
    */
   extractSessions() {
     const sessions = [];
-    
+
     for (const course of this.courses) {
       const courseInfo = {
         courseId: course.id || String(course._id),
@@ -439,7 +450,7 @@ class SimulatedAnnealing {
             studentCount: course.enrolledStudents,
             teacherIds: course.assignedTeachers
               .filter(t => !t.sessionTypes || t.sessionTypes.includes('Theory'))
-              .map(t => t.teacherId)
+              .map(t => this.normalizeId(t.teacherId))
           });
         }
       }
@@ -448,7 +459,7 @@ class SimulatedAnnealing {
       if (course.sessions?.practical) {
         const practical = course.sessions.practical;
         const batches = course.divisions?.[0]?.batches || [{ batchId: 'default', studentCount: course.enrolledStudents }];
-        
+
         for (let i = 0; i < practical.sessionsPerWeek; i++) {
           for (const batch of batches) {
             sessions.push({
@@ -462,7 +473,7 @@ class SimulatedAnnealing {
               requiresLab: true,
               teacherIds: course.assignedTeachers
                 .filter(t => !t.sessionTypes || t.sessionTypes.includes('Practical'))
-                .map(t => t.teacherId)
+                .map(t => this.normalizeId(t.teacherId))
             });
           }
         }
@@ -481,7 +492,7 @@ class SimulatedAnnealing {
             studentCount: course.enrolledStudents,
             teacherIds: course.assignedTeachers
               .filter(t => !t.sessionTypes || t.sessionTypes.includes('Tutorial'))
-              .map(t => t.teacherId)
+              .map(t => this.normalizeId(t.teacherId))
           });
         }
       }

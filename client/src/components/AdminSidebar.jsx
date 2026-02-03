@@ -108,12 +108,12 @@ const AdminSidebar = ({ activeTab, onTabChange, showQuickActions = true, userRol
   const navigationTabs = getNavigationTabs();
 
   const quickActions = [
-    { label: 'Create Timetable', icon: Plus, color: 'bg-blue-700 hover:bg-blue-600', path: '/create-timetable' },
-    { label: 'Manage Students', icon: GraduationCap, color: 'bg-indigo-700 hover:bg-indigo-600', path: '/student-management' },
-    { label: 'Manage Teachers', icon: Users, color: 'bg-yellow-700 hover:bg-yellow-600', path: '/teachers-data' },
-    { label: 'Manage Rooms', icon: Settings, color: 'bg-orange-700 hover:bg-orange-600', path: '/classrooms-data' },
-    { label: 'Manage Programs', icon: Building2, color: 'bg-purple-700 hover:bg-purple-600', path: '/programs-data' },
-    { label: 'Infrastructure & Policy', icon: BookOpen, color: 'bg-green-700 hover:bg-green-600', path: '/infrastructure-data' }
+    { label: 'Create Timetable', icon: Plus, color: 'bg-blue-600 hover:bg-blue-700', path: '/create-timetable' },
+    { label: 'Manage Students', icon: GraduationCap, color: 'bg-blue-600 hover:bg-blue-700', path: '/student-management' },
+    { label: 'Manage Teachers', icon: Users, color: 'bg-blue-600 hover:bg-blue-700', path: '/teachers-data' },
+    { label: 'Manage Rooms', icon: Settings, color: 'bg-blue-600 hover:bg-blue-700', path: '/classrooms-data' },
+    { label: 'Manage Programs', icon: Building2, color: 'bg-blue-600 hover:bg-blue-700', path: '/programs-data' },
+    { label: 'Infrastructure & Policy', icon: BookOpen, color: 'bg-blue-600 hover:bg-blue-700', path: '/infrastructure-data' }
   ];
 
   const handleNavigation = (path, tabId) => {
@@ -210,7 +210,7 @@ const AdminSidebar = ({ activeTab, onTabChange, showQuickActions = true, userRol
                 onClick={() => handleNavigation(tab.path, tab.id)}
                 className={`relative w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-3' : 'pl-6 pr-4'
                   } py-2 rounded-lg transition-all duration-200 text-left group ${currentTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-[1.02]'
+                    ? 'bg-blue-600 text-white shadow-lg scale-[1.02]'
                     : isDarkMode
                       ? 'text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-md'
                       : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900 hover:shadow-md'

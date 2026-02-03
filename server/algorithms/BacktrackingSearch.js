@@ -36,6 +36,17 @@ class BacktrackingSearch {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Main solve method
    */
   async solve(progressCallback = null) {
@@ -231,7 +242,7 @@ class BacktrackingSearch {
             studentCount: course.enrolledStudents,
             teacherIds: course.assignedTeachers
               .filter(t => !t.sessionTypes || t.sessionTypes.includes('Theory'))
-              .map(t => t.teacherId)
+              .map(t => this.normalizeId(t.teacherId))
           });
         }
       }
@@ -256,7 +267,7 @@ class BacktrackingSearch {
               requiresLab: true,
               teacherIds: course.assignedTeachers
                 .filter(t => !t.sessionTypes || t.sessionTypes.includes('Practical'))
-                .map(t => t.teacherId)
+                .map(t => this.normalizeId(t.teacherId))
             });
           }
         }
@@ -275,7 +286,7 @@ class BacktrackingSearch {
             studentCount: course.enrolledStudents,
             teacherIds: course.assignedTeachers
               .filter(t => !t.sessionTypes || t.sessionTypes.includes('Tutorial'))
-              .map(t => t.teacherId)
+              .map(t => this.normalizeId(t.teacherId))
           });
         }
       }
@@ -292,12 +303,12 @@ class BacktrackingSearch {
     return sessions.sort((a, b) => {
       // Prioritize sessions with visiting faculty
       const aHasVisiting = a.teacherIds?.some(tid => {
-        const teacher = this.teachers.find(t => (t.id || String(t._id)) === tid);
+        const teacher = this.teachers.find(t => this.normalizeId(t.id || t._id) === this.normalizeId(tid));
         return teacher?.teacherType === 'visiting' || teacher?.teacherType === 'guest';
       });
 
       const bHasVisiting = b.teacherIds?.some(tid => {
-        const teacher = this.teachers.find(t => (t.id || String(t._id)) === tid);
+        const teacher = this.teachers.find(t => this.normalizeId(t.id || t._id) === this.normalizeId(tid));
         return teacher?.teacherType === 'visiting' || teacher?.teacherType === 'guest';
       });
 
@@ -322,13 +333,13 @@ class BacktrackingSearch {
     for (const slot of this.timeSlots) {
       for (const teacher of this.teachers) {
         // Check if teacher can teach this course
-        const teacherId = teacher.id || String(teacher._id);
+        const teacherId = this.normalizeId(teacher.id || teacher._id);
         if (!session.teacherIds || !session.teacherIds.includes(teacherId)) {
           continue;
         }
 
         for (const classroom of this.classrooms) {
-          const classroomId = classroom.id || String(classroom._id);
+          const classroomId = this.normalizeId(classroom.id || classroom._id);
 
           // Quick pre-checks
           if (session.requiresLab && !classroom.type?.includes('Lab')) continue;

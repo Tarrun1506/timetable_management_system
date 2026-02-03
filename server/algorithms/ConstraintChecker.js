@@ -13,11 +13,22 @@ class ConstraintChecker {
     this.classrooms = classrooms || [];
     this.courses = courses || [];
     this.settings = settings;
-    
+
     // Create lookup maps for faster access
-    this.teacherMap = new Map(teachers.map(t => [t.id || String(t._id), t]));
-    this.classroomMap = new Map(classrooms.map(c => [c.id || String(c._id), c]));
-    this.courseMap = new Map(courses.map(c => [c.id || String(c._id), c]));
+    this.teacherMap = new Map(teachers.map(t => [this.normalizeId(t.id || t._id), t]));
+    this.classroomMap = new Map(classrooms.map(c => [this.normalizeId(c.id || c._id), c]));
+    this.courseMap = new Map(courses.map(c => [this.normalizeId(c.id || c._id), c]));
+  }
+
+  /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
   }
 
   /**
@@ -61,12 +72,13 @@ class ConstraintChecker {
    * Check if teacher has a conflict at the given time
    */
   checkTeacherConflict(assignment, schedule) {
-    const { teacherId, day, startTime, endTime } = assignment;
-    
+    const teacherId = this.normalizeId(assignment.teacherId);
+    const { day, startTime, endTime } = assignment;
+
     for (const slot of schedule) {
-      if (slot.teacherId === teacherId && 
-          slot.day === day && 
-          this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
+      if (this.normalizeId(slot.teacherId) === teacherId &&
+        slot.day === day &&
+        this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
         return {
           type: 'TEACHER_CONFLICT',
           severity: 'critical',
@@ -83,23 +95,26 @@ class ConstraintChecker {
    * EXCEPTION: Multiple lab sessions can occur simultaneously if different teachers/subjects
    */
   checkClassroomConflict(assignment, schedule) {
-    const { classroomId, day, startTime, endTime, sessionType, teacherId, courseId } = assignment;
-    
+    const classroomId = this.normalizeId(assignment.classroomId);
+    const teacherId = this.normalizeId(assignment.teacherId);
+    const courseId = this.normalizeId(assignment.courseId);
+    const { day, startTime, endTime, sessionType } = assignment;
+
     for (const slot of schedule) {
-      if (slot.classroomId === classroomId && 
-          slot.day === day && 
-          this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
-        
+      if (this.normalizeId(slot.classroomId) === classroomId &&
+        slot.day === day &&
+        this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
+
         // EXCEPTION: Labs can run simultaneously if:
         // 1. Both are lab sessions
         // 2. Different teachers
         // 3. Different courses
-        const isLabException = 
-          sessionType === 'Practical' && 
+        const isLabException =
+          sessionType === 'Practical' &&
           slot.sessionType === 'Practical' &&
-          slot.teacherId !== teacherId &&
-          slot.courseId !== courseId;
-        
+          this.normalizeId(slot.teacherId) !== teacherId &&
+          this.normalizeId(slot.courseId) !== courseId;
+
         if (!isLabException) {
           return {
             type: 'CLASSROOM_CONFLICT',
@@ -118,26 +133,29 @@ class ConstraintChecker {
    * EXCEPTION: Electives can run simultaneously as students are split
    */
   checkStudentGroupConflict(assignment, schedule) {
-    const { program, year, semester, divisionId, batchId, day, startTime, endTime, courseId, isElective } = assignment;
-    
+    const { program, year, semester, divisionId, batchId, day, startTime, endTime } = assignment;
+    const courseId = this.normalizeId(assignment.courseId);
+    const isElective = assignment.isElective;
+
     const course = this.courseMap.get(courseId);
-    
+
     for (const slot of schedule) {
+      const slotCourseId = this.normalizeId(slot.courseId);
       // Same program, year, semester means potentially same students
-      if (slot.program === program && 
-          slot.year === year && 
-          slot.semester === semester &&
-          slot.day === day && 
-          this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
-        
+      if (slot.program === program &&
+        slot.year === year &&
+        slot.semester === semester &&
+        slot.day === day &&
+        this.timeOverlaps(slot.startTime, slot.endTime, startTime, endTime)) {
+
         // Check division/batch overlap
         const hasDivisionOverlap = divisionId && slot.divisionId === divisionId;
         const hasBatchOverlap = batchId && slot.batchId === batchId;
-        
+
         // EXCEPTION: Electives can run simultaneously
         // Students choose 1 out of 3, so different elective courses don't conflict
         const isElectiveException = isElective && slot.isElective && slot.courseId !== courseId;
-        
+
         if ((hasDivisionOverlap || (!divisionId && !slot.divisionId)) && !isElectiveException) {
           // If no batch specified, it's a full division class - conflict
           if (!batchId && !hasBatchOverlap) {
@@ -148,7 +166,7 @@ class ConstraintChecker {
               conflictingSlot: slot
             };
           }
-          
+
           // If same batch, definitely a conflict
           if (batchId && hasBatchOverlap) {
             return {
@@ -168,9 +186,10 @@ class ConstraintChecker {
    * Check if teacher is available at the given time
    */
   checkTeacherAvailability(assignment) {
-    const { teacherId, day, startTime } = assignment;
+    const teacherId = this.normalizeId(assignment.teacherId);
+    const { day, startTime } = assignment;
     const teacher = this.teacherMap.get(teacherId);
-    
+
     if (!teacher) {
       return {
         type: 'TEACHER_NOT_FOUND',
@@ -181,7 +200,7 @@ class ConstraintChecker {
 
     const dayLower = day.toLowerCase();
     const availability = teacher.availability?.[dayLower];
-    
+
     if (!availability || !availability.available) {
       return {
         type: 'TEACHER_UNAVAILABLE',
@@ -205,9 +224,10 @@ class ConstraintChecker {
    * Check if classroom has sufficient capacity
    */
   checkClassroomCapacity(assignment) {
-    const { classroomId, studentCount, batchId } = assignment;
+    const classroomId = this.normalizeId(assignment.classroomId);
+    const { studentCount, batchId } = assignment;
     const classroom = this.classroomMap.get(classroomId);
-    
+
     if (!classroom) {
       return {
         type: 'CLASSROOM_NOT_FOUND',
@@ -217,7 +237,7 @@ class ConstraintChecker {
     }
 
     const requiredCapacity = studentCount || 30;
-    
+
     // For labs with batches, capacity can be smaller
     // Otherwise, need full capacity
     if (classroom.capacity < requiredCapacity && !batchId) {
@@ -235,9 +255,10 @@ class ConstraintChecker {
    * Check if classroom has required features
    */
   checkClassroomFeatures(assignment) {
-    const { classroomId, sessionType, requiredFeatures = [] } = assignment;
+    const classroomId = this.normalizeId(assignment.classroomId);
+    const { sessionType, requiredFeatures = [] } = assignment;
     const classroom = this.classroomMap.get(classroomId);
-    
+
     if (!classroom) return null;
 
     // Lab sessions require lab facilities
@@ -255,7 +276,7 @@ class ConstraintChecker {
     // Check specific required features
     const classroomFeatures = classroom.features || [];
     const missingFeatures = requiredFeatures.filter(f => !classroomFeatures.includes(f));
-    
+
     if (missingFeatures.length > 0) {
       return {
         type: 'MISSING_FEATURES',
@@ -309,7 +330,8 @@ class ConstraintChecker {
    * Check teacher preferences
    */
   checkTeacherPreferences(assignment) {
-    const { teacherId, day, startTime } = assignment;
+    const teacherId = this.normalizeId(assignment.teacherId);
+    const { day, startTime } = assignment;
     const teacher = this.teacherMap.get(teacherId);
     let penalty = 0;
     const reasons = [];
@@ -320,7 +342,7 @@ class ConstraintChecker {
 
     // Check preferred time slots
     if (teacher.preferences.preferredTimeSlots?.length > 0) {
-      const isPreferred = teacher.preferences.preferredTimeSlots.some(slot => 
+      const isPreferred = teacher.preferences.preferredTimeSlots.some(slot =>
         slot.day === day && startTime >= slot.startTime && startTime <= slot.endTime
       );
       if (!isPreferred) {
@@ -331,7 +353,7 @@ class ConstraintChecker {
 
     // Check avoid time slots
     if (teacher.preferences.avoidTimeSlots?.length > 0) {
-      const isAvoided = teacher.preferences.avoidTimeSlots.some(slot => 
+      const isAvoided = teacher.preferences.avoidTimeSlots.some(slot =>
         slot.day === day && startTime >= slot.startTime && startTime <= slot.endTime
       );
       if (isAvoided) {
@@ -347,14 +369,15 @@ class ConstraintChecker {
    * Check classroom utilization
    */
   checkClassroomUtilization(assignment) {
-    const { classroomId, studentCount } = assignment;
+    const classroomId = this.normalizeId(assignment.classroomId);
+    const { studentCount } = assignment;
     const classroom = this.classroomMap.get(classroomId);
     let penalty = 0;
 
     if (!classroom) return { penalty: 0 };
 
     const utilization = studentCount / classroom.capacity;
-    
+
     // Penalize poor utilization (less than 50% or overbooked)
     if (utilization < 0.5) {
       penalty = 0.15 * (1 - utilization);
@@ -362,8 +385,8 @@ class ConstraintChecker {
       penalty = 0.25 * (utilization - 1.0);
     }
 
-    return { 
-      penalty, 
+    return {
+      penalty,
       reasons: penalty > 0 ? [`Poor utilization: ${(utilization * 100).toFixed(1)}%`] : []
     };
   }
@@ -379,7 +402,7 @@ class ConstraintChecker {
     if (!teacher) return { penalty: 0 };
 
     // Count current hours for this teacher
-    const teacherSlots = schedule.filter(s => s.teacherId === teacherId);
+    const teacherSlots = schedule.filter(s => this.normalizeId(s.teacherId) === teacherId);
     const currentHours = teacherSlots.reduce((sum, slot) => {
       const duration = this.calculateDuration(slot.startTime, slot.endTime);
       return sum + duration;
@@ -393,8 +416,8 @@ class ConstraintChecker {
       penalty = 0.2 * (utilization - 0.9) / 0.1;
     }
 
-    return { 
-      penalty, 
+    return {
+      penalty,
       reasons: penalty > 0 ? [`High workload: ${(utilization * 100).toFixed(1)}%`] : []
     };
   }
@@ -410,12 +433,12 @@ class ConstraintChecker {
     if (!teacher) return { penalty: 0 };
 
     const maxConsecutive = teacher.preferences?.maxConsecutiveHours || 3;
-    
+
     // Find consecutive slots for this teacher on this day
     const daySlots = schedule
-      .filter(s => s.teacherId === teacherId && s.day === day)
+      .filter(s => this.normalizeId(s.teacherId) === teacherId && s.day === day)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
-    
+
     // Add current assignment
     daySlots.push(assignment);
     daySlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -423,7 +446,7 @@ class ConstraintChecker {
     // Count consecutive hours
     let consecutiveCount = 1;
     for (let i = 1; i < daySlots.length; i++) {
-      if (daySlots[i].startTime === daySlots[i-1].endTime) {
+      if (daySlots[i].startTime === daySlots[i - 1].endTime) {
         consecutiveCount++;
       } else {
         consecutiveCount = 1;
@@ -434,8 +457,8 @@ class ConstraintChecker {
       penalty = 0.15 * (consecutiveCount - maxConsecutive);
     }
 
-    return { 
-      penalty, 
+    return {
+      penalty,
       reasons: penalty > 0 ? [`Too many consecutive hours: ${consecutiveCount}`] : []
     };
   }
@@ -448,9 +471,9 @@ class ConstraintChecker {
     let penalty = 0;
 
     const daySlots = schedule
-      .filter(s => s.teacherId === teacherId && s.day === day)
+      .filter(s => this.normalizeId(s.teacherId) === teacherId && s.day === day)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
-    
+
     // Add current assignment
     daySlots.push(assignment);
     daySlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -458,7 +481,7 @@ class ConstraintChecker {
     // Calculate gaps
     let totalGapMinutes = 0;
     for (let i = 1; i < daySlots.length; i++) {
-      const gap = this.calculateDuration(daySlots[i-1].endTime, daySlots[i].startTime);
+      const gap = this.calculateDuration(daySlots[i - 1].endTime, daySlots[i].startTime);
       if (gap > 0 && gap < 180) { // Gaps between 0 and 3 hours
         totalGapMinutes += gap;
       }
@@ -469,8 +492,8 @@ class ConstraintChecker {
       penalty = 0.1 * (totalGapMinutes - 120) / 60;
     }
 
-    return { 
-      penalty, 
+    return {
+      penalty,
       reasons: penalty > 0 ? [`Excessive gaps: ${totalGapMinutes} minutes`] : []
     };
   }
@@ -484,11 +507,11 @@ class ConstraintChecker {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       const aPriority = priorityOrder[a.priority] || 2;
       const bPriority = priorityOrder[b.priority] || 2;
-      
+
       if (aPriority !== bPriority) {
         return bPriority - aPriority; // Higher priority first
       }
-      
+
       // Then by teaching load (less loaded first)
       const aLoad = a.currentWorkload || 0;
       const bLoad = b.currentWorkload || 0;
@@ -505,11 +528,11 @@ class ConstraintChecker {
       const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
       const aPriority = priorityOrder[a.priority] || 2;
       const bPriority = priorityOrder[b.priority] || 2;
-      
+
       if (aPriority !== bPriority) {
         return bPriority - aPriority;
       }
-      
+
       // Courses with more constraints first (harder to schedule)
       const aConstraints = this.countCourseConstraints(a);
       const bConstraints = this.countCourseConstraints(b);

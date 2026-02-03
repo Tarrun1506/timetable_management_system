@@ -118,13 +118,13 @@ router.post('/generate', [
 router.get('/generate/:id/progress', async (req, res) => {
   try {
     const timetableId = req.params.id;
-    
-    logger.info('[PROGRESS CHECK]', { 
-      timetableId, 
+
+    logger.info('[PROGRESS CHECK]', {
+      timetableId,
       hasActiveGeneration: activeGenerations.has(timetableId),
       activeGenerationsCount: activeGenerations.size
     });
-    
+
     // Check if generation is active
     if (activeGenerations.has(timetableId)) {
       const generationInfo = activeGenerations.get(timetableId);
@@ -133,7 +133,7 @@ router.get('/generate/:id/progress', async (req, res) => {
         progress: generationInfo.progress,
         currentStep: generationInfo.currentStep
       });
-      
+
       return res.json({
         success: true,
         status: 'generating',
@@ -149,7 +149,7 @@ router.get('/generate/:id/progress', async (req, res) => {
 
     // Check database for completed/failed generation
     logger.info('[PROGRESS CHECK] No active generation, checking database', { timetableId });
-    
+
     const timetable = await Timetable.findById(timetableId);
     if (!timetable) {
       logger.warn('[PROGRESS CHECK] Timetable not found in database', { timetableId });
@@ -206,8 +206,8 @@ router.get('/', [
       });
     }
 
-    const { status, department, academicYear, semester, page = 1, limit = 20 } = req.query;
-    
+    const { status, department, academicYear, semester, page = 1, limit = 50 } = req.query;
+
     // Build query
     const query = { isActive: true };
     if (status) query.status = status;
@@ -256,7 +256,7 @@ router.get('/:id', [
 ], async (req, res) => {
   try {
     const { format = 'full' } = req.query;
-    
+
     let timetable;
     if (format === 'schedule_only') {
       timetable = await Timetable.findById(req.params.id).select('schedule name academicYear semester department');
@@ -477,7 +477,7 @@ router.post('/:id/detect-conflicts', async (req, res) => {
 
     // Run conflict detection
     const conflicts = timetable.detectConflicts();
-    
+
     // Update timetable with detected conflicts
     timetable.conflicts = conflicts;
     await timetable.save();
@@ -530,7 +530,7 @@ router.patch('/:id/conflicts/:conflictIndex/resolve', [
     }
 
     const conflictIndex = parseInt(req.params.conflictIndex);
-    
+
     if (conflictIndex < 0 || conflictIndex >= timetable.conflicts.length) {
       return res.status(400).json({
         success: false,
@@ -541,7 +541,7 @@ router.patch('/:id/conflicts/:conflictIndex/resolve', [
     // Mark conflict as resolved
     timetable.conflicts[conflictIndex].resolved = true;
     timetable.conflicts[conflictIndex].resolutionNotes = req.body.resolutionNotes || 'Manually resolved';
-    
+
     await timetable.save();
 
     logger.info('Conflict resolved', {
@@ -640,12 +640,12 @@ router.get('/statistics/overview', async (req, res) => {
  */
 async function generateTimetableAsync(timetableId, department, year, semester, settings, io) {
   try {
-    logger.info('[GENERATION START] Timetable generation initiated', { 
-      timetableId, 
-      department, 
-      year, 
+    logger.info('[GENERATION START] Timetable generation initiated', {
+      timetableId,
+      department,
+      year,
       semester,
-      algorithm: settings.algorithm 
+      algorithm: settings.algorithm
     });
 
     // Store generation info
@@ -686,7 +686,7 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
         generationInfo.currentStep = step || generationInfo.currentStep;
         generationInfo.generation = generation || generationInfo.generation;
         generationInfo.fitness = fitness || generationInfo.fitness;
-        
+
         // Emit progress update
         if (io) {
           io.to(`generation_${timetableId}`).emit('generation_progress', {
@@ -750,7 +750,7 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
     // Start optimization
     logger.info('[GENERATION] Starting optimization process', { algorithm: settings.algorithm });
     progressCallback(30, 'Starting optimization');
-    
+
     logger.info('[GENERATION] Calling optimizationEngine.optimize()');
     const result = await optimizationEngine.optimize(
       teachers,
@@ -762,7 +762,7 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
       }
     );
 
-    logger.info('[GENERATION] Optimization completed, processing result', { 
+    logger.info('[GENERATION] Optimization completed, processing result', {
       success: result.success,
       hasSolution: !!result.solution
     });
@@ -804,10 +804,10 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
       timetable.conflicts = result.conflicts || [];
       timetable.metrics = result.metrics;
       timetable.quality = result.metrics.qualityMetrics;
-      
+
       // Calculate statistics
       timetable.statistics = calculateTimetableStatistics(result.solution, teachers, classrooms, courses);
-      
+
       await timetable.save();
 
       progressCallback(100, 'Completed');
@@ -834,7 +834,7 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
 
       const timetable = await Timetable.findById(timetableId);
       timetable.status = 'draft';
-      timetable.conflicts = [{ 
+      timetable.conflicts = [{
         type: 'generation_error',
         severity: 'critical',
         description: result.reason || 'Unknown generation error'
@@ -862,7 +862,7 @@ async function generateTimetableAsync(timetableId, department, year, semester, s
       const timetable = await Timetable.findById(timetableId);
       if (timetable) {
         timetable.status = 'draft';
-        timetable.conflicts = [{ 
+        timetable.conflicts = [{
           type: 'system_error',
           severity: 'critical',
           description: error.message || 'System error during generation'
@@ -963,15 +963,15 @@ function calculateTimetableStatistics(schedule, teachers, classrooms, courses) {
 router.get('/teacher/:teacherId', async (req, res) => {
   try {
     const { teacherId } = req.params;
-    
+
     // Find the most recently published timetable (sorted by publishedAt descending)
-    const timetable = await Timetable.findOne({ 
-      status: 'published', 
-      isActive: true 
+    const timetable = await Timetable.findOne({
+      status: 'published',
+      isActive: true
     })
-    .populate('createdBy', 'name email')
-    .sort({ publishedAt: -1 })
-    .limit(1);
+      .populate('createdBy', 'name email')
+      .sort({ publishedAt: -1 })
+      .limit(1);
 
     if (!timetable) {
       return res.json({
@@ -1024,15 +1024,15 @@ router.get('/teacher/:teacherId', async (req, res) => {
 router.get('/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
-    
+
     // Find the most recently published timetable (sorted by publishedAt descending)
-    const timetable = await Timetable.findOne({ 
-      status: 'published', 
-      isActive: true 
+    const timetable = await Timetable.findOne({
+      status: 'published',
+      isActive: true
     })
-    .populate('createdBy', 'name email')
-    .sort({ publishedAt: -1 })
-    .limit(1);
+      .populate('createdBy', 'name email')
+      .sort({ publishedAt: -1 })
+      .limit(1);
 
     if (!timetable) {
       return res.json({
@@ -1082,14 +1082,14 @@ router.get('/student/:studentId', async (req, res) => {
 router.get('/status/published', async (req, res) => {
   try {
     // Find the most recently published timetable
-    const timetable = await Timetable.findOne({ 
-      status: 'published', 
-      isActive: true 
+    const timetable = await Timetable.findOne({
+      status: 'published',
+      isActive: true
     })
-    .populate('createdBy', 'name email')
-    .select('-conflicts -comments') // Exclude detailed information
-    .sort({ publishedAt: -1 })
-    .limit(1);
+      .populate('createdBy', 'name email')
+      .select('-conflicts -comments') // Exclude detailed information
+      .sort({ publishedAt: -1 })
+      .limit(1);
 
     if (!timetable) {
       return res.json({

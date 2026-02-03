@@ -39,6 +39,17 @@ class CSPSolver {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Generate all possible time slots
    */
   generateTimeSlots() {
@@ -192,7 +203,8 @@ class CSPSolver {
         }
 
         for (const teacher of variable.assignedTeachers) {
-          const teacherObj = this.teachers.find(t => t.id === teacher.teacherId);
+          const teacherId = this.normalizeId(teacher.teacherId);
+          const teacherObj = this.teachers.find(t => this.normalizeId(t.id || t._id) === teacherId);
           if (!teacherObj) {
             debugInfo.teachersFailed++;
             continue;
@@ -223,8 +235,8 @@ class CSPSolver {
 
             possibleAssignments.push({
               timeSlot: timeSlot.id,
-              teacherId: teacher.teacherId,
-              classroomId: classroom.id,
+              teacherId: teacherId,
+              classroomId: this.normalizeId(classroom.id || classroom._id),
               day: timeSlot.day,
               startTime: timeSlot.startTime,
               endTime: sessionEndTime, // Use calculated end time based on session duration
@@ -772,21 +784,25 @@ class CSPSolver {
 
     for (const [varId, value] of this.assignment) {
       const variable = this.variables.find(v => v.id === varId);
-      const teacher = this.teachers.find(t => t.id === value.teacherId);
-      const classroom = this.classrooms.find(c => c.id === value.classroomId);
-      const course = this.courses.find(c => c.id === variable.courseId);
+      const teacherId = this.normalizeId(value.teacherId);
+      const classroomId = this.normalizeId(value.classroomId);
+      const courseId = this.normalizeId(variable.courseId);
+
+      const teacher = this.teachers.find(t => this.normalizeId(t.id || t._id) === teacherId);
+      const classroom = this.classrooms.find(c => this.normalizeId(c.id || c._id) === classroomId);
+      const course = this.courses.find(c => this.normalizeId(c.id || c._id) === courseId);
 
       schedule.push({
         day: value.day,
         startTime: value.startTime,
         endTime: value.endTime,
-        courseId: variable.courseId,
+        courseId: courseId,
         courseName: variable.courseName,
         courseCode: variable.courseCode,
         sessionType: variable.sessionType,
-        teacherId: value.teacherId,
+        teacherId: teacherId,
         teacherName: teacher?.name,
-        classroomId: value.classroomId,
+        classroomId: classroomId,
         classroomName: classroom?.name,
         studentCount: course?.enrolledStudents
       });

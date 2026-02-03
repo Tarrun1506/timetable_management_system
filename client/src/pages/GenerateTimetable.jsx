@@ -1027,7 +1027,7 @@ const GenerateTimetable = () => {
               </div>
               <button
                 onClick={handleTestAPI}
-                className="flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium shadow-sm"
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-all duration-300 transform hover:scale-105"
               >
                 <Activity className="w-4 h-4 mr-2" />
                 Test API Endpoint
@@ -1053,22 +1053,25 @@ const GenerateTimetable = () => {
 
             {/* Generation Controls */}
             {!isGenerating && !generationComplete && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ready to Generate</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl transform transition-all duration-300 hover:shadow-2xl">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="max-w-2xl">
+                    <h3 className="text-2xl font-bold mb-3 flex items-center">
+                      <CheckCircle2 className="w-6 h-6 mr-2 text-blue-200" />
+                      Ready to Generate
+                    </h3>
+                    <p className="text-blue-50 text-lg leading-relaxed">
                       All data has been validated and algorithm settings are configured.
-                      Click "Generate Timetable" to start the process.
+                      Our AI engine is ready to create your optimized schedule.
                     </p>
                   </div>
                   <button
                     onClick={handleStartGeneration}
                     disabled={!dataValidation.overall?.ready}
-                    className="flex items-center space-x-2 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium text-lg"
+                    className="flex items-center space-x-3 px-10 py-5 bg-white text-blue-600 rounded-xl hover:bg-blue-50 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-bold text-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
                   >
-                    <Zap className="w-5 h-5" />
-                    <span>Generate Timetable</span>
+                    <Zap className="w-6 h-6 fill-current" />
+                    <span>Start Generation</span>
                   </button>
                 </div>
               </div>

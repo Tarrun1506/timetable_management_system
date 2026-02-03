@@ -769,8 +769,8 @@ const StudentManagement = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${student.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                                student.status === 'Inactive' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' :
-                                  'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                              student.status === 'Inactive' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' :
+                                'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                               }`}>
                               {student.status}
                             </span>
@@ -1043,8 +1043,8 @@ const StudentManagement = () => {
                         <option value="FT">FT</option>
                         <option value="IT">IT</option>
                         <option value="MECHANICAL">MECHANICAL</option>
-                      </select>
-                    </div>
+                      </select >
+                    </div >
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Program *
@@ -1101,7 +1101,7 @@ const StudentManagement = () => {
                         <option value="2">Semester 2</option>
                       </select>
                     </div>
-                  </div>
+                  </div >
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -1183,13 +1183,13 @@ const StudentManagement = () => {
                       {loading ? 'Saving...' : modalType === 'edit' ? 'Update Student' : 'Create Student'}
                     </button>
                   </div>
-                </form>
+                </form >
               )}
-            </div>
-          </div>
-        </div>
+            </div >
+          </div >
+        </div >
       )}
-    </div>
+    </div >
   );
 };
 

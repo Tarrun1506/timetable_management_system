@@ -46,13 +46,24 @@ class OptimizationEngine {
   }
 
   /**
+   * Helper to normalize ID from string or object
+   */
+  normalizeId(id) {
+    if (!id) return null;
+    if (typeof id === 'string') return id;
+    if (id.id) return id.id;
+    if (id._id) return String(id._id);
+    return String(id);
+  }
+
+  /**
    * Main optimization method
    */
   async optimize(teachers, classrooms, courses, settings, progressCallback = null) {
     const startTime = Date.now();
-    
+
     try {
-      logger.info('[OPTIMIZATION] Starting timetable optimization', { 
+      logger.info('[OPTIMIZATION] Starting timetable optimization', {
         algorithm: settings.algorithm,
         courses: courses.length,
         teachers: teachers.length,
@@ -62,9 +73,9 @@ class OptimizationEngine {
       // Validate input data
       logger.info('[OPTIMIZATION] Starting data validation...');
       const validationStartTime = Date.now();
-      
+
       const validation = this.validateInputData(teachers, classrooms, courses);
-      
+
       const validationDuration = Date.now() - validationStartTime;
       logger.info('[OPTIMIZATION] Data validation completed', {
         duration: `${validationDuration}ms`,
@@ -77,13 +88,13 @@ class OptimizationEngine {
           issues: validation.issues,
           reason: validation.reason
         });
-        return { 
-          success: false, 
+        return {
+          success: false,
           reason: validation.reason,
-          validationErrors: validation.issues 
+          validationErrors: validation.issues
         };
       }
-      
+
       logger.info('[OPTIMIZATION] Data validation passed successfully');
 
       // Select and configure algorithm
@@ -98,9 +109,9 @@ class OptimizationEngine {
       // Execute algorithm
       logger.info('[OPTIMIZATION] Executing algorithm:', settings.algorithm);
       const algorithmStartTime = Date.now();
-      
+
       const result = await algorithm(teachers, classrooms, courses, optimizedSettings, progressCallback);
-      
+
       const algorithmDuration = Date.now() - algorithmStartTime;
       logger.info('[OPTIMIZATION] Algorithm execution completed', {
         duration: `${algorithmDuration}ms`,
@@ -111,29 +122,29 @@ class OptimizationEngine {
         // Post-process the solution
         logger.info('[OPTIMIZATION] Starting post-processing...');
         const postProcessStart = Date.now();
-        
+
         const optimizedSolution = await this.postProcessSolution(
-          result.solution, 
-          teachers, 
-          classrooms, 
-          courses, 
+          result.solution,
+          teachers,
+          classrooms,
+          courses,
           settings
         );
-        
+
         const postProcessDuration = Date.now() - postProcessStart;
         logger.info(`[OPTIMIZATION] Post-processing completed in ${postProcessDuration}ms`);
 
         // Calculate quality metrics
         logger.info('[OPTIMIZATION] Calculating quality metrics...');
         const metricsStart = Date.now();
-        
+
         const qualityMetrics = this.calculateQualityMetrics(
-          optimizedSolution, 
-          teachers, 
-          classrooms, 
+          optimizedSolution,
+          teachers,
+          classrooms,
           courses
         );
-        
+
         const metricsDuration = Date.now() - metricsStart;
         logger.info(`[OPTIMIZATION] Quality metrics calculated in ${metricsDuration}ms`);
         logger.info(`[OPTIMIZATION] Quality Score: ${qualityMetrics.overallScore}`);
@@ -141,9 +152,9 @@ class OptimizationEngine {
         // Detect conflicts
         logger.info('[OPTIMIZATION] Detecting conflicts...');
         const conflictStart = Date.now();
-        
+
         const conflicts = this.detectAndClassifyConflicts(optimizedSolution, teachers, classrooms, courses);
-        
+
         const conflictDuration = Date.now() - conflictStart;
         logger.info(`[OPTIMIZATION] Conflict detection completed in ${conflictDuration}ms`);
         logger.info(`[OPTIMIZATION] Conflicts found: ${conflicts.length}`);
@@ -151,15 +162,15 @@ class OptimizationEngine {
         // Generate recommendations
         logger.info('[OPTIMIZATION] Generating recommendations...');
         const recommendStart = Date.now();
-        
+
         const recommendations = this.generateRecommendations(optimizedSolution, qualityMetrics);
-        
+
         const recommendDuration = Date.now() - recommendStart;
         logger.info(`[OPTIMIZATION] Recommendations generated in ${recommendDuration}ms`);
 
         const endTime = Date.now();
         const totalDuration = endTime - startTime;
-        
+
         logger.info('[OPTIMIZATION] ========================================');
         logger.info('[OPTIMIZATION] OPTIMIZATION COMPLETE!');
         logger.info(`[OPTIMIZATION]   Algorithm: ${settings.algorithm}`);
@@ -205,25 +216,25 @@ class OptimizationEngine {
     logger.info('[VALIDATION] ========================================');
     logger.info('[VALIDATION] Starting detailed data validation...');
     logger.info('[VALIDATION] ========================================');
-    
+
     const issues = [];
     const warnings = [];
 
     // Check teachers
     const teacherCheckStart = Date.now();
     logger.info('[VALIDATION] Step 1/4: Validating teachers...');
-    
+
     if (!teachers || teachers.length === 0) {
       issues.push('No teachers provided');
       logger.error('[VALIDATION] ✗ No teachers found!');
     } else {
       logger.info(`[VALIDATION] Found ${teachers.length} teachers to validate`);
-      
+
       let teacherIssueCount = 0;
       for (let i = 0; i < teachers.length; i++) {
         const teacher = teachers[i];
         logger.info(`[VALIDATION]   Checking teacher ${i + 1}/${teachers.length}: ${teacher.name}`);
-        
+
         if (!teacher.subjects || teacher.subjects.length === 0) {
           issues.push(`Teacher ${teacher.name} has no subjects assigned`);
           teacherIssueCount++;
@@ -231,7 +242,7 @@ class OptimizationEngine {
         } else {
           logger.info(`[VALIDATION]     ✓ Subjects: ${teacher.subjects.join(', ')}`);
         }
-        
+
         if (!teacher.availability) {
           issues.push(`Teacher ${teacher.name} has no availability defined`);
           teacherIssueCount++;
@@ -240,7 +251,7 @@ class OptimizationEngine {
           logger.info(`[VALIDATION]     ✓ Availability defined`);
         }
       }
-      
+
       const teacherCheckDuration = Date.now() - teacherCheckStart;
       logger.info(`[VALIDATION] ✓ Teacher validation completed in ${teacherCheckDuration}ms (${teacherIssueCount} issues)`);
     }
@@ -248,18 +259,18 @@ class OptimizationEngine {
     // Check classrooms
     const classroomCheckStart = Date.now();
     logger.info('[VALIDATION] Step 2/4: Validating classrooms...');
-    
+
     if (!classrooms || classrooms.length === 0) {
       issues.push('No classrooms provided');
       logger.error('[VALIDATION] ✗ No classrooms found!');
     } else {
       logger.info(`[VALIDATION] Found ${classrooms.length} classrooms to validate`);
-      
+
       let classroomIssueCount = 0;
       for (let i = 0; i < classrooms.length; i++) {
         const classroom = classrooms[i];
         logger.info(`[VALIDATION]   Checking classroom ${i + 1}/${classrooms.length}: ${classroom.name}`);
-        
+
         if (!classroom.capacity || classroom.capacity < 1) {
           issues.push(`Classroom ${classroom.name} has invalid capacity`);
           classroomIssueCount++;
@@ -267,10 +278,10 @@ class OptimizationEngine {
         } else {
           logger.info(`[VALIDATION]     ✓ Capacity: ${classroom.capacity}`);
         }
-        
+
         logger.info(`[VALIDATION]     Type: ${classroom.type}, Features: ${classroom.features?.length || 0}`);
       }
-      
+
       const classroomCheckDuration = Date.now() - classroomCheckStart;
       logger.info(`[VALIDATION] ✓ Classroom validation completed in ${classroomCheckDuration}ms (${classroomIssueCount} issues)`);
     }
@@ -278,18 +289,18 @@ class OptimizationEngine {
     // Check courses
     const courseCheckStart = Date.now();
     logger.info('[VALIDATION] Step 3/4: Validating courses...');
-    
+
     if (!courses || courses.length === 0) {
       issues.push('No courses provided');
       logger.error('[VALIDATION] ✗ No courses found!');
     } else {
       logger.info(`[VALIDATION] Found ${courses.length} courses to validate`);
-      
+
       let courseIssueCount = 0;
       for (let i = 0; i < courses.length; i++) {
         const course = courses[i];
         logger.info(`[VALIDATION]   Checking course ${i + 1}/${courses.length}: ${course.name} (${course.code})`);
-        
+
         if (!course.assignedTeachers || course.assignedTeachers.length === 0) {
           issues.push(`Course ${course.name} has no teachers assigned`);
           courseIssueCount++;
@@ -297,18 +308,18 @@ class OptimizationEngine {
         } else {
           logger.info(`[VALIDATION]     ✓ Assigned to ${course.assignedTeachers.length} teacher(s)`);
         }
-        
+
         const theoryCount = course.sessions?.theory?.sessionsPerWeek || 0;
         const practicalCount = course.sessions?.practical?.sessionsPerWeek || 0;
         const tutorialCount = course.sessions?.tutorial?.sessionsPerWeek || 0;
         const totalSessions = theoryCount + practicalCount + tutorialCount;
-        
+
         logger.info(`[VALIDATION]     Sessions: Theory=${theoryCount}, Practical=${practicalCount}, Tutorial=${tutorialCount}, Total=${totalSessions}`);
-        
-        const hasValidSessions = ['theory', 'practical', 'tutorial'].some(type => 
+
+        const hasValidSessions = ['theory', 'practical', 'tutorial'].some(type =>
           course.sessions[type] && course.sessions[type].sessionsPerWeek > 0
         );
-        
+
         if (!hasValidSessions) {
           issues.push(`Course ${course.name} has no valid sessions defined`);
           courseIssueCount++;
@@ -317,7 +328,7 @@ class OptimizationEngine {
           logger.info(`[VALIDATION]     ✓ Has valid sessions`);
         }
       }
-      
+
       const courseCheckDuration = Date.now() - courseCheckStart;
       logger.info(`[VALIDATION] ✓ Course validation completed in ${courseCheckDuration}ms (${courseIssueCount} issues)`);
     }
@@ -325,15 +336,20 @@ class OptimizationEngine {
     // Check teacher-course compatibility (as warnings, not errors)
     const compatibilityCheckStart = Date.now();
     logger.info('[VALIDATION] Step 4/4: Checking teacher-course compatibility...');
-    
+
     let compatibilityWarnings = 0;
     for (const course of courses) {
       for (const assignedTeacher of course.assignedTeachers) {
-        const teacher = teachers.find(t => t.id === assignedTeacher.teacherId);
+        const assignedTeacherId = this.normalizeId(assignedTeacher.teacherId);
+        const teacher = teachers.find(t => {
+          const tid = this.normalizeId(t.id || t._id);
+          return tid === assignedTeacherId;
+        });
+
         if (!teacher) {
-          issues.push(`Course ${course.name} assigned to non-existent teacher ${assignedTeacher.teacherId}`);
-          logger.error(`[VALIDATION]   ✗ Course ${course.name} assigned to non-existent teacher ${assignedTeacher.teacherId}`);
-        } else if (!teacher.subjects.some(subject => 
+          issues.push(`Course ${course.name} assigned to non-existent teacher ${assignedTeacherId}`);
+          logger.error(`[VALIDATION]   ✗ Course ${course.name} assigned to non-existent teacher ${assignedTeacherId}`);
+        } else if (!teacher.subjects.some(subject =>
           course.name.toLowerCase().includes(subject.toLowerCase()) ||
           subject.toLowerCase().includes(course.name.toLowerCase())
         )) {
@@ -344,10 +360,10 @@ class OptimizationEngine {
         }
       }
     }
-    
+
     const compatibilityCheckDuration = Date.now() - compatibilityCheckStart;
     logger.info(`[VALIDATION] ✓ Compatibility check completed in ${compatibilityCheckDuration}ms (${compatibilityWarnings} warnings)`);
-    
+
     // Final validation summary
     const totalValidationDuration = Date.now() - validationStartTime;
     logger.info('[VALIDATION] ========================================');
@@ -362,7 +378,7 @@ class OptimizationEngine {
     if (warnings.length > 0) {
       logger.warn('[VALIDATION] Warnings found:', warnings);
     }
-    
+
     if (issues.length > 0) {
       logger.error('[VALIDATION] Issues found:', issues);
     }
@@ -380,11 +396,11 @@ class OptimizationEngine {
    */
   selectAlgorithm(algorithmName) {
     logger.info('[OPTIMIZATION] selectAlgorithm called with:', algorithmName);
-    
+
     if (this.algorithms.has(algorithmName)) {
       const algorithm = this.algorithms.get(algorithmName);
       logger.info('[OPTIMIZATION] Algorithm found in map:', typeof algorithm);
-      
+
       // Return a wrapper function that instantiates the class if needed
       if (typeof algorithm === 'function' && algorithm.prototype && algorithm.prototype.solve) {
         logger.info('[OPTIMIZATION] Algorithm is a class, will wrap it');
@@ -395,11 +411,11 @@ class OptimizationEngine {
           return await instance.solve(progressCallback);
         };
       }
-      
+
       logger.info('[OPTIMIZATION] Algorithm is a regular function');
       return algorithm;
     }
-    
+
     // Default to hybrid approach
     logger.warn(`Unknown algorithm ${algorithmName}, using hybrid approach`);
     return this.algorithms.get('hybrid');
@@ -414,24 +430,24 @@ class OptimizationEngine {
 
     // Adjust parameters based on problem size - CAP AT REASONABLE VALUES
     if (settings.algorithm === 'genetic' || settings.algorithm === 'hybrid') {
-      // Cap population size - never exceed 100
+      // Cap population size - increased from 100 to 200
       const basePopulation = settings.populationSize || 50;
       if (problemSize > 10000) {
-        optimizedSettings.populationSize = Math.min(100, Math.max(50, basePopulation));
+        optimizedSettings.populationSize = Math.min(200, Math.max(50, basePopulation));
       } else if (problemSize < 1000) {
-        optimizedSettings.populationSize = Math.min(50, Math.max(30, basePopulation * 0.8));
+        optimizedSettings.populationSize = Math.min(100, Math.max(30, basePopulation * 0.8));
       } else {
-        optimizedSettings.populationSize = Math.min(75, Math.max(40, basePopulation));
+        optimizedSettings.populationSize = Math.min(150, Math.max(40, basePopulation));
       }
 
-      // Cap generations - never exceed 300
+      // Cap generations - increased from 300 to 500
       const baseGenerations = settings.maxGenerations || 200;
       if (problemSize > 10000) {
-        optimizedSettings.maxGenerations = Math.min(300, Math.max(150, baseGenerations));
+        optimizedSettings.maxGenerations = Math.min(500, Math.max(150, baseGenerations));
       } else if (problemSize < 1000) {
-        optimizedSettings.maxGenerations = Math.min(150, Math.max(100, baseGenerations * 0.8));
+        optimizedSettings.maxGenerations = Math.min(250, Math.max(100, baseGenerations * 0.8));
       } else {
-        optimizedSettings.maxGenerations = Math.min(200, Math.max(100, baseGenerations));
+        optimizedSettings.maxGenerations = Math.min(300, Math.max(100, baseGenerations));
       }
 
       // Adjust mutation rate based on diversity needs
@@ -448,7 +464,7 @@ class OptimizationEngine {
     // Adjust time slots based on total required hours
     const totalHours = courses.reduce((sum, course) => sum + (course.totalHoursPerWeek || 0), 0);
     const availableSlots = this.calculateAvailableTimeSlots(settings);
-    
+
     if (totalHours / availableSlots > 0.8) {
       logger.warn('High utilization detected, may require extended hours');
       optimizedSettings.extendedHours = true;
@@ -465,10 +481,10 @@ class OptimizationEngine {
     const startHour = parseInt(settings.startTime?.split(':')[0] || '9');
     const endHour = parseInt(settings.endTime?.split(':')[0] || '17');
     const slotDuration = settings.slotDuration || 60;
-    
+
     const hoursPerDay = endHour - startHour;
     const slotsPerDay = hoursPerDay * (60 / slotDuration);
-    
+
     return workingDays * slotsPerDay;
   }
 
@@ -497,7 +513,7 @@ class OptimizationEngine {
 
     // Phase 2: Use GA to optimize the CSP solution (with reduced settings)
     logger.info('CSP found initial solution, starting GA optimization');
-    
+
     const ga = new GeneticAlgorithm(teachers, classrooms, courses, {
       ...settings,
       populationSize: Math.min(settings.populationSize || 50, 50), // Max 50 for hybrid
@@ -609,7 +625,7 @@ class OptimizationEngine {
    */
   detectAndClassifyConflicts(solution, teachers, classrooms, courses) {
     const conflicts = [];
-    
+
     // Teacher conflicts
     const teacherSlots = new Map();
     solution.forEach((slot, index) => {
@@ -678,12 +694,12 @@ class OptimizationEngine {
     // Try to reschedule the lower priority session
     const course1 = this.findCourseBySlot(slot1);
     const course2 = this.findCourseBySlot(slot2);
-    
+
     const targetIndex = course1.priority < course2.priority ? slot1Index : slot2Index;
-    
+
     // Find alternative time slot for the target session
     const alternativeSlot = this.findAlternativeTimeSlot(solution[targetIndex], solution, teachers, classrooms);
-    
+
     if (alternativeSlot) {
       solution[targetIndex] = { ...solution[targetIndex], ...alternativeSlot };
     }
@@ -696,13 +712,13 @@ class OptimizationEngine {
    */
   resolveRoomConflict(solution, conflict, classrooms) {
     const [slot1Index, slot2Index] = conflict.slots;
-    
+
     // Try to find alternative room for one of the sessions
     const alternativeRoom = this.findAlternativeRoom(solution[slot1Index], classrooms, solution);
-    
+
     if (alternativeRoom) {
-      solution[slot1Index] = { 
-        ...solution[slot1Index], 
+      solution[slot1Index] = {
+        ...solution[slot1Index],
         classroomId: alternativeRoom.id,
         classroomName: alternativeRoom.name
       };

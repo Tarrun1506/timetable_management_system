@@ -22,7 +22,7 @@ const programSchema = new mongoose.Schema({
     uppercase: true,
     index: true
   },
-  school: {
+  department: {
     type: String,
     required: true,
     trim: true
@@ -69,21 +69,21 @@ const programSchema = new mongoose.Schema({
 });
 
 // Update the updatedAt timestamp on save
-programSchema.pre('save', function(next) {
+programSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Indexes
-programSchema.index({ school: 1, type: 1 });
+programSchema.index({ department: 1, type: 1 });
 programSchema.index({ status: 1 });
 
 // Static methods
-programSchema.statics.findBySchool = function(school) {
-  return this.find({ school, status: 'Active' });
+programSchema.statics.findByDepartment = function (department) {
+  return this.find({ department, status: 'Active' });
 };
 
-programSchema.statics.findByType = function(type) {
+programSchema.statics.findByType = function (type) {
   return this.find({ type, status: 'Active' });
 };
 

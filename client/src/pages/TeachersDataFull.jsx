@@ -443,7 +443,7 @@ const TeachersData = () => {
                         <td key={`${day}-${slot}`} className="px-2 py-2 text-center">
                           <input
                             type="checkbox"
-                            checked={teacherForm.availability[day]?.includes(slot) || false}
+                            checked={(Array.isArray(teacherForm.availability[day]) && teacherForm.availability[day].includes(slot)) || false}
                             onChange={() => handleAvailabilityToggle(day, slot)}
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
@@ -515,8 +515,8 @@ const TeachersData = () => {
                 <button
                   onClick={() => setSubjectDetails({ ...subjectDetails, hasLab: false })}
                   className={`px-3 py-1 text-sm rounded ${!subjectDetails.hasLab
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                     }`}
                 >
                   No
@@ -524,8 +524,8 @@ const TeachersData = () => {
                 <button
                   onClick={() => setSubjectDetails({ ...subjectDetails, hasLab: true })}
                   className={`px-3 py-1 text-sm rounded ${subjectDetails.hasLab
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                     }`}
                 >
                   Yes
@@ -546,8 +546,8 @@ const TeachersData = () => {
                 <button
                   onClick={() => setSubjectDetails({ ...subjectDetails, hasTutorial: false })}
                   className={`px-3 py-1 text-sm rounded ${!subjectDetails.hasTutorial
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                     }`}
                 >
                   No
@@ -555,8 +555,8 @@ const TeachersData = () => {
                 <button
                   onClick={() => setSubjectDetails({ ...subjectDetails, hasTutorial: true })}
                   className={`px-3 py-1 text-sm rounded ${subjectDetails.hasTutorial
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                     }`}
                 >
                   Yes
@@ -762,7 +762,7 @@ const TeachersData = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {teachers.map((teacher) => (
-                    <tr key={teacher.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr key={teacher._id || teacher.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{teacher.name}</div>
@@ -809,8 +809,8 @@ const TeachersData = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded ${teacher.priority === 'Core'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                           }`}>
                           {teacher.priority}
                         </span>
